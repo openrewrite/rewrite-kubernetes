@@ -7,4 +7,4 @@
 
 ### What is this?
 
-This project implements a [Rewrite module](https://github.com/openrewrite/rewrite) that performs common Java testing migration tasks, like migrating from JUnit 4 to JUnit 5.
+This project implements [Rewrite recipes](https://github.com/openrewrite/rewrite) to performs Kubernetes hygiene and migration tasks.
