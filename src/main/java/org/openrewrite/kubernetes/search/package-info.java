@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openrewrite.kubernetes.tree;
+@NonNullApi
+@NonNullFields
+package org.openrewrite.kubernetes.search;
 
-import lombok.Value;
-import org.openrewrite.internal.lang.Nullable;
-import org.openrewrite.marker.Marker;
-
-import java.util.Map;
-
-@Value
-public class KubernetesResource implements Marker {
-    String apiVersion;
-    String kind;
-    Metadata metadata;
-
-    @Value
-    public static class Metadata {
-        @Nullable
-        String name;
-
-        @Nullable
-        Map<String, String> annotations;
-
-        @Nullable
-        Map<String, String> labels;
-    }
-}
+import org.openrewrite.internal.lang.NonNullApi;
+import org.openrewrite.internal.lang.NonNullFields;
