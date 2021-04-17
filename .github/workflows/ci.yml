@@ -33,7 +33,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: setup-cache
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: |
             ~/.gradle/caches
@@ -57,7 +57,7 @@ jobs:
         with:
           java-version: "11"
       - name: setup-cache
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: |
             ~/.gradle/caches
