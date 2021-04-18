@@ -90,6 +90,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:latest.release")
     testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:latest.release")
 }
 
 tasks.withType(KotlinCompile::class.java).configureEach {
@@ -167,4 +169,9 @@ tasks.withType<Javadoc> {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.compilerArgs.add("-parameters")
+}
+
+extensions.findByName("buildScan")?.withGroovyBuilder {
+    setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
+    setProperty("termsOfServiceAgree", "yes")
 }
