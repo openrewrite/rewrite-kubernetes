@@ -35,6 +35,8 @@ recipeList:
   - org.openrewrite.kubernetes.NoRootContainers
   - org.openrewrite.kubernetes.ImagePullPolicyAlways
   - org.openrewrite.kubernetes.NoPrivilegeEscalation
+  - org.openrewrite.kubernetes.NoHostNetworkSharing
+  - org.openrewrite.kubernetes.ReadOnlyRootFilesystem
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodLivenessProbe
@@ -139,7 +141,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
-      resourceKind: PodSecurityPolicy
+      resourceKind: Pod
       configurationPath: /spec/hostPID
       value: 'hostPID: false'
 ---
@@ -151,7 +153,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
-      resourceKind: PodSecurityPolicy
+      resourceKind: Pod
       configurationPath: /spec/hostIPC
       value: 'hostIPC: false'
 ---
@@ -190,4 +192,28 @@ recipeList:
       resourceKind: Pod
       configurationPath: /spec/containers/securityContext/allowPrivilegeEscalation
       value: 'allowPrivilegeEscalation: false'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.NoHostNetworkSharing
+displayName: No host network sharing
+description: When using the host network mode for a container, that container’s network stack is not isolated from the Docker host, so the container shares the host’s networking namespace and does not get its own IP-address allocation.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/hostNetwork
+      value: 'hostNetwork: false'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.ReadOnlyRootFilesystem
+displayName: Read-only root filesystem
+description: Using an immutable root filesystem and a verified boot mechanism prevents against attackers from "owning" the machine through permanent local changes.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/securityContext/readOnlyRootFilesystem
+      value: 'readOnlyRootFilesystem: false'
 ---
