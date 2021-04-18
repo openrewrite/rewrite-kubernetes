@@ -22,6 +22,7 @@ class AddConfigurationTest : KubernetesRecipeTest {
     @Test
     fun addConfigurationIfItDoesntExist() = assertChanged(
         recipe = AddConfiguration(
+            null,
             "PodSecurityPolicy",
             "/spec/privileged",
             "privileged: false"
@@ -41,6 +42,7 @@ class AddConfigurationTest : KubernetesRecipeTest {
     @Test
     fun dontModifyExistingConfiguration() = assertUnchanged(
         recipe = AddConfiguration(
+            null,
             "PodSecurityPolicy",
             "/spec/privileged",
             "privileged: false"

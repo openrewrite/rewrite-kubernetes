@@ -29,6 +29,7 @@ recipeList:
   - org.openrewrite.kubernetes.MissingMemoryRequest
     org.openrewrite.kubernetes.MissingMemoryLimits
   - org.openrewrite.kubernetes.NoPrivilegedContainers
+  - org.openrewrite.kubernetes.LifecycleRuleOnStorageBucket
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodLivenessProbe
@@ -107,4 +108,21 @@ recipeList:
       resourceKind: PodSecurityPolicy
       configurationPath: /spec/privileged
       value: 'privileged: false'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.LifecycleRuleOnStorageBucket
+displayName: Ensure lifecycle rule on `StorageBucket`
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      apiVersion: storage.cnrm.cloud.google.com/v1beta1
+      resourceKind: StorageBucket
+      configurationPath: /spec/lifecycleRule
+      value: |-
+        lifecycleRule:
+          - action:
+              type: Delete
+            condition:
+              age: 7
 ---

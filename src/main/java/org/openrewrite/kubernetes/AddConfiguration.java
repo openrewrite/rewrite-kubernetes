@@ -18,12 +18,18 @@ package org.openrewrite.kubernetes;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.InsertYaml;
 import org.openrewrite.yaml.search.FindKey;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class AddConfiguration extends Recipe {
+    @Nullable
+    @Option(displayName = "API version",
+            example = "policy/v1beta1",
+            required = false)
+    String apiVersion;
 
     @Option(displayName = "Resource kind",
             description = "The Kubernetes resource type the configured is required on.",
@@ -65,7 +71,11 @@ public class AddConfiguration extends Recipe {
         return new KubernetesVisitor<ExecutionContext>() {
             @Override
             public Kubernetes.ResourceDocument visitKubernetesResource(Kubernetes.ResourceDocument resource, ExecutionContext context) {
-                if(!resourceKind.equals(resource.getModel().getKind())) {
+                if (!resourceKind.equals(resource.getModel().getKind())) {
+                    return resource;
+                }
+
+                if(apiVersion != null && !apiVersion.equals(resource.getModel().getApiVersion())) {
                     return resource;
                 }
 
