@@ -1,0 +1,110 @@
+#
+# Copyright 2021 the original author or authors.
+# <p>
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# <p>
+# https://www.apache.org/licenses/LICENSE-2.0
+# <p>
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.KubernetesBestPractices
+displayName: KubernetesBestPractices
+description: Applies best practices to Kubernetes manifests.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.MissingPodLivenessProbe
+  - org.openrewrite.kubernetes.MissingPodReadinessProbe
+  - org.openrewrite.kubernetes.MissingCpuRequest
+  - org.openrewrite.kubernetes.MissingCpuLimits
+  - org.openrewrite.kubernetes.MissingMemoryRequest
+    org.openrewrite.kubernetes.MissingMemoryLimits
+  - org.openrewrite.kubernetes.NoPrivilegedContainers
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.MissingPodLivenessProbe
+displayName: Ensure liveness probe is configured
+description: The kubelet uses liveness probes to know when to schedule restarts for containers. Restarting a container in a deadlock state can help to make the application more available, despite bugs.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/livenessProbe
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.MissingPodReadinessProbe
+displayName: Ensure readiness probe is configured
+description: Using the Readiness Probe ensures teams define what actions need to be taken to prevent failure and ensure recovery in case of unexpected errors.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/readinessProbe
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.MissingCpuRequest
+displayName: Ensure CPU request is set
+description: If a container is created in a namespace that has a default CPU limit, and the container does not specify its own CPU limit, then the container is assigned the default CPU limit.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/resources/requests/cpu
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.MissingCpuLimits
+displayName: Ensure CPU limits are set
+description: A system without managed quotas could eventually collapse due to inadequate resources for the tasks it bares.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/resources/limits/cpu
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.MissingMemoryRequest
+displayName: Ensure memory request is set
+description: A container is guaranteed to have as much memory as it requests, but is not allowed to use more memory than the limit set. This configuration may save resources and prevent an attack on an exploited container.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/resources/requests/memory
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.MissingMemoryLimits
+displayName: Ensure memory limits are set
+description: With no limit set, kubectl allocates more and more memory to the container until it runs out.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/resources/limits/memory
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.NoPrivilegedContainers
+displayName: No privileged containers
+description: Privileged containers are containers that have all of the root capabilities of a host machine, allowing access to resources that are not accessible in ordinary containers.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: PodSecurityPolicy
+      configurationPath: /spec/privileged
+      value: 'privileged: false'
+---

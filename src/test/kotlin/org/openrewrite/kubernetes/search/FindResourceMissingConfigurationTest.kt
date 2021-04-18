@@ -61,4 +61,16 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
                   <Probe arguments>
         """
     )
+
+    @Test
+    fun dontMatchOnDifferentResource() = assertUnchanged(
+        recipe = FindResourceMissingConfiguration(
+            "Pod",
+            "/spec/containers/livenessProbe"
+        ),
+        before = """
+            apiVersion: v1
+            kind: Service
+        """
+    )
 }

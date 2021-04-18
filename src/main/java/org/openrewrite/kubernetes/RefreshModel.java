@@ -15,7 +15,7 @@
  */
 package org.openrewrite.kubernetes;
 
-import org.openrewrite.kubernetes.tree.KubernetesResource;
+import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -31,10 +31,10 @@ public class RefreshModel<P> extends YamlIsoVisitor<P> {
     public Yaml.Document visitDocument(Yaml.Document document, P p) {
         Yaml.Document d = super.visitDocument(document, p);
 
-        KubernetesResource resource = new KubernetesResource(
+        KubernetesModel resource = new KubernetesModel(
                 getCursor().getMessage("apiVersion"),
                 getCursor().getMessage("kind"),
-                new KubernetesResource.Metadata(
+                new KubernetesModel.Metadata(
                         getCursor().getMessage("name"),
                         getCursor().getMessage("annotations"),
                         getCursor().getMessage("labels")

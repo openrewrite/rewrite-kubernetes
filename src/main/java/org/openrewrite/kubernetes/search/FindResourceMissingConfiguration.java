@@ -21,14 +21,16 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
+import org.openrewrite.kubernetes.Kubernetes;
+import org.openrewrite.kubernetes.KubernetesVisitor;
 import org.openrewrite.marker.RecipeSearchResult;
-import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.FindKey;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class FindResourceMissingConfiguration extends Recipe {
+
     @Option(displayName = "Resource kind",
             description = "The Kubernetes resource type to search on.",
             example = "Pod")
@@ -51,13 +53,14 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new YamlIsoVisitor<ExecutionContext>() {
+        return new KubernetesVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext context) {
-                return FindKey.find(document, configurationPath).isEmpty() ?
-                        document.withMarker(new RecipeSearchResult(FindResourceMissingConfiguration.this)) :
-                        document;
+            public Kubernetes.ResourceDocument visitKubernetesResource(Kubernetes.ResourceDocument resource, ExecutionContext executionContext) {
+                return resourceKind.equals(resource.getModel().getKind()) && FindKey.find(resource, configurationPath).isEmpty() ?
+                        resource.withMarker(new RecipeSearchResult(FindResourceMissingConfiguration.this)) :
+                        resource;
             }
+
         };
     }
 }

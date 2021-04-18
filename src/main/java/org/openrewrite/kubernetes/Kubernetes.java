@@ -16,7 +16,9 @@
 package org.openrewrite.kubernetes;
 
 import lombok.Getter;
-import org.openrewrite.kubernetes.tree.KubernetesResource;
+import org.openrewrite.kubernetes.tree.KubernetesModel;
+import org.openrewrite.marker.Markers;
+import org.openrewrite.yaml.YamlVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.List;
@@ -39,9 +41,18 @@ public class Kubernetes extends Yaml.Documents {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Kubernetes withMarkers(Markers markers) {
+        Yaml.Documents k = super.withMarkers(markers);
+        if (k instanceof Kubernetes) {
+            return (Kubernetes) k;
+        }
+        return new Kubernetes(k);
+    }
+
     public static class ResourceDocument extends Yaml.Document {
         @Getter
-        private final KubernetesResource resource;
+        private final KubernetesModel model;
 
         public ResourceDocument(Yaml.Document document) {
             super(
@@ -49,16 +60,33 @@ public class Kubernetes extends Yaml.Documents {
                     document.getPrefix(),
                     document.getMarkers(),
                     document.isExplicit(),
-                    document.getBlocks(),
+                    document.getBlock(),
                     document.getEnd()
             );
 
             //noinspection ConstantConditions
-            resource = document.getMarkers()
-                    .findFirst(KubernetesResource.class)
+            model = document.getMarkers()
+                    .findFirst(KubernetesModel.class)
                     .orElse(null);
 
-            assert resource != null;
+            assert model != null;
+        }
+
+        @Override
+        public <P> Yaml acceptYaml(YamlVisitor<P> v, P p) {
+            if (v instanceof KubernetesVisitor) {
+                return ((KubernetesVisitor<P>) v).visitKubernetesResource(this, p);
+            }
+            return super.acceptYaml(v, p);
+        }
+
+        @Override
+        public ResourceDocument withMarkers(Markers markers) {
+            Yaml.Document k = super.withMarkers(markers);
+            if (k instanceof ResourceDocument) {
+                return (ResourceDocument) k;
+            }
+            return new ResourceDocument(k);
         }
     }
 }

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 class KubernetesParserTest {
 
     @Test
-    fun k8sResourceModel() {
+    fun kubernetesModel() {
         val manifest = """
             apiVersion: storage.cnrm.cloud.google.com/v1beta1
             kind: StorageBucket
@@ -49,12 +49,12 @@ class KubernetesParserTest {
 
         val k = KubernetesParser.builder().build().parse(manifest)[0].documents[0]
 
-        assertThat(k.resource.apiVersion).isEqualTo("storage.cnrm.cloud.google.com/v1beta1")
-        assertThat(k.resource.kind).isEqualTo("StorageBucket")
-        assertThat(k.resource.metadata.name).isEqualTo("sample")
-        assertThat(k.resource.metadata.annotations)
+        assertThat(k.model.apiVersion).isEqualTo("storage.cnrm.cloud.google.com/v1beta1")
+        assertThat(k.model.kind).isEqualTo("StorageBucket")
+        assertThat(k.model.metadata.name).isEqualTo("sample")
+        assertThat(k.model.metadata.annotations)
             .containsExactlyEntriesOf(mapOf("cnrm.cloud.google.com/force-destroy" to "false"))
-        assertThat(k.resource.metadata.labels)
+        assertThat(k.model.metadata.labels)
             .containsExactlyEntriesOf(mapOf("label-one" to "value-one"))
     }
 }

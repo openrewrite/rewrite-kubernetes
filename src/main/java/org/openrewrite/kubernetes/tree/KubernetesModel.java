@@ -22,7 +22,7 @@ import org.openrewrite.marker.Marker;
 import java.util.Map;
 
 @Value
-public class KubernetesResource implements Marker {
+public class KubernetesModel implements Marker {
     String apiVersion;
     String kind;
     Metadata metadata;
