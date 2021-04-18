@@ -27,9 +27,13 @@ recipeList:
   - org.openrewrite.kubernetes.MissingCpuRequest
   - org.openrewrite.kubernetes.MissingCpuLimits
   - org.openrewrite.kubernetes.MissingMemoryRequest
-    org.openrewrite.kubernetes.MissingMemoryLimits
+  - org.openrewrite.kubernetes.MissingMemoryLimits
   - org.openrewrite.kubernetes.NoPrivilegedContainers
   - org.openrewrite.kubernetes.LifecycleRuleOnStorageBucket
+  - org.openrewrite.kubernetes.NoHostProcessIdSharing
+  - org.openrewrite.kubernetes.NoHostIPCSharing
+  - org.openrewrite.kubernetes.NoRootContainers
+  - org.openrewrite.kubernetes.ImagePullPolicyAlways
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodLivenessProbe
@@ -125,4 +129,52 @@ recipeList:
               type: Delete
             condition:
               age: 7
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.NoHostProcessIdSharing
+displayName: No host process ID sharing
+description: Sharing the host process ID namespace breaks the isolation between container images and can make processes visible to other containers in the pod. This includes all information in the /proc directory, which can sometimes include passwords or keys, passed as environment variables.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: PodSecurityPolicy
+      configurationPath: /spec/hostPID
+      value: 'hostPID: false'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.NoHostIPCSharing
+displayName: No host IPC sharing
+description: Preventing sharing of host PID/IPC namespace, networking, and ports ensures proper isolation between Docker containers and the underlying host.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: PodSecurityPolicy
+      configurationPath: /spec/hostIPC
+      value: 'hostIPC: false'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.NoRootContainers
+displayName: No root containers
+description: Containers that run as root frequently have more permissions than their workload requires which, in case of compromise, could help an attacker further their exploits.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: PodSecurityPolicy
+      configurationPath: /spec/runAsUser/rule
+      value: 'rule: MustRunAsNonRoot'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.ImagePullPolicyAlways
+displayName: Ensure image pull policy is `Always`
+description: Containers that run as root frequently have more permissions than their workload requires which, in case of compromise, could help an attacker further their exploits.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/imagePullPolicy
+      value: 'imagePullPolicy: Always'
 ---
