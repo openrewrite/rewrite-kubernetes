@@ -25,7 +25,6 @@ import org.openrewrite.kubernetes.Kubernetes;
 import org.openrewrite.kubernetes.KubernetesVisitor;
 import org.openrewrite.marker.RecipeSearchResult;
 import org.openrewrite.yaml.search.FindKey;
-import org.openrewrite.yaml.tree.Yaml;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
