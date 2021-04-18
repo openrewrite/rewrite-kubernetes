@@ -37,6 +37,7 @@ recipeList:
   - org.openrewrite.kubernetes.NoPrivilegeEscalation
   - org.openrewrite.kubernetes.NoHostNetworkSharing
   - org.openrewrite.kubernetes.ReadOnlyRootFilesystem
+  - org.openrewrite.kubernetes.LimitContainerCapabilities
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodLivenessProbe
@@ -216,4 +217,16 @@ recipeList:
       resourceKind: Pod
       configurationPath: /spec/containers/securityContext/readOnlyRootFilesystem
       value: 'readOnlyRootFilesystem: false'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.LimitContainerCapabilities
+displayName: Limit root capabilities in a container
+description: Limiting the admission of containers with capabilities ensures that only a small number of containers have extended capabilities outside the default range.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/securityContext/capabilities/drop
+      value: 'ALL'
 ---
