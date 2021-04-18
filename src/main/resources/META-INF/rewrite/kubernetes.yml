@@ -34,6 +34,7 @@ recipeList:
   - org.openrewrite.kubernetes.NoHostIPCSharing
   - org.openrewrite.kubernetes.NoRootContainers
   - org.openrewrite.kubernetes.ImagePullPolicyAlways
+  - org.openrewrite.kubernetes.NoPrivilegeEscalation
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodLivenessProbe
@@ -177,4 +178,16 @@ recipeList:
       resourceKind: Pod
       configurationPath: /spec/containers/imagePullPolicy
       value: 'imagePullPolicy: Always'
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.NoPrivilegeEscalation
+displayName: No privilege escalation
+description: Does not allow a process to gain more privileges than its parent process.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.AddConfiguration:
+      resourceKind: Pod
+      configurationPath: /spec/containers/securityContext/allowPrivilegeEscalation
+      value: 'allowPrivilegeEscalation: false'
 ---
