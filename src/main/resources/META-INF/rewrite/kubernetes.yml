@@ -17,7 +17,7 @@
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.KubernetesBestPractices
-displayName: KubernetesBestPractices
+displayName: Kubernetes best practices
 description: Applies best practices to Kubernetes manifests.
 tags:
   - kubernetes
