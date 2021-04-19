@@ -173,7 +173,7 @@ recipeList:
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.ImagePullPolicyAlways
 displayName: Ensure image pull policy is `Always`
-description: Containers that run as root frequently have more permissions than their workload requires which, in case of compromise, could help an attacker further their exploits.
+description: Ensures the latest version of a tag is deployed each time.
 tags:
   - kubernetes
 recipeList:
