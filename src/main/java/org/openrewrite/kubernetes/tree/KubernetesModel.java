@@ -20,9 +20,11 @@ import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.marker.Marker;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Value
 public class KubernetesModel implements Marker {
+    UUID id;
     String apiVersion;
     String kind;
     Metadata metadata;

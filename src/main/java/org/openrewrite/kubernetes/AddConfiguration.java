@@ -70,7 +70,7 @@ public class AddConfiguration extends Recipe {
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         return new KubernetesVisitor<ExecutionContext>() {
             @Override
-            public Kubernetes.ResourceDocument visitKubernetesResource(Kubernetes.ResourceDocument resource, ExecutionContext context) {
+            public Kubernetes.ResourceDocument visitKubernetes(Kubernetes.ResourceDocument resource, ExecutionContext context) {
                 if (!resourceKind.equals(resource.getModel().getKind())) {
                     return resource;
                 }

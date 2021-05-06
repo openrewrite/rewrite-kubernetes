@@ -16,29 +16,47 @@
 package org.openrewrite.kubernetes;
 
 import lombok.Getter;
+import org.openrewrite.Tree;
+import org.openrewrite.TreeVisitor;
+import org.openrewrite.internal.ListUtils;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.marker.Markers;
 import org.openrewrite.yaml.YamlVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Kubernetes extends Yaml.Documents {
     public Kubernetes(Yaml.Documents documents) {
+        //noinspection unchecked
         super(
                 documents.getId(),
                 documents.getMarkers(),
                 documents.getSourcePath(),
-                documents.getDocuments()
+                ListUtils.map((List<Document>) documents.getDocuments(), doc -> doc instanceof ResourceDocument ?
+                        doc : new ResourceDocument(doc))
         );
     }
 
     @Override
-    public List<ResourceDocument> getDocuments() {
-        return super.getDocuments().stream()
-                .map(ResourceDocument::new)
-                .collect(Collectors.toList());
+    public List<Kubernetes.ResourceDocument> getDocuments() {
+        //noinspection unchecked
+        return (List<ResourceDocument>) super.getDocuments();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Nullable
+    public <R extends Tree, P> R accept(TreeVisitor<R, P> v, P p) {
+        if (v instanceof YamlVisitor) {
+            Yaml.Documents k8s = (Documents) super.accept(v, p);
+            if (k8s != this) {
+                return k8s == null ? null : (R) new Kubernetes(k8s);
+            }
+            return (R) this;
+        }
+        return v.defaultValue(this, p);
     }
 
     @Override
@@ -75,7 +93,7 @@ public class Kubernetes extends Yaml.Documents {
         @Override
         public <P> Yaml acceptYaml(YamlVisitor<P> v, P p) {
             if (v instanceof KubernetesVisitor) {
-                return ((KubernetesVisitor<P>) v).visitKubernetesResource(this, p);
+                return ((KubernetesVisitor<P>) v).visitKubernetes(this, p);
             }
             return super.acceptYaml(v, p);
         }

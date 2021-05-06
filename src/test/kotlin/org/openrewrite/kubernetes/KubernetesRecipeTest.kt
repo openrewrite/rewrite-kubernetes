@@ -32,14 +32,14 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") dependsOn: Array<String>,
         @Language("yaml") after: String,
     ) {
-        super.assertChanged(parser, recipe, before, dependsOn, after, 1) {}
+        super.assertChanged(parser, recipe, before, dependsOn, after, 2, 1) {}
     }
 
     fun assertChanged(
         @Language("yaml") before: String,
         @Language("yaml") after: String,
     ) {
-        super.assertChanged(parser, recipe, before, emptyArray(), after, 1) {}
+        super.assertChanged(parser, recipe, before, emptyArray(), after, 2, 1) {}
     }
 
     fun assertChanged(
@@ -49,7 +49,7 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") after: String,
         cycles: Int
     ) {
-        super.assertChanged(parser, recipe, before, dependsOn, after, cycles) {}
+        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, cycles -1) {}
     }
 
     fun assertChanged(
@@ -59,7 +59,18 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") after: String,
         cycles: Int
     ) {
-        super.assertChanged(parser, recipe, before, dependsOn, after, cycles) {}
+        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, cycles -1) {}
+    }
+
+    fun assertChanged(
+        recipe: Recipe?,
+        @Language("yaml") before: String,
+        @Language("yaml") dependsOn: Array<String>,
+        @Language("yaml") after: String,
+        cycles: Int,
+        expectedCyclesToComplete: Int
+    ) {
+        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, expectedCyclesToComplete) {}
     }
 
     fun assertChanged(
@@ -68,7 +79,7 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") after: String,
         cycles: Int
     ) {
-        super.assertChanged(parser, recipe, before, dependsOn, after, cycles) {}
+        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, cycles -1) {}
     }
 
     fun assertChanged(
@@ -77,7 +88,17 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") after: String,
         cycles: Int,
     ) {
-        super.assertChanged(parser, recipe, before, emptyArray(), after, cycles) {}
+        super.assertChanged(parser, recipe, before, emptyArray(), after, cycles, cycles -1) {}
+    }
+
+    fun assertChanged(
+        recipe: Recipe?,
+        @Language("yaml") before: String,
+        @Language("yaml") after: String,
+        cycles: Int,
+        expectedCyclesToComplete: Int
+    ) {
+        super.assertChanged(parser, recipe, before, emptyArray(), after, cycles, expectedCyclesToComplete) {}
     }
 
     fun <T : SourceFile> assertChanged(
@@ -87,9 +108,9 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") after: String,
         cycles: Int,
     ) {
-        super.assertChanged(parser, recipe, before, emptyArray(), after, cycles) {}
+        super.assertChanged(parser, recipe, before, emptyArray(), after, cycles, cycles -1) {}
     }
-    
+
     override fun assertChanged(
         parser: Parser<*>?,
         recipe: Recipe?,
@@ -98,7 +119,7 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") after: String,
         cycles: Int
     ) {
-        super.assertChanged(parser, recipe, before, dependsOn, after, cycles) {}
+        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, cycles -1) {}
     }
 
     override fun <T : SourceFile> assertChanged(
@@ -108,9 +129,10 @@ interface KubernetesRecipeTest : RecipeTest {
         @Language("yaml") dependsOn: Array<String>,
         @Language("yaml") after: String,
         cycles: Int,
+        expectedCyclesThatMakeChanges: Int,
         afterConditions: (T) -> Unit
     ) {
-        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, afterConditions)
+        super.assertChanged(parser, recipe, before, dependsOn, after, cycles, expectedCyclesThatMakeChanges, afterConditions)
     }
 
     fun assertUnchanged(

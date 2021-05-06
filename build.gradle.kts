@@ -73,7 +73,7 @@ configurations.all {
     }
 }
 
-val rewriteVersion = "latest.integration"
+val rewriteVersion = "latest.release"
 
 dependencies {
     implementation("org.openrewrite:rewrite-yaml:$rewriteVersion")

@@ -17,13 +17,23 @@ package org.openrewrite.kubernetes;
 
 import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.yaml.YamlVisitor;
+import org.openrewrite.yaml.tree.Yaml;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 public class KubernetesVisitor<P> extends YamlVisitor<P> {
     protected KubernetesModel model;
 
-    public Kubernetes.ResourceDocument visitKubernetesResource(Kubernetes.ResourceDocument resource, P p) {
+    public Kubernetes.ResourceDocument visitKubernetes(Kubernetes.ResourceDocument resource, P p) {
         this.model = resource.getModel();
-        return (Kubernetes.ResourceDocument) super.visitDocument(resource, p);
+        return (Kubernetes.ResourceDocument) visitDocument(resource, p);
+    }
+
+    @Override
+    public Yaml visitDocument(Yaml.Document document, P p) {
+        Yaml.Document refactored = (Yaml.Document) super.visitDocument(document, p);
+        if (refactored != document) {
+            return new Kubernetes.ResourceDocument(refactored);
+        }
+        return refactored;
     }
 }

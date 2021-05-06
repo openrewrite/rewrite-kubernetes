@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.openrewrite.Tree.randomId;
+
 public class RefreshModel<P> extends YamlIsoVisitor<P> {
     private static final Pattern METADATA_LABEL = Pattern.compile("/metadata/labels/(.+)");
     private static final Pattern METADATA_ANNOTATION = Pattern.compile("/metadata/annotations/(.+)");
@@ -32,6 +34,7 @@ public class RefreshModel<P> extends YamlIsoVisitor<P> {
         Yaml.Document d = super.visitDocument(document, p);
 
         KubernetesModel resource = new KubernetesModel(
+                randomId(),
                 getCursor().getMessage("apiVersion"),
                 getCursor().getMessage("kind"),
                 new KubernetesModel.Metadata(

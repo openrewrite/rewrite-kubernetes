@@ -26,6 +26,8 @@ import org.openrewrite.kubernetes.KubernetesVisitor;
 import org.openrewrite.marker.RecipeSearchResult;
 import org.openrewrite.yaml.search.FindKey;
 
+import static org.openrewrite.Tree.randomId;
+
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class FindResourceMissingConfiguration extends Recipe {
@@ -54,9 +56,9 @@ public class FindResourceMissingConfiguration extends Recipe {
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         return new KubernetesVisitor<ExecutionContext>() {
             @Override
-            public Kubernetes.ResourceDocument visitKubernetesResource(Kubernetes.ResourceDocument resource, ExecutionContext executionContext) {
+            public Kubernetes.ResourceDocument visitKubernetes(Kubernetes.ResourceDocument resource, ExecutionContext executionContext) {
                 return resourceKind.equals(resource.getModel().getKind()) && FindKey.find(resource, configurationPath).isEmpty() ?
-                        resource.withMarker(new RecipeSearchResult(FindResourceMissingConfiguration.this)) :
+                        resource.withMarkers(resource.getMarkers().addIfAbsent(new RecipeSearchResult(randomId(), FindResourceMissingConfiguration.this))) :
                         resource;
             }
 
