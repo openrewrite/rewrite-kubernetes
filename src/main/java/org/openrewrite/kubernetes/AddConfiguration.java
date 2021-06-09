@@ -75,7 +75,7 @@ public class AddConfiguration extends Recipe {
                     return resource;
                 }
 
-                if(apiVersion != null && !apiVersion.equals(resource.getModel().getApiVersion())) {
+                if (apiVersion != null && !apiVersion.equals(resource.getModel().getApiVersion())) {
                     return resource;
                 }
 
