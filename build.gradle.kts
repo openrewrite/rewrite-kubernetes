@@ -15,7 +15,7 @@ plugins {
     `maven-publish`
     signing
 
-    id("org.jetbrains.kotlin.jvm") version "1.5.0"
+    id("org.jetbrains.kotlin.jvm") version "1.5.10"
     id("nebula.maven-resolved-dependencies") version "17.3.2"
     id("nebula.release") version "15.3.1"
     id("io.github.gradle-nexus.publish-plugin") version "1.0.0"
@@ -49,9 +49,11 @@ description =
     "A rewrite module automating best practices and migrations for Kubernetes"
 
 repositories {
-    mavenLocal()
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+    if(!project.hasProperty("releasing")) {
+        mavenLocal()
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
     }
     mavenCentral()
 }
@@ -79,7 +81,11 @@ configurations.all {
     }
 }
 
-val rewriteVersion = "latest.release"
+var rewriteVersion = if(project.hasProperty("releasing")) {
+    "latest.release"
+} else {
+    "latest.integration"
+}
 
 dependencies {
     implementation("org.openrewrite:rewrite-yaml:$rewriteVersion")
