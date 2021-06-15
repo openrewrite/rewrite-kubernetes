@@ -27,6 +27,7 @@ import org.openrewrite.yaml.search.FindKey;
 public class AddConfiguration extends Recipe {
     @Nullable
     @Option(displayName = "API version",
+            description = "The Kubernetes resource API version to use.",
             example = "policy/v1beta1",
             required = false)
     String apiVersion;

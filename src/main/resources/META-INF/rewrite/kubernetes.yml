@@ -120,6 +120,7 @@ recipeList:
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.LifecycleRuleOnStorageBucket
 displayName: Ensure lifecycle rule on `StorageBucket`
+description: When defining a rule, you can specify any set of conditions for any action. The following configuration defines a rule to delete all objects older than 7 days in a bucket.
 tags:
   - kubernetes
 recipeList:
