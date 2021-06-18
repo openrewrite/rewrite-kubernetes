@@ -7,4 +7,4 @@
 
 ### What is this?
 
-This project implements [Rewrite recipes](https://github.com/openrewrite/rewrite) to performs Kubernetes hygiene and migration tasks.
+This project implements [Rewrite recipes](https://github.com/openrewrite/rewrite) to perform Kubernetes hygiene and migration tasks.
