@@ -35,6 +35,7 @@ plugins {
 }
 
 rewrite {
+    setRewriteVersion("latest.integration")
     activeRecipe("org.openrewrite.java.format.AutoFormat")
 }
 
