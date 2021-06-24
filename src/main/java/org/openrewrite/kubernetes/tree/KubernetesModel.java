@@ -32,6 +32,9 @@ public class KubernetesModel implements Marker {
     @Value
     public static class Metadata {
         @Nullable
+        String namespace;
+
+        @Nullable
         String name;
 
         @Nullable

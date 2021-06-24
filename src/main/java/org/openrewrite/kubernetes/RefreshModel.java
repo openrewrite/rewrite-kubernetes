@@ -38,6 +38,7 @@ public class RefreshModel<P> extends YamlIsoVisitor<P> {
                 getCursor().getMessage("apiVersion"),
                 getCursor().getMessage("kind"),
                 new KubernetesModel.Metadata(
+                        getCursor().getMessage("namespace"),
                         getCursor().getMessage("name"),
                         getCursor().getMessage("annotations"),
                         getCursor().getMessage("labels")
@@ -60,6 +61,9 @@ public class RefreshModel<P> extends YamlIsoVisitor<P> {
                     break;
                 case "/kind":
                     getCursor().putMessageOnFirstEnclosing(Yaml.Document.class, "kind", value);
+                    break;
+                case "/metadata/namespace":
+                    getCursor().putMessageOnFirstEnclosing(Yaml.Document.class, "namespace", value);
                     break;
                 case "/metadata/name":
                     getCursor().putMessageOnFirstEnclosing(Yaml.Document.class, "name", value);
