@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openrewrite.kubernetes;
+package org.openrewrite.kubernetes.opa;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -27,29 +27,36 @@ import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.util.Arrays;
 import java.util.Optional;
-
-import static org.openrewrite.internal.StringUtils.isNullOrEmpty;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class ChangeImageName extends Recipe {
+public class UpgradeContainerImage extends Recipe {
 
-    @Option(displayName = "Repository",
-            description = "Name of the container repository to use when updating the image.",
-            example = "repo.mycompany.com",
-            required = false)
-    @Nullable
-    String repository;
+    @Option(displayName = "Allowed repos",
+            description = "Comma-separated list of allowed repository names.",
+            example = "repo.dev.lan,repo.prod.wan")
+    @NonNull
+    String allowedRepos;
+
+    @Option(displayName = "Preferred repo",
+            description = "Name of the preferred repository to update an image reference to if it's not one of the " +
+                    "approved repos.",
+            example = "repo.prod.wan")
+    @NonNull
+    String preferredRepo;
+
     @Option(displayName = "Image name",
-            description = "Name of the container image to use when updating.",
+            description = "Name of the container image to upgrade the version tag and optionally the repository to.",
             example = "nginx")
-    @NonNull
+    @Nullable
     String imageName;
-    @Option(displayName = "Image tag",
-            description = "Tag of the container to use when updating the image.",
+
+    @Option(displayName = "Image version tag",
+            description = "Version tag of the container to use when upgrading the image.",
             example = "latest")
-    @NonNull
+    @Nullable
     String imageTag;
 
     @Override
@@ -71,12 +78,32 @@ public class ChangeImageName extends Recipe {
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
                 if (workloadMatcher.matches(getCursor()) || podMatcher.matches(getCursor())) {
+                    String[] allowedRepos = UpgradeContainerImage.this.allowedRepos.split(",");
+
                     return getScalarValue(entry)
                             .map(s -> {
                                 String currentImageName = s.getValue();
-                                String newImageName = (!isNullOrEmpty(repository) ? repository + "/" : "")
-                                        + imageName
-                                        + ":" + imageTag;
+                                if (null != imageName && !currentImageName.contains(imageName)) {
+                                    return entry;
+                                }
+
+                                int slashIdx = currentImageName.indexOf('/');
+                                String currentRepoName = slashIdx > -1
+                                        ? currentImageName.substring(0, slashIdx)
+                                        : "";
+                                boolean hasAllowedRepo = Arrays.binarySearch(allowedRepos, currentRepoName) > -1;
+
+                                int colonIdx = currentImageName.lastIndexOf(':');
+                                String currentVersionTag = colonIdx > -1
+                                        ? currentImageName.substring(colonIdx + 1)
+                                        : "";
+
+                                String newImageName = (currentRepoName.isEmpty() || !hasAllowedRepo
+                                        ? preferredRepo : currentRepoName) + "/"
+                                        + (null != imageName ? imageName : currentImageName.substring(slashIdx > -1 ?
+                                        slashIdx + 1 : 0, colonIdx))
+                                        + ":" + (imageTag != null && !currentVersionTag.equals(imageTag) ? imageTag :
+                                        currentVersionTag);
                                 if (!newImageName.equals(currentImageName)) {
                                     return entry.withValue(s.withValue(newImageName));
                                 } else {
