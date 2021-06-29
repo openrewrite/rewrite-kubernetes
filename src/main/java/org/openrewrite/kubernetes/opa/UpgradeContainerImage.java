@@ -21,14 +21,13 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.internal.lang.NonNull;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
-import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -37,31 +36,31 @@ public class UpgradeContainerImage extends Recipe {
     @Option(displayName = "Allowed repos",
             description = "Comma-separated list of allowed repository names.",
             example = "repo.dev.lan,repo.prod.wan")
-    @NonNull
-    String allowedRepos;
+    Set<String> allowedRepos;
 
     @Option(displayName = "Preferred repo",
             description = "Name of the preferred repository to update an image reference to if it's not one of the " +
                     "approved repos.",
             example = "repo.prod.wan")
-    @NonNull
     String preferredRepo;
 
     @Option(displayName = "Image name",
             description = "Name of the container image to upgrade the version tag and optionally the repository to.",
-            example = "nginx")
+            example = "nginx",
+            required = false)
     @Nullable
     String imageName;
 
     @Option(displayName = "Image version tag",
             description = "Version tag of the container to use when upgrading the image.",
-            example = "latest")
+            example = "latest",
+            required = false)
     @Nullable
     String imageTag;
 
     @Override
     public String getDisplayName() {
-        return "Change Image name";
+        return "Change image name";
     }
 
     @Override
@@ -78,7 +77,6 @@ public class UpgradeContainerImage extends Recipe {
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
                 if (workloadMatcher.matches(getCursor()) || podMatcher.matches(getCursor())) {
-                    String[] allowedRepos = UpgradeContainerImage.this.allowedRepos.split(",");
 
                     return getScalarValue(entry)
                             .map(s -> {
@@ -88,22 +86,17 @@ public class UpgradeContainerImage extends Recipe {
                                 }
 
                                 int slashIdx = currentImageName.indexOf('/');
-                                String currentRepoName = slashIdx > -1
-                                        ? currentImageName.substring(0, slashIdx)
-                                        : "";
-                                boolean hasAllowedRepo = Arrays.binarySearch(allowedRepos, currentRepoName) > -1;
+                                String currentRepoName = slashIdx > -1 ? currentImageName.substring(0, slashIdx) : "";
+                                boolean hasAllowedRepo = allowedRepos.contains(currentRepoName);
 
                                 int colonIdx = currentImageName.lastIndexOf(':');
-                                String currentVersionTag = colonIdx > -1
-                                        ? currentImageName.substring(colonIdx + 1)
-                                        : "";
+                                String currentVersionTag = colonIdx > -1 ? currentImageName.substring(colonIdx + 1) : "";
 
-                                String newImageName = (currentRepoName.isEmpty() || !hasAllowedRepo
-                                        ? preferredRepo : currentRepoName) + "/"
-                                        + (null != imageName ? imageName : currentImageName.substring(slashIdx > -1 ?
-                                        slashIdx + 1 : 0, colonIdx))
-                                        + ":" + (imageTag != null && !currentVersionTag.equals(imageTag) ? imageTag :
-                                        currentVersionTag);
+                                String newImageName = (currentRepoName.isEmpty() || !hasAllowedRepo ? preferredRepo : currentRepoName)
+                                        + "/"
+                                        + (null != imageName ? imageName : currentImageName.substring(slashIdx > -1 ? slashIdx + 1 : 0, colonIdx))
+                                        + ":"
+                                        + (imageTag != null && !currentVersionTag.equals(imageTag) ? imageTag : currentVersionTag);
                                 if (!newImageName.equals(currentImageName)) {
                                     return entry.withValue(s.withValue(newImageName));
                                 } else {

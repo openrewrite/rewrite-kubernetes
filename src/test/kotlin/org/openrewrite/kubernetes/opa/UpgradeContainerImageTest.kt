@@ -23,7 +23,7 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
     @Test
     fun mustChangeImageNameIfNotApprovedRepo() = assertChanged(
         recipe = UpgradeContainerImage(
-            "repo.dev.lan,repo.prod.wan",
+            setOf("repo.dev.lan", "repo.prod.wan"),
             "repo.dev.lan",
             "nginx",
             "1.2.3"
@@ -49,14 +49,13 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
               containers:            
               - name: mycontainer
                 image: repo.dev.lan/nginx:1.2.3
-        """,
-        cycles = 2
+        """
     )
 
     @Test
     fun mustNotChangeImageNameIfApprovedRepo() = assertUnchanged(
         recipe = UpgradeContainerImage(
-            "repo.dev.lan,repo.prod.wan",
+            setOf("repo.dev.lan", "repo.prod.wan"),
             "repo.dev.lan",
             "nginx",
             "latest"
@@ -77,7 +76,7 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
     @Test
     fun mustChangeImageNameWithRepo() = assertChanged(
         recipe = UpgradeContainerImage(
-            "repo.dev.lan,repo.prod.wan",
+            setOf("repo.dev.lan", "repo.prod.wan"),
             "repo.dev.lan",
             "nginx",
             "1.2.3"
@@ -103,14 +102,13 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
               containers:            
               - name: mycontainer
                 image: repo.prod.wan/nginx:1.2.3
-        """,
-        cycles = 2
+        """
     )
 
     @Test
     fun mustChangePreferredRepoForAllImages() = assertChanged(
         recipe = UpgradeContainerImage(
-            "repo.dev.lan,repo.prod.wan",
+            setOf("repo.dev.lan", "repo.prod.wan"),
             "repo.dev.lan",
             null,
             null
@@ -136,14 +134,13 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
               containers:            
               - name: mycontainer
                 image: repo.dev.lan/nginx:latest
-        """,
-        cycles = 2
+        """
     )
 
     @Test
     fun mustChangePreferredRepoAndVersionForAllImages() = assertChanged(
         recipe = UpgradeContainerImage(
-            "repo.dev.lan,repo.prod.wan",
+            setOf("repo.dev.lan", "repo.prod.wan"),
             "repo.dev.lan",
             null,
             "1.2.3"
@@ -169,8 +166,7 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
               containers:            
               - name: mycontainer
                 image: repo.dev.lan/nginx:1.2.3
-        """,
-        cycles = 2
+        """
     )
 
 }
