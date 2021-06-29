@@ -31,9 +31,9 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
     fun assertChanged(
         parser: KubernetesParser = this.parser,
         recipe: Recipe = this.recipe!!,
-        @Language("xml") before: String,
-        @Language("xml") dependsOn: Array<String> = emptyArray(),
-        @Language("xml") after: String,
+        @Language("yml") before: String,
+        @Language("yml") dependsOn: Array<String> = emptyArray(),
+        @Language("yml") after: String,
         cycles: Int = 2,
         expectedCyclesThatMakeChanges: Int = cycles - 1,
         afterConditions: (Kubernetes) -> Unit = { }
@@ -44,9 +44,9 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
     fun assertChanged(
         parser: KubernetesParser = this.parser,
         recipe: Recipe = this.recipe!!,
-        @Language("xml") before: File,
-        @Language("xml") dependsOn: Array<File> = emptyArray(),
-        @Language("xml") after: String,
+        @Language("yml") before: File,
+        @Language("yml") dependsOn: Array<File> = emptyArray(),
+        @Language("yml") after: String,
         cycles: Int = 2,
         expectedCyclesThatMakeChanges: Int = cycles - 1,
         afterConditions: (Kubernetes) -> Unit = { }
@@ -57,8 +57,8 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
     fun assertUnchanged(
         parser: KubernetesParser = this.parser,
         recipe: Recipe = this.recipe!!,
-        @Language("xml") before: String,
-        @Language("xml") dependsOn: Array<String> = emptyArray()
+        @Language("yml") before: String,
+        @Language("yml") dependsOn: Array<String> = emptyArray()
     ) {
         super.assertUnchangedBase(parser, recipe, before, dependsOn)
     }
@@ -66,8 +66,8 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
     fun assertUnchanged(
         parser: KubernetesParser = this.parser,
         recipe: Recipe = this.recipe!!,
-        @Language("xml") before: File,
-        @Language("xml") dependsOn: Array<File> = emptyArray()
+        @Language("yml") before: File,
+        @Language("yml") dependsOn: Array<File> = emptyArray()
     ) {
         super.assertUnchangedBase(parser, recipe, before, dependsOn)
     }
