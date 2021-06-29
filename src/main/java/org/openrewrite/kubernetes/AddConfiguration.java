@@ -90,13 +90,13 @@ public class AddConfiguration extends Recipe {
                         }
 
                         if (FindKey.find(resource, path + "/" + subpath).isEmpty()) {
-                            doAfterVisit(new InsertYaml(path.isEmpty() ? "/" : path, subpath + ":"));
+                            doAfterVisit(new InsertYaml(path.isEmpty() ? "/" : path, subpath + ":", null));
                         }
 
                         path += "/" + subpath;
                     }
 
-                    doAfterVisit(new InsertYaml(path, value));
+                    doAfterVisit(new InsertYaml(path, value, null));
                 }
 
                 return resource;
