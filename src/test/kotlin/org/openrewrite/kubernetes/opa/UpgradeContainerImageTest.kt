@@ -143,7 +143,7 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
             setOf("repo.dev.lan", "repo.prod.wan"),
             "repo.dev.lan",
             null,
-            "1.2.3"
+            "latest"
         ),
         before = """
             apiVersion: v1
@@ -154,7 +154,7 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
             spec:
               containers:            
               - name: mycontainer
-                image: nginx:latest
+                image: nginx:1.2.3
         """,
         after = """
             apiVersion: v1
@@ -165,7 +165,7 @@ class UpgradeContainerImageTest : KubernetesRecipeTest {
             spec:
               containers:            
               - name: mycontainer
-                image: repo.dev.lan/nginx:1.2.3
+                image: repo.dev.lan/nginx:latest
         """
     )
 
