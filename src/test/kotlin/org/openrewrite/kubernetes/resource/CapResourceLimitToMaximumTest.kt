@@ -18,7 +18,7 @@ package org.openrewrite.kubernetes.resource
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
-class CapResourceValueToMaximumTest : KubernetesRecipeTest {
+class CapResourceLimitToMaximumTest : KubernetesRecipeTest {
 
     @Test
     fun `must cap resource limit to given maximum in different units`() = assertChanged(
@@ -92,5 +92,4 @@ class CapResourceValueToMaximumTest : KubernetesRecipeTest {
                         memory: "256M"
         """
     )
-
 }

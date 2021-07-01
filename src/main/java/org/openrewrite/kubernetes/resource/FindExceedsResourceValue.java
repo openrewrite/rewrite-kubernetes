@@ -21,7 +21,6 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
@@ -61,24 +60,17 @@ public class FindExceedsResourceValue extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        ResourceValue max = ResourceValue.parseResourceString(resourceLimit);
-        XPathMatcher resourceMatcher = new XPathMatcher("spec/containers/resources/" + resourceValueType + "/" + resourceType);
-
+        ResourceLimit limit = new ResourceLimit("spec/containers/resources/" + resourceValueType + "/" + resourceType, resourceLimit);
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
-                if (resourceMatcher.matches(getCursor()) && entry.getValue() instanceof Yaml.Scalar) {
-                    Yaml.Scalar scalarValue = (Yaml.Scalar) entry.getValue();
-                    ResourceValue rv = ResourceValue.parseResourceString(scalarValue.getValue());
-                    if (rv.getAbsoluteValue() > max.getAbsoluteValue()) {
-                        return entry.withValue(scalarValue.withMarkers(scalarValue.getMarkers().addIfAbsent(new YamlSearchResult(randomId(),
-                                FindExceedsResourceValue.this,
-                                "exceeds maximum of " + max))));
-                    }
+            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
+                if (limit.isResourceValueExceeding(getCursor())) {
+                    return scalar.withMarkers(scalar.getMarkers().addIfAbsent(new YamlSearchResult(randomId(),
+                            FindExceedsResourceValue.this,
+                            "exceeds maximum of " + limit.getValue().toString())));
                 }
-                return super.visitMappingEntry(entry, executionContext);
+                return super.visitScalar(scalar, executionContext);
             }
         };
     }
-
 }

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 import org.openrewrite.kubernetes.resource.FindExceedsResourceValue
 
-class FindExceedsResourceValueTest : KubernetesRecipeTest {
+class FindExceedsResourceLimitTest : KubernetesRecipeTest {
 
     @Test
     fun `must find limits that exceed a given maximum`() = assertChanged(
@@ -168,5 +168,4 @@ class FindExceedsResourceValueTest : KubernetesRecipeTest {
                         memory: ~~(exceeds maximum of 1Gi)~~>"2000M"
         """
     )
-
 }
