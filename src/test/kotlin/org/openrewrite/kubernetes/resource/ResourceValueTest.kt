@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openrewrite.kubernetes.util
+package org.openrewrite.kubernetes.resource
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.openrewrite.kubernetes.resource.ResourceValue
 import java.util.stream.Stream
 
 class ResourceValueTest {
