@@ -64,12 +64,11 @@ public class FindExceedsResourceValue extends Recipe {
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
-                if (limit.isResourceValueExceeding(getCursor())) {
-                    return scalar.withMarkers(scalar.getMarkers().addIfAbsent(new YamlSearchResult(randomId(),
-                            FindExceedsResourceValue.this,
-                            "exceeds maximum of " + limit.getValue().toString())));
-                }
-                return super.visitScalar(scalar, executionContext);
+                return limit.isResourceValueExceeding(getCursor()) ?
+                        scalar.withMarkers(scalar.getMarkers().addIfAbsent(new YamlSearchResult(randomId(),
+                                FindExceedsResourceValue.this,
+                                "exceeds maximum of " + limit.getValue()))) :
+                        super.visitScalar(scalar, executionContext);
             }
         };
     }
