@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openrewrite.kubernetes.search;
+package org.openrewrite.kubernetes.resource;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.*;
-import org.openrewrite.kubernetes.util.ResourceValue;
+import org.openrewrite.ExecutionContext;
+import org.openrewrite.Option;
+import org.openrewrite.Recipe;
+import org.openrewrite.TreeVisitor;
 import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
@@ -38,7 +40,8 @@ public class FindExceedsResourceValue extends Recipe {
 
     @Option(displayName = "Resource limit type",
             description = "The type of resource limit to search for.",
-            example = "memory")
+            example = "memory",
+            valid = {"cpu", "memory"})
     String resourceType;
 
     @Option(displayName = "Resource limit",

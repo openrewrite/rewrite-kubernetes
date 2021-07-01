@@ -19,6 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.openrewrite.kubernetes.resource.ResourceValue
 import java.util.stream.Stream
 
 class ResourceValueTest {

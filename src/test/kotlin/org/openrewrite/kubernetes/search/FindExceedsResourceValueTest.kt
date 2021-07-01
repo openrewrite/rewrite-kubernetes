@@ -17,6 +17,7 @@ package org.openrewrite.kubernetes.search
 
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
+import org.openrewrite.kubernetes.resource.FindExceedsResourceValue
 
 class FindExceedsResourceValueTest : KubernetesRecipeTest {
 

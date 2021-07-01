@@ -16,6 +16,7 @@
 package org.openrewrite.kubernetes
 
 import org.junit.jupiter.api.Test
+import org.openrewrite.kubernetes.resource.CapResourceValueToMaximum
 
 class CapResourceValueToMaximumTest : KubernetesRecipeTest {
 
