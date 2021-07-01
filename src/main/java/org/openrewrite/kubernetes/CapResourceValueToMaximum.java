@@ -16,7 +16,8 @@ public class CapResourceValueToMaximum extends Recipe {
 
     @Option(displayName = "Resource value type",
             description = "The type of resource to search for.",
-            example = "limits")
+            example = "limits",
+            valid = {"limits", "requests"})
     String resourceValueType;
     @Option(displayName = "Resource type",
             description = "The type of resource value to search for.",
