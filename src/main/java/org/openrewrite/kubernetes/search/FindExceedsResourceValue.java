@@ -35,10 +35,12 @@ public class FindExceedsResourceValue extends Recipe {
             example = "limits",
             valid = {"limits", "requests"})
     String resourceValueType;
+
     @Option(displayName = "Resource limit type",
             description = "The type of resource limit to search for.",
             example = "memory")
     String resourceType;
+
     @Option(displayName = "Resource limit",
             description = "The resource limit maximum to search for to find resources that request more than the maximum.",
             example = "2Gi")
