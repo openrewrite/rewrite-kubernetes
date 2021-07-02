@@ -1,4 +1,3 @@
-package org.openrewrite.kubernetes.search
 /*
  * Copyright 2021 the original author or authors.
  * <p>
@@ -14,6 +13,8 @@ package org.openrewrite.kubernetes.search
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.openrewrite.kubernetes.search
+
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
