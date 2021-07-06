@@ -17,6 +17,9 @@ package org.openrewrite.kubernetes;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import org.openrewrite.Cursor;
+import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import static org.openrewrite.internal.StringUtils.isNullOrEmpty;
@@ -58,12 +61,26 @@ public class ContainerImage {
         this.imageName = new ImageName(repository, image, tag, digest);
     }
 
+    public static boolean matches(Cursor cursor) {
+        if (!(cursor.getValue() instanceof Yaml.Scalar)) {
+            return false;
+        }
+        XPathMatcher imageMatcher = new XPathMatcher("//spec/containers/image");
+        XPathMatcher initImageMatcher = new XPathMatcher("//spec/initContainers/image");
+        Cursor parent = cursor.getParentOrThrow();
+        return imageMatcher.matches(parent) || initImageMatcher.matches(parent);
+    }
+
     @Value
     public static class ImageName {
 
+        @Nullable
         String repository;
+        @Nullable
         String image;
+        @Nullable
         String tag;
+        @Nullable
         String digest;
 
         @Override
