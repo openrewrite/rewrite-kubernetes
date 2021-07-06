@@ -22,11 +22,16 @@ import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.nio.file.*;
+import java.util.Arrays;
+
 import static org.openrewrite.internal.StringUtils.isNullOrEmpty;
 
 @Value
 @EqualsAndHashCode
 public class ContainerImage {
+
+    private final static FileSystem FS = FileSystems.getDefault();
 
     ImageName imageName;
 
@@ -83,6 +88,27 @@ public class ContainerImage {
         @Nullable
         String digest;
 
+        public boolean matches(ImageName otherName) {
+            boolean matchesRepo =
+                    bothNull(this.getRepository(), otherName.getRepository())
+                            || firstContainsSecond(this.getRepository(), otherName.getRepository())
+                            || isGlobMatch(this.getRepository(), otherName.getRepository());
+            boolean matchesImage =
+                    bothNull(this.getImage(), otherName.getImage())
+                            || firstContainsSecond(this.getImage(), otherName.getImage())
+                            || isGlobMatch(this.getImage(), otherName.getImage());
+            boolean matchesTag =
+                    bothNull(this.getTag(), otherName.getTag())
+                            || firstContainsSecond(this.getTag(), otherName.getTag())
+                            || isGlobMatch(this.getTag(), otherName.getTag());
+            boolean matchesDigest =
+                    bothNull(this.getDigest(), otherName.getDigest())
+                            || firstContainsSecond(this.getDigest(), otherName.getDigest())
+                            || isGlobMatch(this.getDigest(), otherName.getDigest());
+
+            return matchesRepo && matchesImage && matchesTag && matchesDigest;
+        }
+
         @Override
         public String toString() {
             String s = "";
@@ -93,10 +119,40 @@ public class ContainerImage {
             if (!isNullOrEmpty(tag)) {
                 s += ":" + tag;
             }
-            if (!isNullOrEmpty(digest)) {
+            if (!isNullOrEmpty(digest) && !"*".equals(digest)) {
                 s += "@" + digest;
             }
             return s;
+        }
+
+
+        private static boolean bothNull(@Nullable String s1, @Nullable String s2) {
+            return s1 == null && s2 == null;
+        }
+
+        private static boolean firstContainsSecond(@Nullable String s1, @Nullable String s2) {
+            return !isNullOrEmpty(s1) && s2 != null && s1.contains(s2);
+        }
+
+        private static boolean isGlobMatch(@Nullable String s1, @Nullable String s2) {
+            if ("*".equals(s2)) {
+                return true;
+            }
+            PathMatcher pm = FS.getPathMatcher("glob:" + s2);
+            Path path;
+            if (s1 != null && s1.contains("/")) {
+                String[] parts = s1.split("/");
+                if (parts.length > 1) {
+                    path = Paths.get(parts[0], Arrays.copyOfRange(parts, 1, parts.length - 1));
+                } else {
+                    path = Paths.get(parts[0]);
+                }
+            } else if (s1 == null) {
+                path = Paths.get("");
+            } else {
+                path = Paths.get(s1);
+            }
+            return pm.matches(path);
         }
     }
 

@@ -26,8 +26,7 @@ class FindImageTest : KubernetesRecipeTest {
         recipe = FindImage(
             "repo.id/account/bucket",
             "image",
-            "v1.2.3",
-            "digest"
+            "v1.2.3"
         ),
         before = """
             apiVersion: v1
@@ -69,7 +68,57 @@ class FindImageTest : KubernetesRecipeTest {
             kind: Pod
             spec:
                 containers:             
-                - image: ~~(repo.id/account/bucket/image:v1.2.3@digest)~~>repo.id/account/bucket/image:v1.2.3@digest
+                - image: ~~(repo.id/account/bucket/image:v1.2.3)~~>repo.id/account/bucket/image:v1.2.3@digest
+        """
+    )
+    @Test
+    fun `must support globbing in image name`() = assertChanged(
+        recipe = FindImage(
+            "repo.id/*",
+            "image",
+            "v1.*"
+        ),
+        before = """
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: image
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: app:v1.2.3
+                initContainers:             
+                - image: account/image:latest
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: repo.id/account/bucket/image:v1.2.3@digest
+        """,
+        after = """
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: image
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: app:v1.2.3
+                initContainers:             
+                - image: account/image:latest
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: ~~(repo.id/*/image:v1.*)~~>repo.id/account/bucket/image:v1.2.3@digest
         """
     )
 
@@ -78,8 +127,7 @@ class FindImageTest : KubernetesRecipeTest {
         recipe = FindImage(
             "*",
             "image",
-            "latest",
-            null
+            "latest"
         ),
         before = """
             apiVersion: v1
@@ -122,6 +170,57 @@ class FindImageTest : KubernetesRecipeTest {
             spec:
                 containers:             
                 - image: repo.id/account/bucket/image:v1.2.3@digest
+        """
+    )
+
+    @Test
+    fun `image name must preserve digest value`() = assertChanged(
+        recipe = FindImage(
+            "*",
+            "*",
+            "*"
+        ),
+        before = """
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: image:latest
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: app:v1.2.3
+                initContainers:             
+                - image: account/image:latest
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: repo.id/account/bucket/image:v1.2.3@digest
+        """,
+        after = """
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: ~~(*/*:*)~~>image:latest
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: ~~(*/*:*)~~>app:v1.2.3
+                initContainers:             
+                - image: ~~(*/*:*)~~>account/image:latest
+            ---
+            apiVersion: v1
+            kind: Pod
+            spec:
+                containers:             
+                - image: ~~(*/*:*)~~>repo.id/account/bucket/image:v1.2.3@digest
         """
     )
 
