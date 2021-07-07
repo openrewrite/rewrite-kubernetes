@@ -17,9 +17,11 @@ package org.openrewrite.kubernetes.search;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.*;
+import org.openrewrite.ExecutionContext;
+import org.openrewrite.Option;
+import org.openrewrite.Recipe;
+import org.openrewrite.TreeVisitor;
 import org.openrewrite.kubernetes.ContainerImage;
-import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
@@ -35,6 +37,12 @@ public class FindDisallowedImageTags extends Recipe {
             example = "latest")
     Set<String> disallowedTags;
 
+    @Option(displayName = "Include initContainers",
+            description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
+                    "containers/image.",
+            example = "false")
+    boolean includeInitContainers;
+
     @Override
     public String getDisplayName() {
         return "Disallowed tags";
@@ -47,14 +55,10 @@ public class FindDisallowedImageTags extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        XPathMatcher imageMatcher = new XPathMatcher("//spec/containers/image");
-        XPathMatcher initImageMatcher = new XPathMatcher("//spec/initContainers/image");
-
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
-                Cursor parent = getCursor().getParentOrThrow();
-                if (imageMatcher.matches(parent) || initImageMatcher.matches(parent)) {
+                if (ContainerImage.matches(getCursor(), includeInitContainers)) {
                     ContainerImage image = new ContainerImage(scalar);
                     if (disallowedTags.stream().anyMatch(t -> t.equals(image.getImageName().getTag()))) {
                         return scalar.withMarkers(scalar.getMarkers().addIfAbsent(new YamlSearchResult(
