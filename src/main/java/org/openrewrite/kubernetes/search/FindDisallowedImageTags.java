@@ -55,19 +55,18 @@ public class FindDisallowedImageTags extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
+        YamlSearchResult result = new YamlSearchResult(this, "disallowed tag: " + disallowedTags);
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
-                if (ContainerImage.matches(getCursor(), includeInitContainers)) {
+            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
+                Yaml.Scalar s = super.visitScalar(scalar, ctx);
+                if (ContainerImage.matches(getCursor(), s, includeInitContainers)) {
                     ContainerImage image = new ContainerImage(scalar);
                     if (disallowedTags.stream().anyMatch(t -> t.equals(image.getImageName().getTag()))) {
-                        return scalar.withMarkers(scalar.getMarkers().addIfAbsent(new YamlSearchResult(
-                                FindDisallowedImageTags.this,
-                                "disallowed tag: " + disallowedTags
-                        )));
+                        return s.withMarkers(scalar.getMarkers().addIfAbsent(result));
                     }
                 }
-                return super.visitScalar(scalar, executionContext);
+                return s;
             }
         };
     }

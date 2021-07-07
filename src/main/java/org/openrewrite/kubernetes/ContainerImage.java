@@ -69,12 +69,16 @@ public class ContainerImage {
         this.imageName = new ImageName(repository, image, tag, digest);
     }
 
-    public static boolean matches(Cursor cursor) {
-        return matches(cursor, false);
+    public static boolean matches(Cursor cursor, Yaml.Scalar s) {
+        return matches(cursor, s, false);
     }
 
-    public static boolean matches(Cursor cursor, boolean includeInitContainers) {
+    public static boolean matches(Cursor cursor, Yaml.Scalar s, boolean includeInitContainers) {
         if (!(cursor.getValue() instanceof Yaml.Scalar)) {
+            return false;
+        }
+        Yaml.Mapping.Entry entry = cursor.firstEnclosing(Yaml.Mapping.Entry.class);
+        if (entry == null || entry.getValue() != s) {
             return false;
         }
         XPathMatcher imageMatcher = new XPathMatcher("//spec/containers/image");
@@ -117,6 +121,10 @@ public class ContainerImage {
                             || isGlobMatch(this.getDigest(), otherName.getDigest());
 
             return matchesRepo && matchesImage && matchesTag && matchesDigest;
+        }
+
+        public boolean hasDigest() {
+            return !isNullOrEmpty(digest);
         }
 
         @Override

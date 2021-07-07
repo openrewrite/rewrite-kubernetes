@@ -94,7 +94,7 @@ public class UpdateContainerImageName extends Recipe {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
                 Yaml.Scalar s = super.visitScalar(scalar, executionContext);
-                if (ContainerImage.matches(getCursor(), includeInitContainers)) {
+                if (ContainerImage.matches(getCursor(), s, includeInitContainers)) {
                     ContainerImage image = new ContainerImage(s);
                     if (image.getImageName().matches(imageToSearch)) {
                         ContainerImage.ImageName newName = image.getImageName();
