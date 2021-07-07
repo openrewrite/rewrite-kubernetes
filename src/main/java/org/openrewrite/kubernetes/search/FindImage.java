@@ -75,8 +75,7 @@ public class FindImage extends Recipe {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Yaml.Scalar s = super.visitScalar(scalar, ctx);
-                Yaml.Mapping.Entry entry = getCursor().firstEnclosing(Yaml.Mapping.Entry.class);
-                if (entry != null && entry.getValue() == s && ContainerImage.matches(getCursor(), s, includeInitContainers)) {
+                if (ContainerImage.matches(getCursor(), s, includeInitContainers)) {
                     ContainerImage image = new ContainerImage(s);
                     if (image.getImageName().matches(imageToSearch)) {
                         return scalar.withMarkers(scalar.getMarkers().addIfAbsent(result));

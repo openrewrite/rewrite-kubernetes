@@ -53,7 +53,7 @@ public class FindMissingDigest extends Recipe {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Yaml.Scalar s = super.visitScalar(scalar, ctx);
-                if (ContainerImage.matches(getCursor(), s)) {
+                if (ContainerImage.matches(getCursor(), s, includeInitContainers)) {
                     ContainerImage image = new ContainerImage(s);
                     if (!image.getImageName().hasDigest()) {
                         return s.withMarkers(s.getMarkers().addIfAbsent(result));
