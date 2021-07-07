@@ -26,7 +26,8 @@ class FindImageTest : KubernetesRecipeTest {
         recipe = FindImage(
             "repo.id/account/bucket",
             "image",
-            "v1.2.3"
+            "v1.2.3",
+            false
         ),
         before = """
             apiVersion: v1
@@ -71,12 +72,14 @@ class FindImageTest : KubernetesRecipeTest {
                 - image: ~~(repo.id/account/bucket/image:v1.2.3)~~>repo.id/account/bucket/image:v1.2.3@digest
         """
     )
+
     @Test
     fun `must support globbing in image name`() = assertChanged(
         recipe = FindImage(
             "repo.id/*",
             "image",
-            "v1.*"
+            "v1.*",
+            false
         ),
         before = """
             apiVersion: v1
@@ -126,15 +129,16 @@ class FindImageTest : KubernetesRecipeTest {
     fun `must find partly specified image`() = assertChanged(
         recipe = FindImage(
             "*",
-            "image",
-            "latest"
+            "nginx",
+            "latest",
+            false
         ),
         before = """
             apiVersion: v1
             kind: Pod
             spec:
                 containers:             
-                - image: image:latest
+                - image: nginx:latest
             ---
             apiVersion: v1
             kind: Pod
@@ -142,20 +146,20 @@ class FindImageTest : KubernetesRecipeTest {
                 containers:             
                 - image: app:v1.2.3
                 initContainers:             
-                - image: account/image:latest
+                - image: account/nginx:latest
             ---
             apiVersion: v1
             kind: Pod
             spec:
                 containers:             
-                - image: repo.id/account/bucket/image:v1.2.3@digest
+                - image: repo.id/account/bucket/nginx:v1.2.3@digest
         """,
         after = """
             apiVersion: v1
             kind: Pod
             spec:
                 containers:             
-                - image: ~~(*/image:latest)~~>image:latest
+                - image: ~~(*/nginx:latest)~~>nginx:latest
             ---
             apiVersion: v1
             kind: Pod
@@ -163,13 +167,13 @@ class FindImageTest : KubernetesRecipeTest {
                 containers:             
                 - image: app:v1.2.3
                 initContainers:             
-                - image: ~~(*/image:latest)~~>account/image:latest
+                - image: account/nginx:latest
             ---
             apiVersion: v1
             kind: Pod
             spec:
                 containers:             
-                - image: repo.id/account/bucket/image:v1.2.3@digest
+                - image: repo.id/account/bucket/nginx:v1.2.3@digest
         """
     )
 
@@ -178,7 +182,8 @@ class FindImageTest : KubernetesRecipeTest {
         recipe = FindImage(
             "*",
             "*",
-            "*"
+            "*",
+            true
         ),
         before = """
             apiVersion: v1

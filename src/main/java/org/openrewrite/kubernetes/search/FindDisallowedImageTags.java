@@ -37,6 +37,12 @@ public class FindDisallowedImageTags extends Recipe {
             example = "latest")
     Set<String> disallowedTags;
 
+    @Option(displayName = "Include initContainers",
+            description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
+                    "containers/image.",
+            example = "false")
+    boolean includeInitContainers;
+
     @Override
     public String getDisplayName() {
         return "Disallowed tags";
@@ -52,7 +58,7 @@ public class FindDisallowedImageTags extends Recipe {
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
-                if (ContainerImage.matches(getCursor())) {
+                if (ContainerImage.matches(getCursor(), includeInitContainers)) {
                     ContainerImage image = new ContainerImage(scalar);
                     if (disallowedTags.stream().anyMatch(t -> t.equals(image.getImageName().getTag()))) {
                         return scalar.withMarkers(scalar.getMarkers().addIfAbsent(new YamlSearchResult(

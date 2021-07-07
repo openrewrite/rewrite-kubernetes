@@ -17,6 +17,7 @@ package org.openrewrite.kubernetes;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.With;
 import org.openrewrite.Cursor;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.XPathMatcher;
@@ -24,6 +25,7 @@ import org.openrewrite.yaml.tree.Yaml;
 
 import java.nio.file.*;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.openrewrite.internal.StringUtils.isNullOrEmpty;
 
@@ -52,6 +54,7 @@ public class ContainerImage {
         }
         idx = imageName.lastIndexOf(':');
         if (idx > -1) {
+            image = imageName.substring(0, idx);
             tag = imageName.substring(idx + 1);
             imageName = imageName.substring(0, idx);
         }
@@ -67,22 +70,29 @@ public class ContainerImage {
     }
 
     public static boolean matches(Cursor cursor) {
+        return matches(cursor, false);
+    }
+
+    public static boolean matches(Cursor cursor, boolean includeInitContainers) {
         if (!(cursor.getValue() instanceof Yaml.Scalar)) {
             return false;
         }
         XPathMatcher imageMatcher = new XPathMatcher("//spec/containers/image");
         XPathMatcher initImageMatcher = new XPathMatcher("//spec/initContainers/image");
         Cursor parent = cursor.getParentOrThrow();
-        return imageMatcher.matches(parent) || initImageMatcher.matches(parent);
+        return imageMatcher.matches(parent) || (includeInitContainers && initImageMatcher.matches(parent));
     }
 
     @Value
     public static class ImageName {
 
         @Nullable
+        @With
         String repository;
+        @With
         @Nullable
         String image;
+        @With
         @Nullable
         String tag;
         @Nullable
@@ -91,19 +101,19 @@ public class ContainerImage {
         public boolean matches(ImageName otherName) {
             boolean matchesRepo =
                     bothNull(this.getRepository(), otherName.getRepository())
-                            || firstContainsSecond(this.getRepository(), otherName.getRepository())
+                            || Objects.equals(this.getRepository(), otherName.getRepository())
                             || isGlobMatch(this.getRepository(), otherName.getRepository());
             boolean matchesImage =
                     bothNull(this.getImage(), otherName.getImage())
-                            || firstContainsSecond(this.getImage(), otherName.getImage())
+                            || Objects.equals(this.getImage(), otherName.getImage())
                             || isGlobMatch(this.getImage(), otherName.getImage());
             boolean matchesTag =
                     bothNull(this.getTag(), otherName.getTag())
-                            || firstContainsSecond(this.getTag(), otherName.getTag())
+                            || Objects.equals(this.getTag(), otherName.getTag())
                             || isGlobMatch(this.getTag(), otherName.getTag());
             boolean matchesDigest =
                     bothNull(this.getDigest(), otherName.getDigest())
-                            || firstContainsSecond(this.getDigest(), otherName.getDigest())
+                            || Objects.equals(this.getDigest(), otherName.getDigest())
                             || isGlobMatch(this.getDigest(), otherName.getDigest());
 
             return matchesRepo && matchesImage && matchesTag && matchesDigest;
@@ -128,10 +138,6 @@ public class ContainerImage {
 
         private static boolean bothNull(@Nullable String s1, @Nullable String s2) {
             return s1 == null && s2 == null;
-        }
-
-        private static boolean firstContainsSecond(@Nullable String s1, @Nullable String s2) {
-            return !isNullOrEmpty(s1) && s2 != null && s1.contains(s2);
         }
 
         private static boolean isGlobMatch(@Nullable String s1, @Nullable String s2) {

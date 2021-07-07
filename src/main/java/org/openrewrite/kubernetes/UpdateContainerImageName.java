@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.openrewrite.kubernetes.search;
+package org.openrewrite.kubernetes;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -23,33 +23,52 @@ import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
 import org.openrewrite.internal.lang.Nullable;
-import org.openrewrite.kubernetes.ContainerImage;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class FindImage extends Recipe {
+public class UpdateContainerImageName extends Recipe {
 
-    @Option(displayName = "Repository",
+    @Option(displayName = "Repository to find",
             description = "The repository part of the image name to search for in containers and initContainers.",
             example = "gcr.io",
             required = false)
     @Nullable
-    String repository;
+    String repoToFind;
 
-    @Option(displayName = "Image name",
+    @Option(displayName = "Image name to find",
             description = "The image name to search for in containers and initContainers.",
             example = "nginx")
-    String imageName;
+    String imageToFind;
 
-    @Option(displayName = "Image tag",
+    @Option(displayName = "Image tag to find",
             description = "The tag part of the image name to search for in containers and initContainers.",
             example = "v1.2.3",
             required = false)
     @Nullable
-    String imageTag;
+    String tagToFind;
+
+    @Option(displayName = "Repository to update",
+            description = "The repository part of the image name to update to in containers and initContainers.",
+            example = "gcr.io/account/bucket",
+            required = false)
+    @Nullable
+    String repoToUpdate;
+
+    @Option(displayName = "Image name to update",
+            description = "The image name to update to in containers and initContainers.",
+            example = "nginx",
+            required = false)
+    @Nullable
+    String imageToUpdate;
+
+    @Option(displayName = "Image tag to update",
+            description = "The tag part of the image name to update to in containers and initContainers.",
+            example = "v1.2.3",
+            required = false)
+    @Nullable
+    String tagToUpdate;
 
     @Option(displayName = "Include initContainers",
             description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
@@ -59,28 +78,36 @@ public class FindImage extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Image name";
+        return "Update image name";
     }
 
     @Override
     public String getDescription() {
-        return "The image name to search for in containers and initContainers.";
+        return "Search for image names that match patterns and replace the components of the name with new values.";
     }
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repository, imageName, imageTag, "*");
-        YamlSearchResult result = new YamlSearchResult(this, imageToSearch.toString());
+        ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repoToFind, imageToFind, tagToFind, "*");
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
-                Yaml.Scalar s = super.visitScalar(scalar, ctx);
-                Yaml.Mapping.Entry entry = getCursor().firstEnclosing(Yaml.Mapping.Entry.class);
-                if (entry != null && entry.getValue() == s && ContainerImage.matches(getCursor(), includeInitContainers)) {
+            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
+                Yaml.Scalar s = super.visitScalar(scalar, executionContext);
+                if (ContainerImage.matches(getCursor(), includeInitContainers)) {
                     ContainerImage image = new ContainerImage(s);
                     if (image.getImageName().matches(imageToSearch)) {
-                        return scalar.withMarkers(scalar.getMarkers().addIfAbsent(result));
+                        ContainerImage.ImageName newName = image.getImageName();
+                        if (null != repoToUpdate) {
+                            newName = newName.withRepository(repoToUpdate);
+                        }
+                        if (null != imageToUpdate) {
+                            newName = newName.withImage(imageToUpdate);
+                        }
+                        if (null != tagToUpdate) {
+                            newName = newName.withTag(tagToUpdate);
+                        }
+                        return s.withValue(newName.toString());
                     }
                 }
                 return s;

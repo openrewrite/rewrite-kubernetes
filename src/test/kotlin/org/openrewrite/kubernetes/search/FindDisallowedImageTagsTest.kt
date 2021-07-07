@@ -37,7 +37,8 @@ class FindDisallowedImageTagsTest : KubernetesRecipeTest {
     @Test
     fun `must find disallowed image tags`() = assertChanged(
         recipe = FindDisallowedImageTags(
-            setOf("latest", "dev")
+            setOf("latest", "dev"),
+            true
         ),
         before = """
             apiVersion: v1
@@ -90,7 +91,8 @@ class FindDisallowedImageTagsTest : KubernetesRecipeTest {
     @Test
     fun `must find disallowed image tags in workloads`() = assertChanged(
         recipe = FindDisallowedImageTags(
-            setOf("latest", "dev")
+            setOf("latest", "dev"),
+            false
         ),
         before = """
             apiVersion: apps/v1
