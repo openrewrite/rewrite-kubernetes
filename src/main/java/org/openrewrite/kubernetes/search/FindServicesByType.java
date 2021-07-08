@@ -23,7 +23,6 @@ import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
 import org.openrewrite.kubernetes.Kubernetes;
-import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.FindKey;
 import org.openrewrite.yaml.search.YamlSearchResult;
@@ -55,7 +54,6 @@ public class FindServicesByType extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        XPathMatcher matcher = new XPathMatcher("/spec/type");
         YamlSearchResult result = new YamlSearchResult(this, "type:" + serviceType);
 
         return new YamlIsoVisitor<ExecutionContext>() {
