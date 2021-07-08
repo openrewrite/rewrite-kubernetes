@@ -24,44 +24,60 @@ import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class FindServiceExternalIPs extends Recipe {
 
-    @Option(displayName = "IP addresses",
-            description = "A set of IP addresses to find in the service's externalIPs.",
-            example = "192.168.0.1")
-    Set<String> ipAddresses;
+    private static final String FIND_IPS = "findips";
 
-    @Option(displayName = "Find missing",
-            description = "Whether to treat this search as finding Services who's externalIPs do not contain any of the query IPs.")
-    boolean findMissing;
+    @Option(displayName = "IP addresses",
+            description = "The list of IP addresses of which at least one external IP should .",
+            example = "192.168.0.1")
+    Set<String> externalIPs;
+    @Option(displayName = "Invert query",
+            description = "Whether to treat this search as finding Services whose externalIPs do not contain any of " +
+                    "the query IPs.")
+    boolean invertQuery;
 
     @Override
     public String getDisplayName() {
-        return "IP addresses";
+        return "Find externalIPs";
     }
 
     @Override
     public String getDescription() {
-        return "A set of IP addresses to find Services.";
+        return "Find Services whose externalIPs list contains, or does not contain, one of a list of IPs.";
     }
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         XPathMatcher matcher = new XPathMatcher("/spec/externalIPs");
-        YamlSearchResult result = new YamlSearchResult(this, (findMissing ? "missing" : "found") + " ip");
+        YamlSearchResult result = new YamlSearchResult(this, (invertQuery ? "missing" : "found") + " ip");
         return new YamlIsoVisitor<ExecutionContext>() {
+            @Override
+            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
+                Yaml.Mapping.Entry e = super.visitMappingEntry(entry, executionContext);
+                if (Boolean.TRUE.equals(getCursor().getMessage(FIND_IPS))) {
+                    return e.withMarkers(e.getMarkers().addIfAbsent(result));
+                }
+                return e;
+            }
+
             @Override
             public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext ctx) {
                 Cursor parent = getCursor().getParentOrThrow();
                 if (parent.getValue() instanceof Yaml.Mapping.Entry && matcher.matches(parent)) {
-                    boolean ipIsFound = sequence.getEntries().stream()
-                            .anyMatch(e -> ipAddresses.contains(((Yaml.Scalar) e.getBlock()).getValue()));
-                    if ((!findMissing && ipIsFound) || (findMissing && !ipIsFound)) {
-                        return sequence.withMarkers(sequence.getMarkers().addIfAbsent(result));
+                    List<String> ips = sequence.getEntries().stream()
+                            .map(e -> ((Yaml.Scalar) e.getBlock()).getValue())
+                            .collect(Collectors.toList());
+                    boolean queryMatchesThisIp = ips.stream().anyMatch(externalIPs::contains);
+                    boolean ipIsMissing = ips.stream().anyMatch(ip -> !externalIPs.contains(ip));
+                    if ((!invertQuery && queryMatchesThisIp) || (invertQuery && ipIsMissing)) {
+                        getCursor().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, FIND_IPS, Boolean.TRUE);
                     }
                 }
                 return super.visitSequence(sequence, ctx);

@@ -71,8 +71,8 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-              externalIPs:~~(found ip)~~>
-                - 192.168.0.1~~(found ip)~~>
+              ~~(found ip)~~>externalIPs:
+                - 192.168.0.1
             ---
             apiVersion: v1
             kind: Service
@@ -156,8 +156,8 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-              externalIPs:~~(missing ip)~~>
-                - 10.10.0.1~~(missing ip)~~>
+              ~~(missing ip)~~>externalIPs:
+                - 10.10.0.1
         """.trimIndent()
     )
 
