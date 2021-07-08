@@ -24,7 +24,8 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
     @Test
     fun `must find services by external IPs`() = assertChanged(
         recipe = FindServiceExternalIPs(
-            setOf("192.168.0.1", "10.10.10.10")
+            setOf("192.168.0.1", "10.10.10.10"),
+            false
         ),
         before = """
             apiVersion: v1
@@ -70,8 +71,8 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-              externalIPs:
-                - ~~(IP)~~>192.168.0.1
+              externalIPs:~~(found ip)~~>
+                - 192.168.0.1~~(found ip)~~>
             ---
             apiVersion: v1
             kind: Service
@@ -87,6 +88,76 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
                   targetPort: 9376
               externalIPs:
                 - 10.10.10.1
+        """.trimIndent()
+    )
+
+    @Test
+    fun `must find services by external IPs exclusion`() = assertChanged(
+        recipe = FindServiceExternalIPs(
+            setOf("192.168.0.1", "10.10.10.1"),
+            true
+        ),
+        before = """
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
+                  protocol: TCP
+                  port: 80
+                  targetPort: 9376
+              externalIPs:
+                - 192.168.0.1
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
+                  protocol: TCP
+                  port: 80
+                  targetPort: 9376
+              externalIPs:
+                - 10.10.0.1
+        """.trimIndent(),
+        after = """
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
+                  protocol: TCP
+                  port: 80
+                  targetPort: 9376
+              externalIPs:
+                - 192.168.0.1
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
+                  protocol: TCP
+                  port: 80
+                  targetPort: 9376
+              externalIPs:~~(missing ip)~~>
+                - 10.10.0.1~~(missing ip)~~>
         """.trimIndent()
     )
 

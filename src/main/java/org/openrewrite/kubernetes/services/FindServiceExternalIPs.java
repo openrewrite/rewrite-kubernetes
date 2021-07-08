@@ -19,7 +19,6 @@ package org.openrewrite.kubernetes.services;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
-import org.openrewrite.internal.ListUtils;
 import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
@@ -32,9 +31,13 @@ import java.util.Set;
 public class FindServiceExternalIPs extends Recipe {
 
     @Option(displayName = "IP addresses",
-            description = "A set of IP addresses to find Services.",
+            description = "A set of IP addresses to find in the service's externalIPs.",
             example = "192.168.0.1")
     Set<String> ipAddresses;
+    @Option(displayName = "Find missing",
+            description = "Whether to treat this search as finding Services who's externalIPs do not contain any of " +
+                    "the query IPs.")
+    boolean findMissing;
 
     @Override
     public String getDisplayName() {
@@ -49,21 +52,17 @@ public class FindServiceExternalIPs extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         XPathMatcher matcher = new XPathMatcher("/spec/externalIPs");
-        YamlSearchResult result = new YamlSearchResult(this, "IP");
+        YamlSearchResult result = new YamlSearchResult(this, (findMissing ? "missing" : "found") + " ip");
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext ctx) {
                 Cursor parent = getCursor().getParentOrThrow();
                 if (parent.getValue() instanceof Yaml.Mapping.Entry && matcher.matches(parent)) {
-                    return sequence.withEntries(ListUtils.map(sequence.getEntries(), entry -> {
-                        if (entry.getBlock() instanceof Yaml.Scalar) {
-                            Yaml.Scalar ip = (Yaml.Scalar) entry.getBlock();
-                            if (ipAddresses.contains(ip.getValue())) {
-                                return entry.withBlock(ip.withMarkers(ip.getMarkers().addIfAbsent(result)));
-                            }
-                        }
-                        return entry;
-                    }));
+                    boolean ipIsFound = sequence.getEntries().stream()
+                            .anyMatch(e -> ipAddresses.contains(((Yaml.Scalar) e.getBlock()).getValue()));
+                    if ((!findMissing && ipIsFound) || (findMissing && !ipIsFound)) {
+                        return sequence.withMarkers(sequence.getMarkers().addIfAbsent(result));
+                    }
                 }
                 return super.visitSequence(sequence, ctx);
             }
