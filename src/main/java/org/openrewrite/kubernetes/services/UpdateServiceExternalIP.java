@@ -13,7 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.openrewrite.kubernetes.search;
+
+package org.openrewrite.kubernetes.services;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -21,46 +22,48 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.kubernetes.ContainerImage;
+import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class FindMissingDigest extends Recipe {
+public class UpdateServiceExternalIP extends Recipe {
 
-    @Option(displayName = "Include initContainers",
-            description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
-                    "containers/image.")
-    boolean includeInitContainers;
+    @Option(displayName = "IP to find",
+            description = "An ExternalIP address to find in the service's external IPs.",
+            example = "192.168.0.1")
+    String ipToFind;
+    @Option(displayName = "IP to update",
+            description = "An ExternalIP address to update to in the service's external IPs.",
+            example = "10.10.0.1")
+    String ipToUpdate;
 
     @Override
     public String getDisplayName() {
-        return "Find missing digest";
+        return "Update Service ExternalIPs";
     }
 
     @Override
     public String getDescription() {
-        return "Find instances of a container name that fails to specify a digest.";
+        return "Swap out an IP address with another one in the Service externalIPs setting.";
     }
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult result = new YamlSearchResult(this, "missing digest");
+        XPathMatcher matcher = new XPathMatcher("/spec/externalIPs");
+
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
-                Yaml.Scalar s = super.visitScalar(scalar, ctx);
-                if (ContainerImage.matches(getCursor(), s, includeInitContainers)) {
-                    ContainerImage image = new ContainerImage(s);
-                    if (!image.getImageName().hasDigest()) {
-                        return s.withMarkers(s.getMarkers().addIfAbsent(result));
+            public Yaml.Sequence.Entry visitSequenceEntry(Yaml.Sequence.Entry entry, ExecutionContext ctx) {
+                if (matcher.matches(getCursor().getParentOrThrow().getParentOrThrow())) {
+                    Yaml.Scalar s = (Yaml.Scalar) entry.getBlock();
+                    if (ipToFind.equals(s.getValue())) {
+                        return entry.withBlock(s.withValue(ipToUpdate));
                     }
                 }
-                return s;
+                return super.visitSequenceEntry(entry, ctx);
             }
         };
     }
-
 }

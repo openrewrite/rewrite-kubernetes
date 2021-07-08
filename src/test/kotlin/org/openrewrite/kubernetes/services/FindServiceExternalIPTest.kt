@@ -14,16 +14,19 @@
  *  limitations under the License.
  */
 
-package org.openrewrite.kubernetes.search
+package org.openrewrite.kubernetes.services
 
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
-class FindServicesByTypeTest : KubernetesRecipeTest {
+class FindServiceExternalIPTest : KubernetesRecipeTest {
 
     @Test
-    fun `must find NodePort services`() = assertChanged(
-        recipe = FindServicesByType("NodePort"),
+    fun `must find services by external IPs`() = assertChanged(
+        recipe = FindServiceExternalIPs(
+            setOf("192.168.0.1", "10.10.10.10"),
+            false
+        ),
         before = """
             apiVersion: v1
             kind: Service
@@ -37,41 +40,23 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-                - name: https
+              externalIPs:
+                - 192.168.0.1
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
                   protocol: TCP
-                  port: 443
-                  targetPort: 9377
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              type: NodePort
-              selector:
-                app: MyApp
-              ports:
-                - port: 80
-                  targetPort: 80
-                  nodePort: 30007
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              selector:
-                app: MyApp
-              ports:
-                - protocol: TCP
                   port: 80
                   targetPort: 9376
-              clusterIP: 10.0.171.239
-              type: LoadBalancer
-            status:
-              loadBalancer:
-                ingress:
-                - ip: 192.0.2.127
+              externalIPs:
+                - 10.10.10.1
         """.trimIndent(),
         after = """
             apiVersion: v1
@@ -86,23 +71,8 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-                - name: https
-                  protocol: TCP
-                  port: 443
-                  targetPort: 9377
-            ~~(type:NodePort)~~>---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              type: NodePort
-              selector:
-                app: MyApp
-              ports:
-                - port: 80
-                  targetPort: 80
-                  nodePort: 30007
+              externalIPs:~~(found ip)~~>
+                - 192.168.0.1~~(found ip)~~>
             ---
             apiVersion: v1
             kind: Service
@@ -112,21 +82,21 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
               selector:
                 app: MyApp
               ports:
-                - protocol: TCP
+                - name: http
+                  protocol: TCP
                   port: 80
                   targetPort: 9376
-              clusterIP: 10.0.171.239
-              type: LoadBalancer
-            status:
-              loadBalancer:
-                ingress:
-                - ip: 192.0.2.127
+              externalIPs:
+                - 10.10.10.1
         """.trimIndent()
     )
 
     @Test
-    fun `must find ClusterIP services`() = assertChanged(
-        recipe = FindServicesByType("ClusterIP"),
+    fun `must find services by external IPs exclusion`() = assertChanged(
+        recipe = FindServiceExternalIPs(
+            setOf("192.168.0.1", "10.10.10.1"),
+            true
+        ),
         before = """
             apiVersion: v1
             kind: Service
@@ -140,44 +110,10 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-                - name: https
-                  protocol: TCP
-                  port: 443
-                  targetPort: 9377
+              externalIPs:
+                - 192.168.0.1
             ---
             apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              type: NodePort
-              selector:
-                app: MyApp
-              ports:
-                - port: 80
-                  targetPort: 80
-                  nodePort: 30007
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              selector:
-                app: MyApp
-              ports:
-                - protocol: TCP
-                  port: 80
-                  targetPort: 9376
-              clusterIP: 10.0.171.239
-              type: LoadBalancer
-            status:
-              loadBalancer:
-                ingress:
-                - ip: 192.0.2.127
-        """.trimIndent(),
-        after = """
-            ~~(type:ClusterIP)~~>apiVersion: v1
             kind: Service
             metadata:
               name: my-service
@@ -189,41 +125,39 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 80
                   targetPort: 9376
-                - name: https
+              externalIPs:
+                - 10.10.0.1
+        """.trimIndent(),
+        after = """
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
                   protocol: TCP
-                  port: 443
-                  targetPort: 9377
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              type: NodePort
-              selector:
-                app: MyApp
-              ports:
-                - port: 80
-                  targetPort: 80
-                  nodePort: 30007
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-service
-            spec:
-              selector:
-                app: MyApp
-              ports:
-                - protocol: TCP
                   port: 80
                   targetPort: 9376
-              clusterIP: 10.0.171.239
-              type: LoadBalancer
-            status:
-              loadBalancer:
-                ingress:
-                - ip: 192.0.2.127
+              externalIPs:
+                - 192.168.0.1
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              selector:
+                app: MyApp
+              ports:
+                - name: http
+                  protocol: TCP
+                  port: 80
+                  targetPort: 9376
+              externalIPs:~~(missing ip)~~>
+                - 10.10.0.1~~(missing ip)~~>
         """.trimIndent()
     )
 
