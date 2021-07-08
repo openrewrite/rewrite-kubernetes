@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.openrewrite.kubernetes.search;
+package org.openrewrite.kubernetes.services;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;

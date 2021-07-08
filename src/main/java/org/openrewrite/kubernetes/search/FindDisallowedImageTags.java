@@ -39,8 +39,7 @@ public class FindDisallowedImageTags extends Recipe {
 
     @Option(displayName = "Include initContainers",
             description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
-                    "containers/image.",
-            example = "false")
+                    "containers/image.")
     boolean includeInitContainers;
 
     @Override
