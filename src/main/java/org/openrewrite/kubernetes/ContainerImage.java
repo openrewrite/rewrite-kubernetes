@@ -33,7 +33,7 @@ import static org.openrewrite.internal.StringUtils.isNullOrEmpty;
 @EqualsAndHashCode
 public class ContainerImage {
 
-    private final static FileSystem FS = FileSystems.getDefault();
+    private static final FileSystem FS = FileSystems.getDefault();
 
     ImageName imageName;
 
