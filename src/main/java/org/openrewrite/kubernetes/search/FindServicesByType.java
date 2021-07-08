@@ -67,12 +67,8 @@ public class FindServicesByType extends Recipe {
                 }
 
                 Set<Yaml.Mapping.Entry> typeEntries = FindKey.find(document, "/spec/type");
-                if (typeEntries.isEmpty() && "ClusterIP".equals(serviceType) || typeEntries.stream().anyMatch(e -> {
-                    if (e.getValue() instanceof Yaml.Scalar) {
-                        return serviceType.equals(((Yaml.Scalar) e.getValue()).getValue());
-                    }
-                    return false;
-                })) {
+                if (typeEntries.isEmpty() && "ClusterIP".equals(serviceType) || typeEntries.stream()
+                        .anyMatch(e -> e.getValue() instanceof Yaml.Scalar && serviceType.equals(((Yaml.Scalar) e.getValue()).getValue()))) {
                     return document
                             .withMarkers(document.getMarkers().addIfAbsent(result))
                             .withBlock((Yaml.Block) requireNonNull(visit(document.getBlock(), ctx, getCursor())));
