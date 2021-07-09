@@ -31,12 +31,13 @@ public class FindAnnotation extends Recipe {
             description = "The name of the annotation to search for the existence of.",
             example = "mycompany.io/annotation")
     String annotationName;
-    @Option(displayName = "Value regex",
-            description = "An optional regex that will find values that match.",
+
+    @Option(displayName = "Value",
+            description = "An optional glob expression that will find values that match.",
             example = "value.*",
             required = false)
     @Nullable
-    String valueRegex;
+    String value;
 
     @Override
     public String getDisplayName() {
@@ -51,9 +52,9 @@ public class FindAnnotation extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         YamlSearchResult found = new YamlSearchResult(this, "found:" + annotationName);
-        YamlSearchResult valid = new YamlSearchResult(this, "found:" + valueRegex);
+        YamlSearchResult valid = new YamlSearchResult(this, "found:" + value);
 
-        return new ValidatingMappingEntryVisitor("//metadata/annotations", annotationName, valueRegex) {
+        return new ValidatingMappingEntryVisitor("//metadata/annotations", annotationName, value) {
             @Override
             public Yaml.Mapping.Entry visitFoundEntry(Yaml.Mapping.Entry entry, Cursor parent, ExecutionContext ctx) {
                 parent.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MESSAGE_KEY, found);
