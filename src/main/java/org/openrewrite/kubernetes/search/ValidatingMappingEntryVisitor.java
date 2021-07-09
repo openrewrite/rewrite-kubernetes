@@ -37,6 +37,7 @@ class ValidatingMappingEntryVisitor extends YamlIsoVisitor<ExecutionContext> {
 
     XPathMatcher mappingMatcher;
     String entryKey;
+
     @Nullable
     Pattern validationPattern;
 
