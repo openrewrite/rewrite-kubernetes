@@ -36,13 +36,13 @@ class ValidatingMappingEntryVisitor extends YamlIsoVisitor<ExecutionContext> {
     static final String MESSAGE_KEY = ValidatingMappingEntryVisitor.class.getSimpleName();
 
     XPathMatcher mappingMatcher;
-    String annotationName;
+    String entryKey;
     @Nullable
     Pattern validationPattern;
 
-    public ValidatingMappingEntryVisitor(String mappingPath, String annotationName, @Nullable String validationRegex) {
+    public ValidatingMappingEntryVisitor(String mappingPath, String entryKey, @Nullable String validationRegex) {
         this.mappingMatcher = new XPathMatcher(mappingPath);
-        this.annotationName = annotationName;
+        this.entryKey = entryKey;
         this.validationPattern = validationRegex == null ? null : Pattern.compile(validationRegex);
     }
 
@@ -80,12 +80,12 @@ class ValidatingMappingEntryVisitor extends YamlIsoVisitor<ExecutionContext> {
             return m;
         }
 
-        AtomicBoolean annotationFound = new AtomicBoolean(false);
+        AtomicBoolean entryFound = new AtomicBoolean(false);
         List<Yaml.Mapping.Entry> newEntries = ListUtils.map(m.getEntries(), e -> {
-            if (!e.getKey().getValue().equals(annotationName)) {
+            if (!e.getKey().getValue().equals(entryKey)) {
                 return e;
             }
-            annotationFound.compareAndSet(false, true);
+            entryFound.compareAndSet(false, true);
             String annoValue = ((Yaml.Scalar) e.getValue()).getValue();
             if (validationPattern == null) {
                 return visitFoundEntry(e, getCursor(), ctx);
@@ -96,7 +96,7 @@ class ValidatingMappingEntryVisitor extends YamlIsoVisitor<ExecutionContext> {
             }
         });
 
-        if (!annotationFound.get()) {
+        if (!entryFound.get()) {
             m = visitMissingEntry(m, getCursor(), ctx);
         }
 
