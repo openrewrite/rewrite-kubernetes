@@ -27,18 +27,17 @@ import org.openrewrite.yaml.tree.Yaml;
 @EqualsAndHashCode(callSuper = true)
 public class FindMissingAnnotation extends Recipe {
 
-    private static final String FIND_ANNO = "find_anno";
-
     @Option(displayName = "Annotation name",
             description = "The name of the annotation to search for the existence of.",
             example = "mycompany.io/annotation")
     String annotationName;
-    @Option(displayName = "Value regex",
-            description = "An optional regex that will validate values that match.",
+
+    @Option(displayName = "Value",
+            description = "An optional glob that will validate values that match.",
             example = "value.*",
             required = false)
     @Nullable
-    String valueRegex;
+    String value;
 
     @Override
     public String getDisplayName() {
@@ -47,15 +46,15 @@ public class FindMissingAnnotation extends Recipe {
 
     @Override
     public String getDescription() {
-        return "Find annotations that optionally match a given regex.";
+        return "Find annotations that optionally match a given value.";
     }
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         YamlSearchResult missing = new YamlSearchResult(this, "missing:" + annotationName);
-        YamlSearchResult invalid = null != valueRegex ? new YamlSearchResult(this, "invalid:" + valueRegex) : null;
+        YamlSearchResult invalid = null != value ? new YamlSearchResult(this, "invalid:" + value) : null;
 
-        return new ValidatingMappingEntryVisitor("//metadata/annotations", annotationName, valueRegex) {
+        return new ValidatingMappingEntryVisitor("//metadata/annotations", annotationName, value) {
             @Override
             public Yaml.Mapping visitMissingEntry(Yaml.Mapping mapping, Cursor cursor, ExecutionContext ctx) {
                 cursor.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MESSAGE_KEY, missing);
