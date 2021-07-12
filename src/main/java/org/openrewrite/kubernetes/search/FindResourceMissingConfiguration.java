@@ -17,16 +17,12 @@ package org.openrewrite.kubernetes.search;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.ExecutionContext;
-import org.openrewrite.Option;
-import org.openrewrite.Recipe;
-import org.openrewrite.TreeVisitor;
-import org.openrewrite.kubernetes.Kubernetes;
-import org.openrewrite.kubernetes.KubernetesVisitor;
+import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.marker.RecipeSearchResult;
-import org.openrewrite.yaml.search.FindKey;
-
-import static org.openrewrite.Tree.randomId;
+import org.openrewrite.yaml.YamlIsoVisitor;
+import org.openrewrite.yaml.tree.Yaml;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -34,7 +30,9 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Option(displayName = "Resource kind",
             description = "The Kubernetes resource type to search on.",
-            example = "Pod")
+            example = "Pod",
+            required = false)
+    @Nullable
     String resourceKind;
 
     @Option(displayName = "Configuration path",
@@ -54,14 +52,27 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new KubernetesVisitor<ExecutionContext>() {
+        RecipeSearchResult result = new RecipeSearchResult(Tree.randomId(), this);
+
+        return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Kubernetes.ResourceDocument visitKubernetes(Kubernetes.ResourceDocument resource, ExecutionContext executionContext) {
-                return resourceKind.equals(resource.getModel().getKind()) && FindKey.find(resource, configurationPath).isEmpty() ?
-                        resource.withMarkers(resource.getMarkers().addIfAbsent(new RecipeSearchResult(randomId(), FindResourceMissingConfiguration.this))) :
-                        resource;
+            public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
+                Yaml.Block b = (Yaml.Block) visit(document.getBlock(), ctx, getCursor());
+                boolean inKind = resourceKind == null || K8S.inKind(resourceKind, getCursor());
+                if (inKind && !("true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName())))) {
+                    return document.withBlock(b).withMarkers(document.getMarkers().addIfAbsent(result));
+                }
+                return document;
             }
 
+            @Override
+            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
+                if (K8S.firstEnclosingEntryMatching(configurationPath, getCursor()).isPresent()) {
+                    getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,
+                            FindResourceMissingConfiguration.class.getSimpleName(), "true");
+                }
+                return super.visitMappingEntry(entry, ctx);
+            }
         };
     }
 }
