@@ -47,8 +47,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      resourceKind: Pod
-      configurationPath: /spec/containers/livenessProbe
+      configurationPath: //spec/containers/livenessProbe
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodReadinessProbe
@@ -58,8 +57,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      resourceKind: Pod
-      configurationPath: /spec/containers/readinessProbe
+      configurationPath: //spec/containers/readinessProbe
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingCpuRequest
