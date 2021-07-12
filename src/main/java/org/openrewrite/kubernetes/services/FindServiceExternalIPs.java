@@ -19,7 +19,8 @@ package org.openrewrite.kubernetes.services;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
-import org.openrewrite.yaml.XPathMatcher;
+import org.openrewrite.kubernetes.search.EntryMarkingVisitor;
+import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
@@ -38,10 +39,10 @@ public class FindServiceExternalIPs extends Recipe {
             description = "The list of IP addresses of which at least one external IP should .",
             example = "192.168.0.1")
     Set<String> externalIPs;
-    @Option(displayName = "Invert query",
+    @Option(displayName = "Find missing",
             description = "Whether to treat this search as finding Services whose externalIPs do not contain any of " +
                     "the query IPs.")
-    boolean invertQuery;
+    boolean findMissing;
 
     @Override
     public String getDisplayName() {
@@ -54,30 +55,35 @@ public class FindServiceExternalIPs extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        XPathMatcher matcher = new XPathMatcher("/spec/externalIPs");
-        YamlSearchResult result = new YamlSearchResult(this, (invertQuery ? "missing" : "found") + " ip");
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
-                Yaml.Mapping.Entry e = super.visitMappingEntry(entry, executionContext);
-                if (Boolean.TRUE.equals(getCursor().getMessage(FIND_IPS))) {
-                    return e.withMarkers(e.getMarkers().addIfAbsent(result));
+            public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
+                if (K8S.inService(getCursor())) {
+                    return document.withMarkers(document.getMarkers().addIfAbsent(K8S.asResource((Yaml.Mapping) document.getBlock())));
                 }
-                return e;
+                return super.visitDocument(document, ctx);
             }
+        };
+    }
 
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+        YamlSearchResult result = new YamlSearchResult(this, (findMissing ? "missing" : "found") + " ip");
+
+        return new EntryMarkingVisitor() {
             @Override
             public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext ctx) {
-                Cursor parent = getCursor().getParentOrThrow();
-                if (parent.getValue() instanceof Yaml.Mapping.Entry && matcher.matches(parent)) {
+                Cursor c = getCursor();
+                if (K8S.Service.inExternalIPs(c)) {
                     List<String> ips = sequence.getEntries().stream()
                             .map(e -> ((Yaml.Scalar) e.getBlock()).getValue())
                             .collect(Collectors.toList());
-                    boolean queryMatchesThisIp = ips.stream().anyMatch(externalIPs::contains);
-                    boolean ipIsMissing = ips.stream().anyMatch(ip -> !externalIPs.contains(ip));
-                    if ((!invertQuery && queryMatchesThisIp) || (invertQuery && ipIsMissing)) {
-                        getCursor().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, FIND_IPS, Boolean.TRUE);
+
+                    boolean matches = findMissing ? ips.stream().noneMatch(externalIPs::contains) :
+                            ips.stream().anyMatch(externalIPs::contains);
+                    if (matches) {
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, result);
                     }
                 }
                 return super.visitSequence(sequence, ctx);

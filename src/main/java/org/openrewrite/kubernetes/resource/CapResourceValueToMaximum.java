@@ -17,12 +17,13 @@ package org.openrewrite.kubernetes.resource;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.ExecutionContext;
-import org.openrewrite.Option;
-import org.openrewrite.Recipe;
-import org.openrewrite.TreeVisitor;
+import org.openrewrite.*;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
+
+import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inLimits;
+import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inRequests;
+import static org.openrewrite.kubernetes.tree.K8S.asResourceLimits;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -57,13 +58,16 @@ public class CapResourceValueToMaximum extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        ResourceLimit limit = new ResourceLimit("spec/containers/resources/" + resourceValueType + "/" + resourceType, resourceLimit);
+        ResourceLimit limit = new ResourceLimit(resourceLimit);
+
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
-                return limit.isResourceValueExceeding(getCursor()) ?
-                        scalar.withValue(limit.convertToUnit(scalar)) :
-                        super.visitScalar(scalar, executionContext);
+                Cursor c = getCursor();
+                if (((inLimits(resourceType, c) && "limits".equals(resourceValueType)) || (inRequests(resourceType, c) && "requests".equals(resourceValueType))) && asResourceLimits(scalar).getValue().exceeds(limit.getValue())) {
+                    return scalar.withValue(limit.convertToUnit(scalar));
+                }
+                return super.visitScalar(scalar, executionContext);
             }
         };
     }

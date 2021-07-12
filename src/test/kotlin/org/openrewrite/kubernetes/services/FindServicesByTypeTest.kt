@@ -90,12 +90,12 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
                   protocol: TCP
                   port: 443
                   targetPort: 9377
-            ~~(type:NodePort)~~>---
+            ---
             apiVersion: v1
             kind: Service
             metadata:
               name: my-service
-            spec:
+            ~~(type:NodePort)~~>spec:
               type: NodePort
               selector:
                 app: MyApp
@@ -177,11 +177,11 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
                 - ip: 192.0.2.127
         """.trimIndent(),
         after = """
-            ~~(type:ClusterIP)~~>apiVersion: v1
+            apiVersion: v1
             kind: Service
             metadata:
               name: my-service
-            spec:
+            ~~(type:ClusterIP)~~>spec:
               selector:
                 app: MyApp
               ports:
