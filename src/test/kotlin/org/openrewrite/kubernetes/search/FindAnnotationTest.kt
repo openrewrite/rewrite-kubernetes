@@ -47,15 +47,15 @@ class FindAnnotationTest : KubernetesRecipeTest {
             kind: Pod
             metadata:
               name: mypod1
-              ~~(found:mycompany.io/annotation)~~>annotations:
-                mycompany.io/annotation: "hasvalue"
+              annotations:
+                ~~(found:mycompany.io/annotation)~~>mycompany.io/annotation: "hasvalue"
             ---
             apiVersion: v1
             kind: Pod
             metadata:
               name: mypod2
-              ~~(found:mycompany.io/annotation)~~>annotations:
-                mycompany.io/annotation: "novalue"
+              annotations:
+                ~~(found:mycompany.io/annotation)~~>mycompany.io/annotation: "novalue"
         """.trimIndent()
     )
 
@@ -99,8 +99,8 @@ class FindAnnotationTest : KubernetesRecipeTest {
             kind: Pod
             metadata:
               name: mypod1
-              ~~(found:has(.*))~~>annotations:
-                mycompany.io/annotation: "hasvalue"
+              annotations:
+                ~~(found:has(.*))~~>mycompany.io/annotation: "hasvalue"
             ---
             apiVersion: v1
             kind: Pod
@@ -115,8 +115,8 @@ class FindAnnotationTest : KubernetesRecipeTest {
                 template:
                     spec:
                         metadata:
-                            ~~(found:has(.*))~~>annotations:
-                                mycompany.io/annotation: "hasvalue"
+                            annotations:
+                                ~~(found:has(.*))~~>mycompany.io/annotation: "hasvalue"
                         containers:            
                         - name: app
                           image: repo/app:latest

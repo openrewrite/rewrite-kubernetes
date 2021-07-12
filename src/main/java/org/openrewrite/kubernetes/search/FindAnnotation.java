@@ -20,8 +20,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
+
+import java.util.regex.Pattern;
+
+import static org.openrewrite.kubernetes.tree.K8S.Annotations.inAnnotations;
+import static org.openrewrite.kubernetes.tree.K8S.asAnnotations;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -33,7 +39,7 @@ public class FindAnnotation extends Recipe {
     String annotationName;
 
     @Option(displayName = "Value",
-            description = "An optional glob expression that will find values that match.",
+            description = "An optional regex expression that will find values that match.",
             example = "value.*",
             required = false)
     @Nullable
@@ -51,20 +57,23 @@ public class FindAnnotation extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
+        Pattern pattern = value != null ? Pattern.compile(value) : null;
         YamlSearchResult found = new YamlSearchResult(this, "found:" + annotationName);
         YamlSearchResult valid = new YamlSearchResult(this, "found:" + value);
 
-        return new ValidatingMappingEntryVisitor("//metadata/annotations", annotationName, value) {
+        return new EntryMarkingVisitor() {
             @Override
-            public Yaml.Mapping.Entry visitFoundEntry(Yaml.Mapping.Entry entry, Cursor parent, ExecutionContext ctx) {
-                parent.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MESSAGE_KEY, found);
-                return entry;
-            }
-
-            @Override
-            public Yaml.Mapping.Entry visitValidEntry(Yaml.Mapping.Entry entry, Cursor parent, ExecutionContext ctx) {
-                parent.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MESSAGE_KEY, valid);
-                return super.visitInvalidEntry(entry, parent, ctx);
+            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
+                Cursor c = getCursor();
+                if (inAnnotations(c)) {
+                    K8S.Annotations annos = asAnnotations(c.firstEnclosing(Yaml.Mapping.class));
+                    if (value == null && annos.getKeys().contains(annotationName)) {
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, found);
+                    } else if (pattern != null && annos.valueMatches(annotationName, pattern, c)) {
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, valid);
+                    }
+                }
+                return super.visitScalar(scalar, executionContext);
             }
         };
     }

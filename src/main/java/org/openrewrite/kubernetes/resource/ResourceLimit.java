@@ -16,30 +16,16 @@
 package org.openrewrite.kubernetes.resource;
 
 import lombok.EqualsAndHashCode;
-import org.openrewrite.Cursor;
-import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.Locale;
 
 @EqualsAndHashCode
 public class ResourceLimit {
-    private final XPathMatcher resourcePath;
     private final ResourceValue value;
 
-    public ResourceLimit(String resourcePath, String value) {
-        this.resourcePath = new XPathMatcher(resourcePath);
+    public ResourceLimit(String value) {
         this.value = new ResourceValue(value);
-    }
-
-    public boolean isResourceValueExceeding(Cursor cursor) {
-        assert cursor.getValue() instanceof Yaml.Scalar;
-        Yaml.Scalar scalar = cursor.getValue();
-        if (resourcePath.matches(cursor) && ((Yaml.Mapping.Entry) cursor.getParentOrThrow().getValue()).getValue() == scalar) {
-            ResourceValue rv = new ResourceValue(scalar.getValue());
-            return (rv.getAbsoluteValue() > value.getAbsoluteValue());
-        }
-        return false;
     }
 
     public String convertToUnit(Yaml.Scalar scalar) {
@@ -49,6 +35,10 @@ public class ResourceLimit {
 
     public ResourceValue getValue() {
         return value;
+    }
+
+    public boolean exceeds(ResourceValue rv) {
+        return value.getAbsoluteValue() > rv.getAbsoluteValue();
     }
 
     public static class ResourceValue {

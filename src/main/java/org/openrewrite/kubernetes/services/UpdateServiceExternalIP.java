@@ -18,11 +18,8 @@ package org.openrewrite.kubernetes.services;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.ExecutionContext;
-import org.openrewrite.Option;
-import org.openrewrite.Recipe;
-import org.openrewrite.TreeVisitor;
-import org.openrewrite.yaml.XPathMatcher;
+import org.openrewrite.*;
+import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -51,12 +48,12 @@ public class UpdateServiceExternalIP extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        XPathMatcher matcher = new XPathMatcher("/spec/externalIPs");
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Sequence.Entry visitSequenceEntry(Yaml.Sequence.Entry entry, ExecutionContext ctx) {
-                if (matcher.matches(getCursor().getParentOrThrow().getParentOrThrow())) {
+                Cursor c = getCursor();
+                if (K8S.Service.inExternalIPs(c)) {
                     Yaml.Scalar s = (Yaml.Scalar) entry.getBlock();
                     if (ipToFind.equals(s.getValue())) {
                         return entry.withBlock(s.withValue(ipToUpdate));

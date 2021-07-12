@@ -17,14 +17,15 @@ package org.openrewrite.kubernetes.search;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.ExecutionContext;
-import org.openrewrite.Option;
-import org.openrewrite.Recipe;
-import org.openrewrite.TreeVisitor;
+import org.openrewrite.*;
 import org.openrewrite.kubernetes.ContainerImage;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
+
+import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
+import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
+import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -51,14 +52,14 @@ public class FindMissingDigest extends Recipe {
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
-                Yaml.Scalar s = super.visitScalar(scalar, ctx);
-                if (ContainerImage.matches(getCursor(), s, includeInitContainers)) {
-                    ContainerImage image = new ContainerImage(s);
+                Cursor c = getCursor();
+                if ((inContainerSpec(c) || (includeInitContainers && inInitContainerSpec(c))) && isImageName(c)) {
+                    ContainerImage image = new ContainerImage(scalar.getValue());
                     if (!image.getImageName().hasDigest()) {
-                        return s.withMarkers(s.getMarkers().addIfAbsent(result));
+                        return scalar.withMarkers(scalar.getMarkers().addIfAbsent(result));
                     }
                 }
-                return s;
+                return super.visitScalar(scalar, ctx);
             }
         };
     }

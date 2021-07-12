@@ -18,19 +18,12 @@ package org.openrewrite.kubernetes.services;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.openrewrite.ExecutionContext;
-import org.openrewrite.Option;
-import org.openrewrite.Recipe;
-import org.openrewrite.TreeVisitor;
-import org.openrewrite.kubernetes.Kubernetes;
+import org.openrewrite.*;
+import org.openrewrite.kubernetes.search.EntryMarkingVisitor;
+import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.FindKey;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
-
-import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -53,25 +46,34 @@ public class FindServicesByType extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult result = new YamlSearchResult(this, "type:" + serviceType);
-
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
-                Kubernetes.ResourceDocument r = (Kubernetes.ResourceDocument) document;
-                if (!"Service".equals((r.getModel().getKind()))) {
-                    return document;
+                if (K8S.inService(getCursor())) {
+                    return document.withMarkers(document.getMarkers().addIfAbsent(K8S.asResource((Yaml.Mapping) document.getBlock())));
                 }
+                return super.visitDocument(document, ctx);
+            }
+        };
+    }
 
-                Set<Yaml.Mapping.Entry> typeEntries = FindKey.find(document, "/spec/type");
-                if (typeEntries.isEmpty() && "ClusterIP".equals(serviceType) || typeEntries.stream()
-                        .anyMatch(e -> e.getValue() instanceof Yaml.Scalar && serviceType.equals(((Yaml.Scalar) e.getValue()).getValue()))) {
-                    return document
-                            .withMarkers(document.getMarkers().addIfAbsent(result))
-                            .withBlock((Yaml.Block) requireNonNull(visit(document.getBlock(), ctx, getCursor())));
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+        YamlSearchResult result = new YamlSearchResult(this, "type:" + serviceType);
+
+        return new EntryMarkingVisitor() {
+            @Override
+            public Yaml.Mapping visitMapping(Yaml.Mapping mapping, ExecutionContext ctx) {
+                Cursor c = getCursor();
+                if (K8S.Service.isServiceSpec(c)) {
+                    K8S.Service svc = K8S.asService(mapping);
+                    if (serviceType.equals(svc.getType())) {
+                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, result);
+                        return mapping;
+                    }
                 }
-                return document;
+                return super.visitMapping(mapping, ctx);
             }
         };
     }

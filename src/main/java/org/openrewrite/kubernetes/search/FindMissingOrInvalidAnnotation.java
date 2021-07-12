@@ -20,12 +20,18 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.util.regex.Pattern;
+
+import static org.openrewrite.kubernetes.tree.K8S.Annotations.inAnnotations;
+import static org.openrewrite.kubernetes.tree.K8S.asAnnotations;
+
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class FindMissingAnnotation extends Recipe {
+public class FindMissingOrInvalidAnnotation extends Recipe {
 
     @Option(displayName = "Annotation name",
             description = "The name of the annotation to search for the existence of.",
@@ -33,7 +39,7 @@ public class FindMissingAnnotation extends Recipe {
     String annotationName;
 
     @Option(displayName = "Value",
-            description = "An optional glob that will validate values that match.",
+            description = "An optional regex that will validate values that match.",
             example = "value.*",
             required = false)
     @Nullable
@@ -51,22 +57,23 @@ public class FindMissingAnnotation extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
+        Pattern pattern = value != null ? Pattern.compile(value) : null;
         YamlSearchResult missing = new YamlSearchResult(this, "missing:" + annotationName);
         YamlSearchResult invalid = null != value ? new YamlSearchResult(this, "invalid:" + value) : null;
 
-        return new ValidatingMappingEntryVisitor("//metadata/annotations", annotationName, value) {
+        return new EntryMarkingVisitor() {
             @Override
-            public Yaml.Mapping visitMissingEntry(Yaml.Mapping mapping, Cursor cursor, ExecutionContext ctx) {
-                cursor.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MESSAGE_KEY, missing);
-                return mapping;
-            }
-
-            @Override
-            public Yaml.Mapping.Entry visitInvalidEntry(Yaml.Mapping.Entry entry, Cursor parent, ExecutionContext ctx) {
-                if (invalid != null) {
-                    parent.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MESSAGE_KEY, invalid);
+            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
+                Cursor c = getCursor();
+                if (inAnnotations(c)) {
+                    K8S.Annotations annos = asAnnotations(c.firstEnclosing(Yaml.Mapping.class));
+                    if (value == null && !annos.getKeys().contains(annotationName)) {
+                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, missing);
+                    } else if (pattern != null && !annos.valueMatches(annotationName, pattern, c)) {
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, invalid);
+                    }
                 }
-                return entry;
+                return super.visitMappingEntry(entry, ctx);
             }
         };
     }

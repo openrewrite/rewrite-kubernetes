@@ -19,11 +19,11 @@ package org.openrewrite.kubernetes.search
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
-class FindMissingAnnotationTest : KubernetesRecipeTest {
+class FindMissingOrInvalidAnnotationTest : KubernetesRecipeTest {
 
     @Test
     fun `must find missing annotation`() = assertChanged(
-        recipe = FindMissingAnnotation(
+        recipe = FindMissingOrInvalidAnnotation(
             "mycompany.io/annotation",
             null
         ),
@@ -89,7 +89,7 @@ class FindMissingAnnotationTest : KubernetesRecipeTest {
 
     @Test
     fun `must find invalid annotation`() = assertChanged(
-        recipe = FindMissingAnnotation(
+        recipe = FindMissingOrInvalidAnnotation(
             "mycompany.io/annotation",
             "has(.*)"
         ),
@@ -134,8 +134,8 @@ class FindMissingAnnotationTest : KubernetesRecipeTest {
             kind: Pod
             metadata:
               name: mypod2
-              ~~(invalid:has(.*))~~>annotations:
-                mycompany.io/annotation: "novalue"
+              annotations:
+                ~~(invalid:has(.*))~~>mycompany.io/annotation: "novalue"
             ---
             apiVersion: apps/v1
             kind: Deployment

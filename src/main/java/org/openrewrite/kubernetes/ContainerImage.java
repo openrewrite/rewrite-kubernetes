@@ -18,9 +18,7 @@ package org.openrewrite.kubernetes;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.With;
-import org.openrewrite.Cursor;
 import org.openrewrite.internal.lang.Nullable;
-import org.openrewrite.yaml.XPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.nio.file.*;
@@ -67,24 +65,6 @@ public class ContainerImage {
             }
         }
         this.imageName = new ImageName(repository, image, tag, digest);
-    }
-
-    public static boolean matches(Cursor cursor, Yaml.Scalar s) {
-        return matches(cursor, s, false);
-    }
-
-    public static boolean matches(Cursor cursor, Yaml.Scalar s, boolean includeInitContainers) {
-        if (!(cursor.getValue() instanceof Yaml.Scalar)) {
-            return false;
-        }
-        Yaml.Mapping.Entry entry = cursor.firstEnclosing(Yaml.Mapping.Entry.class);
-        if (entry == null || entry.getValue() != s) {
-            return false;
-        }
-        XPathMatcher imageMatcher = new XPathMatcher("//spec/containers/image");
-        XPathMatcher initImageMatcher = new XPathMatcher("//spec/initContainers/image");
-        Cursor parent = cursor.getParentOrThrow();
-        return imageMatcher.matches(parent) || (includeInitContainers && initImageMatcher.matches(parent));
     }
 
     @Value
