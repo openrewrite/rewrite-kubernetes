@@ -95,6 +95,17 @@ public interface K8S extends Marker {
         return new Annotations(randomId(), keys);
     }
 
+    static Labels asLabels(@Nullable Yaml.Mapping m) {
+        if (m == null) {
+            return new Labels(randomId(), emptySet());
+        }
+        Set<String> keys = new HashSet<>();
+        for (Yaml.Mapping.Entry e : m.getEntries()) {
+            keys.add(e.getKey().getValue());
+        }
+        return new Labels(randomId(), keys);
+    }
+
     static ResourceLimits asResourceLimits(@Nullable Yaml.Scalar s) {
         if (null == s) {
             return new ResourceLimits(randomId(), null);
@@ -167,13 +178,41 @@ public interface K8S extends Marker {
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
     @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
     @Data
-    class Annotations {
+    class Annotations implements K8S {
         @EqualsAndHashCode.Include
         UUID id;
         Set<String> keys;
 
         public static boolean inAnnotations(Cursor cursor) {
             return inMappingEntry("//metadata/annotations/*", cursor);
+        }
+
+        public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
+            Yaml.Mapping.Entry e = (cursor.getValue() instanceof Yaml.Mapping.Entry) ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
+            if (e == null) {
+                return false;
+            }
+            if (!name.equals(e.getKey().getValue())) {
+                return false;
+            }
+            if (!(e.getValue() instanceof Yaml.Scalar)) {
+                return false;
+            }
+            String value = ((Yaml.Scalar) e.getValue()).getValue();
+            return regex.matcher(value).matches();
+        }
+    }
+
+    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @Data
+    class Labels implements K8S {
+        @EqualsAndHashCode.Include
+        UUID id;
+        Set<String> keys;
+
+        public static boolean inLabels(Cursor cursor) {
+            return inMappingEntry("//metadata/labels/*", cursor);
         }
 
         public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
