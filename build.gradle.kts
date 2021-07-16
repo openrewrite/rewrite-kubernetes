@@ -90,7 +90,7 @@ var rewriteVersion = if(project.hasProperty("releasing")) {
 
 dependencies {
     implementation("org.openrewrite:rewrite-yaml:$rewriteVersion")
-    runtimeOnly("com.fasterxml.jackson.core:jackson-core:latest.release")
+    runtimeOnly("com.fasterxml.jackson.core:jackson-core:2.12.+")
 
     compileOnly("org.projectlombok:lombok:latest.release")
     annotationProcessor("org.projectlombok:lombok:latest.release")
