@@ -314,4 +314,31 @@ public interface K8S extends Marker {
         }
     }
 
+    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @Data
+    class Ingress implements K8S {
+        @EqualsAndHashCode.Include
+        UUID id;
+
+        public static boolean isTlsConfigured(Cursor cursor) {
+            Optional<Object> tls = new JsonPathMatcher("$.spec.tls[*].hosts").find(cursor);
+            return tls.isPresent();
+        }
+
+        public static boolean isDisallowHttpConfigured(Cursor cursor) {
+            Optional<Object> tls =
+                    new JsonPathMatcher("$.metadata.annotations['kubernetes.io/ingress.allow-http']").find(cursor);
+            return tls.map(o -> {
+                if (o instanceof Yaml.Mapping.Entry) {
+                    Yaml.Mapping.Entry e = (Yaml.Mapping.Entry) o;
+                    if (e.getValue() instanceof Yaml.Scalar) {
+                        return "false".equals(((Yaml.Scalar) e.getValue()).getValue());
+                    }
+                }
+                return false;
+            }).orElse(false);
+        }
+    }
+
 }
