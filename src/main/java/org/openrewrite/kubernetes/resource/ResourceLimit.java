@@ -41,6 +41,10 @@ public class ResourceLimit {
         return value.getAbsoluteValue() > rv.getAbsoluteValue();
     }
 
+    public boolean exceedsRatio(int ratio, ResourceValue rv) {
+        return ((double) rv.getAbsoluteValue() / (double) value.getAbsoluteValue()) > ratio;
+    }
+
     public static class ResourceValue {
         private final Unit unit;
         private final long value;

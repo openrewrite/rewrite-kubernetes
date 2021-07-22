@@ -280,6 +280,10 @@ public interface K8S extends Marker {
         UUID id;
         ResourceLimit value;
 
+        public static boolean inResources(Cursor cursor) {
+            return inMappingEntry("..spec.containers[*].resources", cursor);
+        }
+
         public static boolean inLimits(String type, Cursor cursor) {
             return inMappingEntry("..spec.containers[*].resources.limits." + type, cursor);
         }
