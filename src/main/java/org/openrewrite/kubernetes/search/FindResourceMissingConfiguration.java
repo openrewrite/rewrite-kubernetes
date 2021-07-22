@@ -36,8 +36,8 @@ public class FindResourceMissingConfiguration extends Recipe {
     String resourceKind;
 
     @Option(displayName = "Configuration path",
-            description = "An XPath expression to locate Kubernetes configuration.",
-            example = "/spec/containers/livenessProbe")
+            description = "A JsonPath expression to locate Kubernetes configuration.",
+            example = "$.spec.containers.livenessProbe")
     String configurationPath;
 
     @Override

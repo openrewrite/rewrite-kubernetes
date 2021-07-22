@@ -24,7 +24,7 @@ import org.openrewrite.Cursor;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.resource.ResourceLimit;
 import org.openrewrite.marker.Marker;
-import org.openrewrite.yaml.XPathMatcher;
+import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.HashSet;
@@ -125,19 +125,19 @@ public interface K8S extends Marker {
                 .orElse("ClusterIP"));
     }
 
-    static boolean inMappingEntry(String xpath, @Nullable Cursor cursor) {
-        return inMappingEntry(new XPathMatcher(xpath), cursor);
+    static boolean inMappingEntry(String jsonPath, @Nullable Cursor cursor) {
+        return inMappingEntry(new JsonPathMatcher(jsonPath), cursor);
     }
 
-    static boolean inMappingEntry(XPathMatcher xpath, @Nullable Cursor cursor) {
-        return firstEnclosingEntryMatching(xpath, cursor).isPresent();
+    static boolean inMappingEntry(JsonPathMatcher jsonPath, @Nullable Cursor cursor) {
+        return firstEnclosingEntryMatching(jsonPath, cursor).isPresent();
     }
 
-    static Optional<Cursor> firstEnclosingEntryMatching(String xpath, @Nullable Cursor cursor) {
-        return firstEnclosingEntryMatching(new XPathMatcher(xpath), cursor);
+    static Optional<Cursor> firstEnclosingEntryMatching(String jsonPath, @Nullable Cursor cursor) {
+        return firstEnclosingEntryMatching(new JsonPathMatcher(jsonPath), cursor);
     }
 
-    static Optional<Cursor> firstEnclosingEntryMatching(XPathMatcher xpath, @Nullable Cursor cursor) {
+    static Optional<Cursor> firstEnclosingEntryMatching(JsonPathMatcher jsonPath, @Nullable Cursor cursor) {
         if (cursor == null) {
             return Optional.empty();
         }
@@ -145,10 +145,10 @@ public interface K8S extends Marker {
         Yaml.Mapping.Entry e = cursor.getValue() instanceof Yaml.Mapping.Entry ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
         if (e == null || e.getKey() == cursor.getValue()) {
             return Optional.empty();
-        } else if (xpath.matches(cursor)) {
+        } else if (jsonPath.matches(cursor)) {
             return Optional.of(cursor);
         } else {
-            return firstEnclosingEntryMatching(xpath, cursor.getParent());
+            return firstEnclosingEntryMatching(jsonPath, cursor.getParent());
         }
 
     }
@@ -184,7 +184,7 @@ public interface K8S extends Marker {
         Set<String> keys;
 
         public static boolean inAnnotations(Cursor cursor) {
-            return inMappingEntry("//metadata/annotations/*", cursor);
+            return inMappingEntry("..metadata.annotations.*", cursor);
         }
 
         public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
@@ -212,7 +212,7 @@ public interface K8S extends Marker {
         Set<String> keys;
 
         public static boolean inLabels(Cursor cursor) {
-            return inMappingEntry("//metadata/labels/*", cursor);
+            return inMappingEntry("..metadata.labels.*", cursor);
         }
 
         public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
@@ -239,7 +239,7 @@ public interface K8S extends Marker {
         UUID id;
 
         public static boolean inSpec(Cursor cursor) {
-            return inMappingEntry("//spec/*", cursor);
+            return inMappingEntry("..spec.*", cursor);
         }
 
     }
@@ -252,13 +252,11 @@ public interface K8S extends Marker {
         UUID id;
 
         public static boolean inContainerSpec(Cursor cursor) {
-            return inMappingEntry("//spec/containers", cursor);
+            return inMappingEntry("..spec.containers[*].*", cursor);
         }
 
         public static boolean isImageName(Cursor cursor) {
-            return firstEnclosingEntryMatching("//image", cursor)
-                    //.filter(c -> c == cursor.getParent())
-                    .isPresent();
+            return firstEnclosingEntryMatching(".image", cursor).isPresent();
         }
     }
 
@@ -270,7 +268,7 @@ public interface K8S extends Marker {
         UUID id;
 
         public static boolean inInitContainerSpec(Cursor cursor) {
-            return inMappingEntry("//spec/initContainers", cursor);
+            return inMappingEntry("..spec.initContainers[*].*", cursor);
         }
     }
 
@@ -283,11 +281,11 @@ public interface K8S extends Marker {
         ResourceLimit value;
 
         public static boolean inLimits(String type, Cursor cursor) {
-            return inMappingEntry("//spec/containers/resources/limits/" + type, cursor);
+            return inMappingEntry("..spec.containers[*].resources.limits." + type, cursor);
         }
 
         public static boolean inRequests(String type, Cursor cursor) {
-            return inMappingEntry("//spec/containers/resources/requests/" + type, cursor);
+            return inMappingEntry("..spec.containers[*].resources.requests." + type, cursor);
         }
 
     }
@@ -302,17 +300,17 @@ public interface K8S extends Marker {
         String type;
 
         public static boolean isServiceSpec(Cursor cursor) {
-            return firstEnclosingEntryMatching("/spec", cursor)
+            return firstEnclosingEntryMatching("$.spec", cursor)
                     .filter(c -> c == cursor.getParent())
                     .isPresent();
         }
 
         public static boolean inServiceSpec(Cursor cursor) {
-            return inMappingEntry("/spec", cursor);
+            return inMappingEntry("$.spec", cursor);
         }
 
         public static boolean inExternalIPs(Cursor cursor) {
-            return inMappingEntry("/spec/externalIPs", cursor);
+            return inMappingEntry("$.spec.externalIPs", cursor);
         }
     }
 
