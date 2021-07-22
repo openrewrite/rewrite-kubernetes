@@ -50,7 +50,6 @@ public class ResourceLimit {
         private final long value;
 
         public ResourceValue(String resourceLimit) {
-            String v;
             int unitLen = 1;
             if (resourceLimit.endsWith("i")) {
                 unitLen = 2;
