@@ -28,19 +28,19 @@ public class FindNonTlsIngress extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "null";
+        return "Find non-TLS Ingresses";
     }
 
     @Override
     public String getDescription() {
-        return super.getDescription();
+        return "Find Ingress resources that don't disallow HTTP or don't have TLS configured.";
     }
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         YamlSearchResult missingTls = new YamlSearchResult(this, "missing TLS");
         YamlSearchResult missingDisallowHttp = new YamlSearchResult(this, "missing disallow http");
-        return new YamlIsoVisitor<>() {
+        return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
                 if (K8S.inKind("Ingress", getCursor())) {
