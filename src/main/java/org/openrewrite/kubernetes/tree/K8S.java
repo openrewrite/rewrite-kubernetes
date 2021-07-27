@@ -27,10 +27,7 @@ import org.openrewrite.marker.Marker;
 import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.emptySet;
@@ -145,12 +142,30 @@ public interface K8S extends Marker {
         Yaml.Mapping.Entry e = cursor.getValue() instanceof Yaml.Mapping.Entry ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
         if (e == null || e.getKey() == cursor.getValue()) {
             return Optional.empty();
-        } else if (jsonPath.matches(cursor)) {
-            return Optional.of(cursor);
-        } else {
-            return firstEnclosingEntryMatching(jsonPath, cursor.getParent());
         }
 
+        return jsonPath.find(cursor)
+                .flatMap(found -> {
+                    if (found instanceof List) {
+                        //noinspection unchecked
+                        return ((List<Object>) found).stream()
+                                .map(o -> {
+                                    Cursor c = cursor;
+                                    while (c != null && c.getValue() != o) {
+                                        c = c.getParent();
+                                    }
+                                    return c;
+                                })
+                                .filter(Objects::nonNull)
+                                .findFirst();
+                    }
+
+                    if (found == cursor.getValue() || (found instanceof Yaml.Mapping.Entry && ((Yaml.Mapping.Entry) found).getValue() == cursor.getValue())) {
+                        return Optional.of(cursor);
+                    }
+
+                    return Optional.empty();
+                });
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -256,7 +271,7 @@ public interface K8S extends Marker {
         }
 
         public static boolean isImageName(Cursor cursor) {
-            return firstEnclosingEntryMatching(".image", cursor).isPresent();
+            return cursor.getPathAsStream(o -> (o instanceof Yaml.Mapping.Entry && ((Yaml.Mapping.Entry) o).getKey().getValue().equals("image"))).findFirst().isPresent();
         }
     }
 
@@ -305,7 +320,7 @@ public interface K8S extends Marker {
 
         public static boolean isServiceSpec(Cursor cursor) {
             return firstEnclosingEntryMatching("$.spec", cursor)
-                    .filter(c -> c == cursor.getParent())
+                    .filter(c -> c == cursor)
                     .isPresent();
         }
 
@@ -314,7 +329,7 @@ public interface K8S extends Marker {
         }
 
         public static boolean inExternalIPs(Cursor cursor) {
-            return inMappingEntry("$.spec.externalIPs", cursor);
+            return cursor.getPathAsStream(o -> o instanceof Yaml.Mapping.Entry && ((Yaml.Mapping.Entry) o).getKey().getValue().equals("externalIPs")).findFirst().isPresent();
         }
     }
 

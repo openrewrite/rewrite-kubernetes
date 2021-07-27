@@ -55,7 +55,9 @@ public class FindImage extends Recipe {
 
     @Option(displayName = "Include initContainers",
             description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
-                    "containers/image.")
+                    "containers/image.",
+            example = "false",
+            required = false)
     boolean includeInitContainers;
 
     @Override

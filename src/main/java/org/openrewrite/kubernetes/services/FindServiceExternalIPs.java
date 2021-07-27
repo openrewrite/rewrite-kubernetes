@@ -41,7 +41,8 @@ public class FindServiceExternalIPs extends Recipe {
     Set<String> externalIPs;
     @Option(displayName = "Find missing",
             description = "Whether to treat this search as finding Services whose externalIPs do not contain any of " +
-                    "the query IPs.")
+                    "the query IPs.",
+            required = false)
     boolean findMissing;
 
     @Override
