@@ -25,7 +25,8 @@ class CapResourceLimitToMaximumTest : KubernetesRecipeTest {
         recipe = CapResourceValueToMaximum(
             "limits",
             "memory",
-            "64Mi"
+            "64Mi",
+            null
         ),
         before = """
             apiVersion: v1
@@ -61,7 +62,8 @@ class CapResourceLimitToMaximumTest : KubernetesRecipeTest {
         recipe = CapResourceValueToMaximum(
             "requests",
             "cpu",
-            "100Mi"
+            "100Mi",
+            null
         ),
         before = """
             apiVersion: v1

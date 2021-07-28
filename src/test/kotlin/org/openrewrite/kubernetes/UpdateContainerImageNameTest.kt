@@ -28,7 +28,8 @@ class UpdateContainerImageNameTest : KubernetesRecipeTest {
             "gcr.io/myaccount/myrepo",
             "nginx-custom",
             "latest",
-            false
+            false,
+            null
         ),
         before = """
             apiVersion: v1
@@ -71,7 +72,8 @@ class UpdateContainerImageNameTest : KubernetesRecipeTest {
             "gcr.io/myaccount/myrepo",
             null,
             null,
-            true
+            true,
+            null
         ),
         before = """
             apiVersion: v1

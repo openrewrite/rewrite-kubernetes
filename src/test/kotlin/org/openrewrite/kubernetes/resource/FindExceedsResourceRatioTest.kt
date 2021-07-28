@@ -25,7 +25,8 @@ class FindExceedsResourceRatioTest : KubernetesRecipeTest {
     fun `must find limits that exceed a given maximum ratio`() = assertChanged(
         recipe = FindExceedsResourceRatio(
             "memory",
-            "2"
+            "2",
+            null
         ),
         before = """
             apiVersion: v1

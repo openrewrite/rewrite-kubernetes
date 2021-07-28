@@ -25,7 +25,8 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
     fun `must find services by external IPs`() = assertChanged(
         recipe = FindServiceExternalIPs(
             setOf("192.168.0.1", "10.10.10.10"),
-            false
+            false,
+            null
         ),
         before = """
             apiVersion: v1
@@ -95,7 +96,8 @@ class FindServiceExternalIPTest : KubernetesRecipeTest {
     fun `must find services by external IPs exclusion`() = assertChanged(
         recipe = FindServiceExternalIPs(
             setOf("192.168.0.1", "10.10.10.1"),
-            true
+            true,
+            null
         ),
         before = """
             apiVersion: v1

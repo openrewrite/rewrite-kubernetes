@@ -25,6 +25,7 @@ class FindMissingOrInvalidAnnotationTest : KubernetesRecipeTest {
     fun `must find missing annotation`() = assertChanged(
         recipe = FindMissingOrInvalidAnnotation(
             "mycompany.io/annotation",
+            null,
             null
         ),
         before = """
@@ -91,7 +92,8 @@ class FindMissingOrInvalidAnnotationTest : KubernetesRecipeTest {
     fun `must find invalid annotation`() = assertChanged(
         recipe = FindMissingOrInvalidAnnotation(
             "mycompany.io/annotation",
-            "has(.*)"
+            "has(.*)",
+            null
         ),
         before = """
             apiVersion: v1

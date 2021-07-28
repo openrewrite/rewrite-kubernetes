@@ -137,7 +137,7 @@ class FindDisallowedImageTagsTest : KubernetesRecipeTest {
         recipe = FindDisallowedImageTags(
             setOf("latest", "dev"),
             false,
-            setOf("/some/path/to/*.yaml")
+            "/some/path/to/*.yaml"
         ),
         before = """
             apiVersion: apps/v1
