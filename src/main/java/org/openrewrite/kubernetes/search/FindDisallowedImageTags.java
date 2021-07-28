@@ -52,13 +52,12 @@ public class FindDisallowedImageTags extends Recipe {
             required = false)
     boolean includeInitContainers;
 
-    @Option(displayName = "Source path include filters",
-            description = "Comma-separated list of glob patterns to use as filters to determine whether this Recipe " +
-                    "should apply to a given file.",
-            example = "**/*.yaml",
-            required = false)
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
     @Nullable
-    Set<String> sourcePathIncludeFilters;
+    String fileMatcher;
 
     @Override
     public String getDisplayName() {
@@ -72,22 +71,10 @@ public class FindDisallowedImageTags extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        RecipeSearchResult applicableResult = new RecipeSearchResult(randomId(), this, "applicable");
-        List<PathMatcher> matchers = (sourcePathIncludeFilters == null ? null : sourcePathIncludeFilters.stream()
-                .map(s -> FileSystems.getDefault().getPathMatcher("glob:" + s))
-                .collect(Collectors.toList()));
-
-        return new YamlIsoVisitor<ExecutionContext>() {
-            @Override
-            public Yaml.Documents visitDocuments(Yaml.Documents documents, ExecutionContext executionContext) {
-                if (matchers != null) {
-                    if (matchers.stream().noneMatch(m -> m.matches(documents.getSourcePath()))) {
-                        return documents;
-                    }
-                }
-                return documents.withMarkers(documents.getMarkers().addIfAbsent(applicableResult));
-            }
-        };
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

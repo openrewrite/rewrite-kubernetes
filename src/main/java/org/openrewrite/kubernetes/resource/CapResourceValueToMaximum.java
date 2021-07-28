@@ -18,6 +18,7 @@ package org.openrewrite.kubernetes.resource;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -46,6 +47,13 @@ public class CapResourceValueToMaximum extends Recipe {
             example = "2Gi")
     String resourceLimit;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Cap exceeds resource value";
@@ -54,6 +62,14 @@ public class CapResourceValueToMaximum extends Recipe {
     @Override
     public String getDescription() {
         return "Cap resource values that exceed a specific maximum.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

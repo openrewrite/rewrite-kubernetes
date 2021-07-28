@@ -40,6 +40,13 @@ public class FindResourceMissingConfiguration extends Recipe {
             example = "$.spec.containers.livenessProbe")
     String configurationPath;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Missing configuration";
@@ -48,6 +55,15 @@ public class FindResourceMissingConfiguration extends Recipe {
     @Override
     public String getDescription() {
         return "Find Kubernetes resources with missing configuration.";
+    }
+
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

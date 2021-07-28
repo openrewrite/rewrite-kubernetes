@@ -21,14 +21,11 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.YamlVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
 import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
-import static org.openrewrite.kubernetes.tree.K8S.*;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -81,6 +78,13 @@ public class UpdateContainerImageName extends Recipe {
             required = false)
     boolean includeInitContainers;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Update image name";
@@ -93,18 +97,10 @@ public class UpdateContainerImageName extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        YamlSearchResult result = new YamlSearchResult(this);
-        return new YamlVisitor<ExecutionContext>() {
-            @Override
-            public Yaml visitDocument(Yaml.Document document, ExecutionContext executionContext) {
-                Cursor c = getCursor();
-                if (inPod(c) || inDeployment(c) || inStatefulSet(c) || inDaemonSet(c)) {
-                    return document.withMarkers(document.getMarkers().addIfAbsent(result));
-                } else {
-                    return document;
-                }
-            }
-        };
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

@@ -18,6 +18,7 @@ package org.openrewrite.kubernetes.search;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
@@ -38,6 +39,13 @@ public class FindMissingDigest extends Recipe {
             required = false)
     boolean includeInitContainers;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Find missing digest";
@@ -46,6 +54,14 @@ public class FindMissingDigest extends Recipe {
     @Override
     public String getDescription() {
         return "Find instances of a container name that fails to specify a digest.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

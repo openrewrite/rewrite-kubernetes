@@ -45,6 +45,13 @@ public class FindMissingOrInvalidLabel extends Recipe {
     @Nullable
     String value;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Find label";
@@ -53,6 +60,14 @@ public class FindMissingOrInvalidLabel extends Recipe {
     @Override
     public String getDescription() {
         return "Find labels that optionally match a given regex.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override
