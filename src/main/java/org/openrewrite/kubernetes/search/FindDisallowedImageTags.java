@@ -18,13 +18,20 @@ package org.openrewrite.kubernetes.search;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
+import org.openrewrite.marker.RecipeSearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.openrewrite.Tree.randomId;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
 import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
@@ -45,6 +52,14 @@ public class FindDisallowedImageTags extends Recipe {
             required = false)
     boolean includeInitContainers;
 
+    @Option(displayName = "Source path include filters",
+            description = "Comma-separated list of glob patterns to use as filters to determine whether this Recipe " +
+                    "should apply to a given file.",
+            example = "**/*.yaml",
+            required = false)
+    @Nullable
+    Set<String> sourcePathIncludeFilters;
+
     @Override
     public String getDisplayName() {
         return "Disallowed tags";
@@ -53,6 +68,26 @@ public class FindDisallowedImageTags extends Recipe {
     @Override
     public String getDescription() {
         return "The set of image tags to find which are considered disallowed.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        RecipeSearchResult applicableResult = new RecipeSearchResult(randomId(), this, "applicable");
+        List<PathMatcher> matchers = (sourcePathIncludeFilters == null ? null : sourcePathIncludeFilters.stream()
+                .map(s -> FileSystems.getDefault().getPathMatcher("glob:" + s))
+                .collect(Collectors.toList()));
+
+        return new YamlIsoVisitor<ExecutionContext>() {
+            @Override
+            public Yaml.Documents visitDocuments(Yaml.Documents documents, ExecutionContext executionContext) {
+                if (matchers != null) {
+                    if (matchers.stream().noneMatch(m -> m.matches(documents.getSourcePath()))) {
+                        return documents;
+                    }
+                }
+                return documents.withMarkers(documents.getMarkers().addIfAbsent(applicableResult));
+            }
+        };
     }
 
     @Override

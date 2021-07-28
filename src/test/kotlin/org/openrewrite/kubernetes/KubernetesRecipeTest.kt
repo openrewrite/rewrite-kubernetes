@@ -51,7 +51,7 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
         expectedCyclesThatMakeChanges: Int = cycles - 1,
         afterConditions: (Kubernetes) -> Unit = { }
     ) {
-        super.assertChangedBase(parser, recipe, before, dependsOn, after, cycles, expectedCyclesThatMakeChanges, afterConditions)
+        super.assertChangedBase(parser, recipe, before, null, dependsOn, after, cycles, expectedCyclesThatMakeChanges, afterConditions)
     }
 
     fun assertUnchanged(
@@ -69,6 +69,6 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
         @Language("yml") before: File,
         @Language("yml") dependsOn: Array<File> = emptyArray()
     ) {
-        super.assertUnchangedBase(parser, recipe, before, dependsOn)
+        super.assertUnchangedBase(parser, recipe, before, null, dependsOn)
     }
 }

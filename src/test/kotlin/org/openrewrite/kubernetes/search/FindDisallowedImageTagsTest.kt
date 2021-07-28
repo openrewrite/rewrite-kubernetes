@@ -38,7 +38,8 @@ class FindDisallowedImageTagsTest : KubernetesRecipeTest {
     fun `must find disallowed image tags`() = assertChanged(
         recipe = FindDisallowedImageTags(
             setOf("latest", "dev"),
-            true
+            true,
+            null
         ),
         before = """
             apiVersion: v1
@@ -92,7 +93,8 @@ class FindDisallowedImageTagsTest : KubernetesRecipeTest {
     fun `must find disallowed image tags in workloads`() = assertChanged(
         recipe = FindDisallowedImageTags(
             setOf("latest", "dev"),
-            false
+            false,
+            null
         ),
         before = """
             apiVersion: apps/v1
@@ -128,6 +130,32 @@ class FindDisallowedImageTagsTest : KubernetesRecipeTest {
                   containers:            
                   - image: ~~(disallowed tag: [latest, dev])~~>app:dev
         """.trimIndent()
+    )
+
+    @Test
+    fun `must not execute on paths that do not match`() = assertUnchanged(
+        recipe = FindDisallowedImageTags(
+            setOf("latest", "dev"),
+            false,
+            setOf("/some/path/to/*.yaml")
+        ),
+        before = """
+            apiVersion: apps/v1
+            kind: Deployment
+            spec:
+              template:
+                spec:
+                  containers:            
+                  - image: nginx:latest
+            ---
+            apiVersion: apps/v1
+            kind: StatefulSet
+            spec:
+              template:
+                spec:
+                  containers:            
+                  - image: app:dev
+        """
     )
 
 }
