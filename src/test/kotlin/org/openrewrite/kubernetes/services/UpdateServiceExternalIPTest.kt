@@ -25,7 +25,8 @@ class UpdateServiceExternalIPTest : KubernetesRecipeTest {
     fun `must update found external IP`() = assertChanged(
         recipe = UpdateServiceExternalIP(
             "192.168.0.1",
-            "10.10.0.1"
+            "10.10.0.1",
+            null
         ),
         before = """
             apiVersion: v1

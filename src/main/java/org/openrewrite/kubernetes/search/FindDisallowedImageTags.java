@@ -18,13 +18,20 @@ package org.openrewrite.kubernetes.search;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
+import org.openrewrite.marker.RecipeSearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.openrewrite.Tree.randomId;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
 import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
@@ -45,6 +52,13 @@ public class FindDisallowedImageTags extends Recipe {
             required = false)
     boolean includeInitContainers;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Disallowed tags";
@@ -53,6 +67,14 @@ public class FindDisallowedImageTags extends Recipe {
     @Override
     public String getDescription() {
         return "The set of image tags to find which are considered disallowed.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

@@ -25,6 +25,7 @@ class FindMissingOrInvalidLabelTest : KubernetesRecipeTest {
     fun `must find missing label`() = assertChanged(
         recipe = FindMissingOrInvalidLabel(
             "mylabel",
+            null,
             null
         ),
         before = """
@@ -91,7 +92,8 @@ class FindMissingOrInvalidLabelTest : KubernetesRecipeTest {
     fun `must find invalid label`() = assertChanged(
         recipe = FindMissingOrInvalidLabel(
             "mylabel",
-            "has(.*)"
+            "has(.*)",
+            null
         ),
         before = """
             apiVersion: v1

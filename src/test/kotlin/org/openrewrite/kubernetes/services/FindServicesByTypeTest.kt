@@ -23,7 +23,7 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
 
     @Test
     fun `must find NodePort services`() = assertChanged(
-        recipe = FindServicesByType("NodePort"),
+        recipe = FindServicesByType("NodePort", null),
         before = """
             apiVersion: v1
             kind: Service
@@ -126,7 +126,7 @@ class FindServicesByTypeTest : KubernetesRecipeTest {
 
     @Test
     fun `must find ClusterIP services`() = assertChanged(
-        recipe = FindServicesByType("ClusterIP"),
+        recipe = FindServicesByType("ClusterIP", null),
         before = """
             apiVersion: v1
             kind: Service

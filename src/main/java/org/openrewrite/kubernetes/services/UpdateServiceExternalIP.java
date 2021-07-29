@@ -19,6 +19,7 @@ package org.openrewrite.kubernetes.services;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
@@ -36,6 +37,13 @@ public class UpdateServiceExternalIP extends Recipe {
             example = "10.10.0.1")
     String ipToUpdate;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Update Service ExternalIPs";
@@ -44,6 +52,14 @@ public class UpdateServiceExternalIP extends Recipe {
     @Override
     public String getDescription() {
         return "Swap out an IP address with another one in the Service externalIPs setting.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

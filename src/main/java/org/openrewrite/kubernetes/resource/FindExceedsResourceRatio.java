@@ -42,6 +42,13 @@ public class FindExceedsResourceRatio extends Recipe {
             example = "2")
     String ratioLimit;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Find exceeds resource ratio";
@@ -50,6 +57,14 @@ public class FindExceedsResourceRatio extends Recipe {
     @Override
     public String getDescription() {
         return "Find resource manifests that have requests to limits ratios beyond a specific maximum.";
+    }
+
+    @Override
+    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

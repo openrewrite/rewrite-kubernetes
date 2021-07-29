@@ -27,7 +27,8 @@ class FindImageTest : KubernetesRecipeTest {
             "repo.id/account/bucket",
             "image",
             "v1.2.3",
-            false
+            false,
+            null
         ),
         before = """
             apiVersion: v1
@@ -79,7 +80,8 @@ class FindImageTest : KubernetesRecipeTest {
             "repo.id/*",
             "image",
             "v1.*",
-            false
+            false,
+            null
         ),
         before = """
             apiVersion: v1
@@ -131,7 +133,8 @@ class FindImageTest : KubernetesRecipeTest {
             "*",
             "nginx",
             "latest",
-            false
+            false,
+            null
         ),
         before = """
             apiVersion: v1
@@ -183,7 +186,8 @@ class FindImageTest : KubernetesRecipeTest {
             "*",
             "*",
             "*",
-            true
+            true,
+            null
         ),
         before = """
             apiVersion: v1

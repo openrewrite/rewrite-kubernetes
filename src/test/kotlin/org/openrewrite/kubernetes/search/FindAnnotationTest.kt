@@ -25,6 +25,7 @@ class FindAnnotationTest : KubernetesRecipeTest {
     fun `must find if annotation exists`() = assertChanged(
         recipe = FindAnnotation(
             "mycompany.io/annotation",
+            null,
             null
         ),
         before = """
@@ -63,7 +64,8 @@ class FindAnnotationTest : KubernetesRecipeTest {
     fun `must find by annotation value`() = assertChanged(
         recipe = FindAnnotation(
             "mycompany.io/annotation",
-            "has(.*)"
+            "has(.*)",
+            null
         ),
         before = """
             apiVersion: v1

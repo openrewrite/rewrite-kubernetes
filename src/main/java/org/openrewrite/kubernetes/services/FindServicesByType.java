@@ -19,9 +19,9 @@ package org.openrewrite.kubernetes.services;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.search.EntryMarkingVisitor;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -35,6 +35,13 @@ public class FindServicesByType extends Recipe {
             valid = {"ClusterIP", "NodePort", "LoadBalancer", "ExternalName"})
     String serviceType;
 
+    @Option(displayName = "Optional file matcher",
+            description = "Matching files will be modified. This is a glob expression.",
+            required = false,
+            example = "**/pod-*.yml")
+    @Nullable
+    String fileMatcher;
+
     @Override
     public String getDisplayName() {
         return "Service type";
@@ -47,15 +54,10 @@ public class FindServicesByType extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        return new YamlIsoVisitor<ExecutionContext>() {
-            @Override
-            public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
-                if (K8S.inService(getCursor())) {
-                    return document.withMarkers(document.getMarkers().addIfAbsent(K8S.asResource((Yaml.Mapping) document.getBlock())));
-                }
-                return super.visitDocument(document, ctx);
-            }
-        };
+        if (fileMatcher != null) {
+            return new HasSourcePath<>(fileMatcher);
+        }
+        return null;
     }
 
     @Override

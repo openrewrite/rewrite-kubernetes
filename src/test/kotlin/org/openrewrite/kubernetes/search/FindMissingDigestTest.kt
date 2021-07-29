@@ -23,7 +23,7 @@ class FindMissingDigestTest : KubernetesRecipeTest {
 
     @Test
     fun `must detect when digest is missing`() = assertChanged(
-        recipe = FindMissingDigest(true),
+        recipe = FindMissingDigest(true, null),
         before = """
             apiVersion: v1
             kind: Pod

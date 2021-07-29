@@ -24,7 +24,8 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     fun podLivenessProbe() = assertChanged(
         recipe = FindResourceMissingConfiguration(
             "Pod",
-            "$.spec.containers[*].livenessProbe"
+            "$.spec.containers[*].livenessProbe",
+            null
         ),
         before = """
             apiVersion: v1
@@ -48,7 +49,8 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     fun correctlyConfiguredPodLivenessProbe() = assertUnchanged(
         recipe = FindResourceMissingConfiguration(
             "Pod",
-            "$.spec.containers[*].livenessProbe"
+            "$.spec.containers[*].livenessProbe",
+            null
         ),
         before = """
             apiVersion: v1
@@ -66,7 +68,8 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     fun dontMatchOnDifferentResource() = assertUnchanged(
         recipe = FindResourceMissingConfiguration(
             "Pod",
-            "$.spec.containers.livenessProbe"
+            "$.spec.containers.livenessProbe",
+            null
         ),
         before = """
             apiVersion: v1
