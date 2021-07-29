@@ -19,6 +19,7 @@ import org.intellij.lang.annotations.Language
 import org.openrewrite.*
 import org.openrewrite.marker.SearchResult
 import java.io.File
+import java.nio.file.Path
 
 interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
     override val parser: KubernetesParser
@@ -45,13 +46,14 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
         parser: KubernetesParser = this.parser,
         recipe: Recipe = this.recipe!!,
         @Language("yml") before: File,
+        relativeTo: Path? = null,
         @Language("yml") dependsOn: Array<File> = emptyArray(),
         @Language("yml") after: String,
         cycles: Int = 2,
         expectedCyclesThatMakeChanges: Int = cycles - 1,
         afterConditions: (Kubernetes) -> Unit = { }
     ) {
-        super.assertChangedBase(parser, recipe, before, null, dependsOn, after, cycles, expectedCyclesThatMakeChanges, afterConditions)
+        super.assertChangedBase(parser, recipe, before, relativeTo, dependsOn, after, cycles, expectedCyclesThatMakeChanges, afterConditions)
     }
 
     fun assertUnchanged(
@@ -67,8 +69,9 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
         parser: KubernetesParser = this.parser,
         recipe: Recipe = this.recipe!!,
         @Language("yml") before: File,
+        relativeTo: Path? = null,
         @Language("yml") dependsOn: Array<File> = emptyArray()
     ) {
-        super.assertUnchangedBase(parser, recipe, before, null, dependsOn)
+        super.assertUnchangedBase(parser, recipe, before, relativeTo, dependsOn)
     }
 }
