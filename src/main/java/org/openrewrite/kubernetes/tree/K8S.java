@@ -81,6 +81,38 @@ public interface K8S extends Marker {
         return new Resource(randomId(), apiVersion, kind);
     }
 
+    @SuppressWarnings("ConstantConditions")
+    static Metadata asMetadata(Yaml.Mapping m) {
+        String namespace = null;
+        String name = "";
+        Annotations annotations = null;
+        Labels labels = null;
+        for (Yaml.Mapping.Entry e : m.getEntries()) {
+            String key = e.getKey().getValue();
+            Object value;
+            if (e.getValue() instanceof Yaml.Scalar) {
+                value = ((Yaml.Scalar) e.getValue()).getValue();
+            } else {
+                value = e.getValue();
+            }
+            switch (key) {
+                case "namespace":
+                    namespace = (String) value;
+                    break;
+                case "name":
+                    name = (String) value;
+                    break;
+                case "labels":
+                    labels = asLabels((Yaml.Mapping) value);
+                    break;
+                case "annotations":
+                    annotations = asAnnotations((Yaml.Mapping) value);
+                    break;
+            }
+        }
+        return new Metadata(randomId(), namespace, name, annotations, labels);
+    }
+
     static Annotations asAnnotations(@Nullable Yaml.Mapping m) {
         if (m == null) {
             return new Annotations(randomId(), emptySet());
@@ -187,7 +219,16 @@ public interface K8S extends Marker {
         @Nullable
         String namespace;
         String name;
+        @Nullable
+        Annotations annotations;
+        @Nullable
+        Labels labels;
 
+        public static boolean isMetadata(Cursor cursor) {
+            return firstEnclosingEntryMatching("$.metadata", cursor)
+                    .filter(c -> c.getValue() == cursor.getValue())
+                    .isPresent();
+        }
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -357,6 +398,18 @@ public interface K8S extends Marker {
                 }
                 return false;
             }).orElse(false);
+        }
+    }
+
+    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @Data
+    class RBAC implements K8S {
+        @EqualsAndHashCode.Include
+        UUID id;
+
+        public static boolean inRules(Cursor cursor) {
+            return inMappingEntry("$.rules", cursor);
         }
     }
 
