@@ -1,0 +1,7 @@
+apiVersion: kubernetes.openrewrite.org/v1alpha1
+kind: Application
+metadata:
+  name: my-custom-app
+spec:
+  name: my-app-name
+  port: 8081

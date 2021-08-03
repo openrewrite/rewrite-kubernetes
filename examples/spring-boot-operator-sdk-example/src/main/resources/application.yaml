@@ -1,0 +1,8 @@
+javaoperatorsdk:
+  controllers:
+    applicationcontroller:
+      retry:
+        maxAttempts: 3
+
+server:
+  port: 8481

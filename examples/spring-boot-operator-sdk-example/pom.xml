@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.3</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>org.openrewrite.kubernetes</groupId>
+    <artifactId>kubernetes-operator-example</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <name>kubernetes-operator-example</name>
+    <description>Example of using openrewrite with Kubernetes and Spring Boot</description>
+
+    <properties>
+        <rewrite-maven.version>4.8.0</rewrite-maven.version>
+        <rewrite-kubernetes.version>1.4.0</rewrite-kubernetes.version>
+        <java.version>11</java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.javaoperatorsdk</groupId>
+            <artifactId>operator-framework-spring-boot-starter</artifactId>
+            <version>1.8.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jkube</groupId>
+                <artifactId>kubernetes-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <configuration>
+                    <resources>
+                        <imagePullPolicy>Never</imagePullPolicy>
+                        <serviceAccounts>
+                            <serviceAccount>
+                                <name>${project.name}</name>
+                                <deploymentRef>${project.name}</deploymentRef>
+                            </serviceAccount>
+                        </serviceAccounts>
+                    </resources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>${rewrite-maven.version}</version>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>org.openrewrite.kubernetes.MissingCpuRequest</recipe>
+                        <recipe>org.openrewrite.kubernetes.MissingCpuLimits</recipe>
+                        <recipe>org.openrewrite.kubernetes.MissingMemoryRequest</recipe>
+                        <recipe>org.openrewrite.kubernetes.MissingMemoryLimits</recipe>
+                    </activeRecipes>
+                </configuration>
+                <dependencies>
+                    <!-- This module is made up for sake of example. It isn't packaged with OpenRewrite -->
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-kubernetes</artifactId>
+                        <version>${rewrite-kubernetes.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
