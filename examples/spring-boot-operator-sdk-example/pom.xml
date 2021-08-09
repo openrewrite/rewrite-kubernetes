@@ -18,8 +18,9 @@
     <description>Example of using openrewrite with Kubernetes and Spring Boot</description>
 
     <properties>
+        <rewrite.version>7.11.0-SNAPSHOT</rewrite.version>
         <rewrite-maven.version>4.8.0</rewrite-maven.version>
-        <rewrite-kubernetes.version>1.4.0</rewrite-kubernetes.version>
+        <rewrite-kubernetes.version>1.5.0-SNAPSHOT</rewrite-kubernetes.version>
         <java.version>11</java.version>
     </properties>
 
@@ -69,14 +70,36 @@
                 <version>${rewrite-maven.version}</version>
                 <configuration>
                     <activeRecipes>
-                        <recipe>org.openrewrite.kubernetes.MissingCpuRequest</recipe>
-                        <recipe>org.openrewrite.kubernetes.MissingCpuLimits</recipe>
-                        <recipe>org.openrewrite.kubernetes.MissingMemoryRequest</recipe>
-                        <recipe>org.openrewrite.kubernetes.MissingMemoryLimits</recipe>
+                        <recipe>org.openrewrite.kubernetes.example.OperatorSdkExample</recipe>
+<!--                        <recipe>org.openrewrite.kubernetes.Fabric8WatchToSharedInformer</recipe>-->
                     </activeRecipes>
                 </configuration>
                 <dependencies>
-                    <!-- This module is made up for sake of example. It isn't packaged with OpenRewrite -->
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>${project.artifactId}</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite</groupId>
+                        <artifactId>rewrite-java</artifactId>
+                        <version>${rewrite.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite</groupId>
+                        <artifactId>rewrite-java-11</artifactId>
+                        <version>${rewrite.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite</groupId>
+                        <artifactId>rewrite-xml</artifactId>
+                        <version>${rewrite.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite</groupId>
+                        <artifactId>rewrite-maven</artifactId>
+                        <version>${rewrite.version}</version>
+                    </dependency>
                     <dependency>
                         <groupId>org.openrewrite.recipe</groupId>
                         <artifactId>rewrite-kubernetes</artifactId>

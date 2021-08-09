@@ -87,7 +87,7 @@ public class ApplicationController implements ResourceController<Application> {
                     .withUid(d.getMetadata().getUid())
                     .build());
 
-            kubernetesClient.pods().inNamespace(resource.getMetadata().getNamespace()).watch(new Watcher<Pod>() {
+            kubernetesClient.pods().watch(new Watcher<>() {
                 @Override
                 public void eventReceived(Action action, Pod resource) {
                     switch (action) {

@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
-import org.openrewrite.yaml.InsertYaml;
+import org.openrewrite.yaml.MergeYaml;
 import org.openrewrite.yaml.search.FindKey;
 
 @Value
@@ -90,13 +90,13 @@ public class AddConfiguration extends Recipe {
                         }
 
                         if (FindKey.find(resource, path + "/" + subpath).isEmpty()) {
-                            doAfterVisit(new InsertYaml(path.isEmpty() ? "/" : path, subpath + ":", null));
+                            doAfterVisit(new MergeYaml(path.isEmpty() ? "/" : path, subpath + ":", true, null));
                         }
 
                         path += "/" + subpath;
                     }
 
-                    doAfterVisit(new InsertYaml(path, value, null));
+                    doAfterVisit(new MergeYaml(path, value, true, null));
                 }
 
                 return resource;

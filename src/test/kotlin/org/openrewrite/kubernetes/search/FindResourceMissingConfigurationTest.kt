@@ -16,6 +16,7 @@
 package org.openrewrite.kubernetes.search
 
 import org.junit.jupiter.api.Test
+import org.openrewrite.config.Environment
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
 class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
@@ -55,12 +56,18 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
         before = """
             apiVersion: v1
             kind: Pod
+            metadata:
+              labels:
+                app: application
             spec:
-              containers:
-              - name: <container name>
-                image: <image>
+              containers:            
+              - image: nginx:latest
                 livenessProbe:
-                  <Probe arguments>
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  initialDelaySeconds: 3
+                  periodSeconds: 3
         """
     )
 
@@ -68,12 +75,87 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     fun dontMatchOnDifferentResource() = assertUnchanged(
         recipe = FindResourceMissingConfiguration(
             "Pod",
-            "$.spec.containers.livenessProbe",
+            "..spec.containers[*].livenessProbe",
             null
         ),
         before = """
-            apiVersion: v1
-            kind: Service
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              labels:
+                app: application
+            spec:
+              template:
+                spec:
+                  containers:            
+                  - image: nginx:latest
+                    livenessProbe:
+                      httpGet:
+                        path: /healthz
+                        port: 8080
+                      initialDelaySeconds: 3
+                      periodSeconds: 3
         """
     )
+
+    @Test
+    fun `must support declarative recipe MissingPodLivenessProbe`() = assertChanged(
+        recipe = Environment.builder()
+            .scanRuntimeClasspath()
+            .build()
+            .activateRecipes("org.openrewrite.kubernetes.MissingPodLivenessProbe"),
+        before = """
+            apiVersion: apps/v1
+            kind: Pod
+            metadata:
+              labels:
+                app: application
+            spec:
+              containers:            
+              - image: nginx:latest
+        """,
+        after = """
+            ~~>apiVersion: apps/v1
+            kind: Pod
+            metadata:
+              labels:
+                app: application
+            spec:
+              containers:            
+              - image: nginx:latest
+        """
+    )
+
+    @Test
+    fun `must support declarative recipe MissingCpuLimits`() = assertChanged(
+        recipe = Environment.builder()
+            .scanRuntimeClasspath()
+            .build()
+            .activateRecipes("org.openrewrite.kubernetes.MissingCpuLimits"),
+        before = """
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              labels:
+                app: application
+            spec:
+              template:
+                spec:
+                  containers:            
+                  - image: nginx:latest
+        """,
+        after = """
+            ~~>apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              labels:
+                app: application
+            spec:
+              template:
+                spec:
+                  containers:            
+                  - image: nginx:latest
+        """
+    )
+
 }

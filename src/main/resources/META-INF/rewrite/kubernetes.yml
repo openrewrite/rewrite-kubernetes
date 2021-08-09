@@ -47,7 +47,8 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      configurationPath: //spec/containers/livenessProbe
+      resourceKind: Pod
+      configurationPath: $.spec.containers[:1].livenessProbe
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingPodReadinessProbe
@@ -57,7 +58,8 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      configurationPath: //spec/containers/readinessProbe
+      resourceKind: Pod
+      configurationPath: $.spec.containers[:1].readinessProbe
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingCpuRequest
@@ -67,8 +69,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      resourceKind: Pod
-      configurationPath: /spec/containers/resources/requests/cpu
+      configurationPath: ..spec.containers[:1].resources.requests.cpu
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingCpuLimits
@@ -78,8 +79,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      resourceKind: Pod
-      configurationPath: /spec/containers/resources/limits/cpu
+      configurationPath: ..spec.containers[:1].resources.limits.cpu
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingMemoryRequest
@@ -89,8 +89,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      resourceKind: Pod
-      configurationPath: /spec/containers/resources/requests/memory
+      configurationPath: ..spec.containers[:1].resources.requests.memory
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.MissingMemoryLimits
@@ -100,8 +99,7 @@ tags:
   - kubernetes
 recipeList:
   - org.openrewrite.kubernetes.search.FindResourceMissingConfiguration:
-      resourceKind: Pod
-      configurationPath: /spec/containers/resources/limits/memory
+      configurationPath: ..spec.containers[:1].resources.limits.memory
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.NoPrivilegedContainers
@@ -214,7 +212,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/containers/securityContext/readOnlyRootFilesystem
+      configurationPath: /spec.containers/securityContext/readOnlyRootFilesystem
       value: 'readOnlyRootFilesystem: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -226,6 +224,6 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/containers/securityContext/capabilities/drop
+      configurationPath: /spec/containers/securityContext/capabilities.drop
       value: 'ALL'
 ---
