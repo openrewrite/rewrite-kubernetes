@@ -1,0 +1,30 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-operator-example
+rules:
+  - apiGroups: [ "apiextensions.k8s.io" ]
+    resources: [ "customresourcedefinitions" ]
+    verbs: [ "create", "get", "list", "watch", "update", "delete" ]
+  - apiGroups: [ "" ]
+    resources: [ "namespaces" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "kubernetes.openrewrite.org" ]
+    resources: [ "applications" ]
+    verbs: [ "create", "get", "list", "watch", "update", "delete" ]
+  - apiGroups: [ "apps" ]
+    resources: [ "deployments" ]
+    verbs: [ "create", "get", "list", "watch", "update", "delete" ]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-operator-example
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-operator-example
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: kubernetes-operator-example
+  apiGroup: rbac.authorization.k8s.io

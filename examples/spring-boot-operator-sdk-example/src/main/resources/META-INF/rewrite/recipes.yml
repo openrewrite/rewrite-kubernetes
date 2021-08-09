@@ -1,0 +1,10 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.example.OperatorSdkExample
+displayName: Recipes to use with Operator SDK example
+description: Applies best practices to Kubernetes manifests.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.search.FindDisallowedImageTags:
+      disallowedTags: ["latest"]
