@@ -54,12 +54,12 @@ public class FindServiceExternalIPs extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Find externalIPs";
+        return "Find uses of `externalIP`";
     }
 
     @Override
     public String getDescription() {
-        return "Find Services whose externalIPs list contains, or does not contain, one of a list of IPs.";
+        return "Find any `Service` whose `externalIP` list contains, or does not contain, one of a list of IPs.";
     }
 
     @Override

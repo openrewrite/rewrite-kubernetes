@@ -29,11 +29,11 @@ import org.openrewrite.yaml.tree.Yaml;
 public class UpdateServiceExternalIP extends Recipe {
 
     @Option(displayName = "IP to find",
-            description = "An ExternalIP address to find in the service's external IPs.",
+            description = "An `externalIP` address to find in the service's external IPs.",
             example = "192.168.0.1")
     String ipToFind;
     @Option(displayName = "IP to update",
-            description = "An ExternalIP address to update to in the service's external IPs.",
+            description = "An `externalIP` address to update to in the service's external IPs.",
             example = "10.10.0.1")
     String ipToUpdate;
 
@@ -46,12 +46,12 @@ public class UpdateServiceExternalIP extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Update Service ExternalIPs";
+        return "Update `Service` `externalIP`";
     }
 
     @Override
     public String getDescription() {
-        return "Swap out an IP address with another one in the Service externalIPs setting.";
+        return "Swap out an IP address with another one in `Service` `externalIP` settings.";
     }
 
     @Override

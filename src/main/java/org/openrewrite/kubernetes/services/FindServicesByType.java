@@ -49,7 +49,7 @@ public class FindServicesByType extends Recipe {
 
     @Override
     public String getDescription() {
-        return "Type of Kubernetes Service to find.";
+        return "Type of Kubernetes `Service` to find.";
     }
 
     @Override
