@@ -69,13 +69,10 @@ public interface K8S extends Marker {
         String kind = null;
         for (Yaml.Mapping.Entry e : m.getEntries()) {
             Yaml.Block value = e.getValue();
-            switch (e.getKey().getValue()) {
-                case "apiVersion":
-                    apiVersion = ((Yaml.Scalar) value).getValue();
-                    break;
-                case "kind":
-                    kind = ((Yaml.Scalar) value).getValue();
-                    break;
+            if (e.getKey().getValue().equals("apiVersion")) {
+                apiVersion = ((Yaml.Scalar) value).getValue();
+            } else if (e.getKey().getValue().equals("kind")) {
+                kind = ((Yaml.Scalar) value).getValue();
             }
         }
         return new Resource(randomId(), apiVersion, kind);

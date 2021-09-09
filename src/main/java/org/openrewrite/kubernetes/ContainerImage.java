@@ -122,32 +122,6 @@ public class ContainerImage {
             }
             return s;
         }
-
-
-        private static boolean bothNull(@Nullable String s1, @Nullable String s2) {
-            return s1 == null && s2 == null;
-        }
-
-        private static boolean isGlobMatch(@Nullable String s1, @Nullable String s2) {
-            if ("*".equals(s2)) {
-                return true;
-            }
-            PathMatcher pm = FS.getPathMatcher("glob:" + s2);
-            Path path;
-            if (s1 != null && s1.contains("/")) {
-                String[] parts = s1.split("/");
-                if (parts.length > 1) {
-                    path = Paths.get(parts[0], Arrays.copyOfRange(parts, 1, parts.length - 1));
-                } else {
-                    path = Paths.get(parts[0]);
-                }
-            } else if (s1 == null) {
-                path = Paths.get("");
-            } else {
-                path = Paths.get(s1);
-            }
-            return pm.matches(path);
-        }
     }
 
 }

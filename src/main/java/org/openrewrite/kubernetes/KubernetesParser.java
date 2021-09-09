@@ -28,7 +28,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-public class KubernetesParser implements Parser<Kubernetes> {
+public final class KubernetesParser implements Parser<Kubernetes> {
     YamlParser yamlParser = new YamlParser();
 
     private KubernetesParser() {
