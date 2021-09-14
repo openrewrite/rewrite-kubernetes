@@ -20,7 +20,7 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.MergeYaml;
-import org.openrewrite.yaml.search.FindKey;
+import org.openrewrite.yaml.search.FindKeyByXPath;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -80,7 +80,7 @@ public class AddConfiguration extends Recipe {
                     return resource;
                 }
 
-                if (FindKey.find(resource, configurationPath).isEmpty()) {
+                if (FindKeyByXPath.find(resource, configurationPath).isEmpty()) {
                     String path = "";
                     String[] subpaths = configurationPath.split("/");
                     for (int i = 0; i < subpaths.length - 1; i++) {
@@ -89,7 +89,7 @@ public class AddConfiguration extends Recipe {
                             continue;
                         }
 
-                        if (FindKey.find(resource, path + "/" + subpath).isEmpty()) {
+                        if (FindKeyByXPath.find(resource, path + "/" + subpath).isEmpty()) {
                             doAfterVisit(new MergeYaml(path.isEmpty() ? "/" : path, subpath + ":", true, null));
                         }
 
