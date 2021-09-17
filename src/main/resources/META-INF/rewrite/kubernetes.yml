@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.KubernetesBestPractices
@@ -110,7 +109,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: PodSecurityPolicy
-      configurationPath: /spec/privileged
+      configurationPath: $.spec
       value: 'privileged: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -123,7 +122,7 @@ recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       apiVersion: storage.cnrm.cloud.google.com/v1beta1
       resourceKind: StorageBucket
-      configurationPath: /spec/lifecycleRule
+      configurationPath: $.spec
       value: |-
         lifecycleRule:
           - action:
@@ -140,7 +139,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/hostPID
+      configurationPath: $.spec
       value: 'hostPID: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -152,7 +151,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/hostIPC
+      configurationPath: $.spec
       value: 'hostIPC: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -164,7 +163,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: PodSecurityPolicy
-      configurationPath: /spec/runAsUser/rule
+      configurationPath: $.spec.runAsUser
       value: 'rule: MustRunAsNonRoot'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -176,7 +175,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/containers/imagePullPolicy
+      configurationPath: $.spec.containers
       value: 'imagePullPolicy: Always'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -188,7 +187,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/containers/securityContext/allowPrivilegeEscalation
+      configurationPath: $.spec.containers[*].securityContext
       value: 'allowPrivilegeEscalation: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -200,7 +199,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/hostNetwork
+      configurationPath: $.spec
       value: 'hostNetwork: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -212,7 +211,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec.containers/securityContext/readOnlyRootFilesystem
+      configurationPath: $.spec.containers[*].securityContext
       value: 'readOnlyRootFilesystem: false'
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -224,6 +223,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: /spec/containers/securityContext/capabilities.drop
-      value: 'ALL'
----
+      configurationPath: $.spec.containers[*].securityContext.capabilities
+      value: |-
+        drop:
+          - ALL

@@ -53,6 +53,7 @@ class FindNonTlsIngressTest : KubernetesRecipeTest {
                           servicePort: 80
         """.trimIndent()
     )
+
     @Test
     fun `must not find if Ingress TLS is configured`() = assertUnchanged(
         recipe = FindNonTlsIngress(),

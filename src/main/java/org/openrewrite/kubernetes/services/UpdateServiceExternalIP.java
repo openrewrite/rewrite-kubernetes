@@ -32,6 +32,7 @@ public class UpdateServiceExternalIP extends Recipe {
             description = "An `externalIP` address to find in the service's external IPs.",
             example = "192.168.0.1")
     String ipToFind;
+
     @Option(displayName = "IP to update",
             description = "An `externalIP` address to update to in the service's external IPs.",
             example = "10.10.0.1")

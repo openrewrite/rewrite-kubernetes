@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.openrewrite.config.Environment
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
-class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
+class FindResourceMissingConfigurationTest : KubernetesRecipeTest {
 
     @Test
     fun podLivenessProbe() = assertChanged(
@@ -72,7 +72,7 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     )
 
     @Test
-    fun dontMatchOnDifferentResource() = assertUnchanged(
+    fun `must only match on configured resources`() = assertUnchanged(
         recipe = FindResourceMissingConfiguration(
             "Pod",
             "..spec.containers[*].livenessProbe",
@@ -99,7 +99,7 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     )
 
     @Test
-    fun `must support declarative recipe MissingPodLivenessProbe`() = assertChanged(
+    fun missingPodLivenessProbe() = assertChanged(
         recipe = Environment.builder()
             .scanRuntimeClasspath()
             .build()
@@ -127,7 +127,7 @@ class FindResourceMissingConfigurationTest: KubernetesRecipeTest {
     )
 
     @Test
-    fun `must support declarative recipe MissingCpuLimits`() = assertChanged(
+    fun missingCpuLimits() = assertChanged(
         recipe = Environment.builder()
             .scanRuntimeClasspath()
             .build()

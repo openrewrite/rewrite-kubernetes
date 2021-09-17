@@ -16,7 +16,9 @@
 package org.openrewrite.kubernetes
 
 import org.intellij.lang.annotations.Language
-import org.openrewrite.*
+import org.openrewrite.Recipe
+import org.openrewrite.RecipeTest
+import org.openrewrite.TreePrinter
 import org.openrewrite.marker.SearchResult
 import java.io.File
 import java.nio.file.Path

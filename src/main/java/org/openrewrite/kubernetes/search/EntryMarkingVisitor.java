@@ -22,7 +22,7 @@ import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 public class EntryMarkingVisitor extends YamlIsoVisitor<ExecutionContext> {
-    public final static String MARKER = EntryMarkingVisitor.class.getSimpleName();
+    public static final String MARKER = EntryMarkingVisitor.class.getSimpleName();
 
     @Override
     public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {

@@ -17,9 +17,9 @@
 type: specs.openrewrite.org/v1beta/category
 name: Kubernetes
 packageName: org.openrewrite.kubernetes
-description: 'Recipes to perform [Kubernetes](https://kubernetes.io/) hygiene and migration tasks.'
+description: Recipes to perform [Kubernetes](https://kubernetes.io/) hygiene and migration tasks.
 ---
 type: specs.openrewrite.org/v1beta/category
 name: RBAC
 packageName: org.openrewrite.kubernetes.rbac
-description: 'Kubernetes recipes related to role-based access control.'
+description: Kubernetes recipes related to role-based access control.

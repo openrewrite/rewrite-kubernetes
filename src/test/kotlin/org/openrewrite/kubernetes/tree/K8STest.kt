@@ -26,7 +26,7 @@ import org.openrewrite.yaml.tree.Yaml
 
 class K8STest {
 
-    val yaml = """
+    private val source = """
         apiVersion: v1
         kind: Pod
         spec:
@@ -44,7 +44,7 @@ class K8STest {
 
     @Test
     fun `must understand resource`() {
-        val doc = YamlParser().parse(yaml)[0].documents[0]
+        val doc = YamlParser().parse(source)[0].documents[0]
         val result = object : YamlVisitor<Any>() {
             val m = YamlSearchResult(null, "found pod")
 
@@ -61,7 +61,7 @@ class K8STest {
 
     @Test
     fun `must understand image container name`() {
-        val doc = YamlParser().parse(yaml)[0].documents[0]
+        val doc = YamlParser().parse(source)[0].documents[0]
         val result = object : YamlVisitor<Any>() {
             val m = YamlSearchResult(null, "found image")
 
@@ -78,7 +78,7 @@ class K8STest {
 
     @Test
     fun `must understand deployment pod spec`() {
-        val doc = YamlParser().parse(yaml)[0].documents[1]
+        val doc = YamlParser().parse(source)[0].documents[1]
         val result = object : YamlVisitor<Any>() {
             val m = YamlSearchResult(null, "found spec")
 

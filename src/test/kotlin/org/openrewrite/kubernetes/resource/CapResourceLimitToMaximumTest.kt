@@ -57,6 +57,7 @@ class CapResourceLimitToMaximumTest : KubernetesRecipeTest {
                         memory: "67M"
         """
     )
+
     @Test
     fun `must cap resource requests to given maximum in different units`() = assertChanged(
         recipe = CapResourceValueToMaximum(

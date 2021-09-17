@@ -20,18 +20,12 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
-import org.openrewrite.marker.RecipeSearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
-import java.nio.file.FileSystems;
-import java.nio.file.PathMatcher;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.openrewrite.Tree.randomId;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
 import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
@@ -46,8 +40,7 @@ public class FindDisallowedImageTags extends Recipe {
     Set<String> disallowedTags;
 
     @Option(displayName = "Include initContainers",
-            description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
-                    "containers/image.",
+            description = "Boolean to indicate whether or not to treat initContainers/image identically to containers/image.",
             example = "false",
             required = false)
     boolean includeInitContainers;

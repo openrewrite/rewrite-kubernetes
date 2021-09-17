@@ -72,8 +72,7 @@ public class UpdateContainerImageName extends Recipe {
     String tagToUpdate;
 
     @Option(displayName = "Include initContainers",
-            description = "Boolean to indicate whether or not to treat initContainers/image identically to " +
-                    "containers/image.",
+            description = "Boolean to indicate whether or not to treat initContainers/image identically to containers/image.",
             example = "false",
             required = false)
     boolean includeInitContainers;

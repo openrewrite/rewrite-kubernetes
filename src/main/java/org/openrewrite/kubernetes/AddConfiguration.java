@@ -17,19 +17,20 @@ package org.openrewrite.kubernetes;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import org.intellij.lang.annotations.Language;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.MergeYaml;
-import org.openrewrite.yaml.search.FindKeyByXPath;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class AddConfiguration extends Recipe {
-    @Nullable
+
     @Option(displayName = "API version",
             description = "The Kubernetes resource API version to use.",
             example = "policy/v1beta1",
             required = false)
+    @Nullable
     String apiVersion;
 
     @Option(displayName = "Resource kind",
@@ -38,22 +39,23 @@ public class AddConfiguration extends Recipe {
     String resourceKind;
 
     @Option(displayName = "Configuration path",
-            description = "An XPath expression to locate Kubernetes configuration. Must be an absolute path.",
-            example = "/spec/privileged")
+            description = "A JsonPath expression to locate Kubernetes configuration. Must be an absolute path.",
+            example = "$.spec")
     String configurationPath;
 
     @Option(displayName = "Value",
             description = "The configuration that is added when necessary, including the key.",
             example = "privileged: false")
+    @Language("yml")
     String value;
 
     @Override
     public Validated validate() {
         return super.validate().and(
                 Validated.test("configurationPath",
-                        "Configuration path must be absolute (i.e. must start with /).",
+                        "Configuration path must be absolute (i.e. must start with $).",
                         configurationPath,
-                        p -> p.startsWith("/"))
+                        p -> p.startsWith("$"))
         );
     }
 
@@ -80,24 +82,26 @@ public class AddConfiguration extends Recipe {
                     return resource;
                 }
 
-                if (FindKeyByXPath.find(resource, configurationPath).isEmpty()) {
-                    String path = "";
-                    String[] subpaths = configurationPath.split("/");
-                    for (int i = 0; i < subpaths.length - 1; i++) {
-                        String subpath = subpaths[i];
-                        if (subpath.isEmpty()) {
-                            continue;
+                String traveledPath = "$";
+                String nextInsertionOnSequencePath = "";
+                for (String currentNode : configurationPath.split("\\.")) {
+                    if (!currentNode.equals("$")) {
+                        if (currentNode.contains("[")) {
+                            String entriesSelectorWithoutFilter = currentNode.substring(0, currentNode.indexOf('['));
+                            nextInsertionOnSequencePath = traveledPath + "." + entriesSelectorWithoutFilter;
+                            doAfterVisit(new MergeYaml(traveledPath, entriesSelectorWithoutFilter + ": {}", true, null));
+                        } else {
+                            if (nextInsertionOnSequencePath.isEmpty()) {
+                                doAfterVisit(new MergeYaml(traveledPath, currentNode + ": {}", true, null));
+                            } else {
+                                doAfterVisit(new MergeYaml(nextInsertionOnSequencePath, currentNode + ": {}", true, null));
+                                nextInsertionOnSequencePath = "";
+                            }
                         }
-
-                        if (FindKeyByXPath.find(resource, path + "/" + subpath).isEmpty()) {
-                            doAfterVisit(new MergeYaml(path.isEmpty() ? "/" : path, subpath + ":", true, null));
-                        }
-
-                        path += "/" + subpath;
+                        traveledPath = traveledPath + "." + currentNode;
                     }
-
-                    doAfterVisit(new MergeYaml(path, value, true, null));
                 }
+                doAfterVisit(new MergeYaml(configurationPath, value, true, null));
 
                 return resource;
             }
