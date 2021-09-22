@@ -21,7 +21,6 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.regex.Pattern;
@@ -73,8 +72,8 @@ public class FindMissingOrInvalidLabel extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         Pattern pattern = value != null ? Pattern.compile(value) : null;
-        YamlSearchResult missing = new YamlSearchResult(this, "missing:" + labelName);
-        YamlSearchResult invalid = null != value ? new YamlSearchResult(this, "invalid:" + value) : null;
+        String missing = "missing:" + labelName;
+        String invalid = null != value ? ("invalid:" + value) : null;
 
         return new EntryMarkingVisitor() {
             @Override
@@ -83,9 +82,9 @@ public class FindMissingOrInvalidLabel extends Recipe {
                 if (inLabels(c)) {
                     K8S.Labels labels = asLabels(c.firstEnclosing(Yaml.Mapping.class));
                     if (value == null && !labels.getKeys().contains(labelName)) {
-                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, missing);
+                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, missing);
                     } else if (pattern != null && !labels.valueMatches(labelName, pattern, c)) {
-                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, invalid);
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, invalid);
                     }
                 }
                 return super.visitMappingEntry(entry, ctx);

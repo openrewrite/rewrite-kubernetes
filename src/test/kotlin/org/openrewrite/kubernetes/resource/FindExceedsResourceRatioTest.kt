@@ -43,6 +43,14 @@ class FindExceedsResourceRatioTest : KubernetesRecipeTest {
                     requests:
                         cpu: "100Mi"
                         memory: "64m"
+              - image: k8s.gcr.io/test-webserver
+                resources:
+                    limits:
+                        cpu: "2Gi"
+                        memory: "1Gi"
+                    requests:
+                        cpu: "100Mi"
+                        memory: "64m"
         """,
         after = """
             apiVersion: v1
@@ -53,6 +61,14 @@ class FindExceedsResourceRatioTest : KubernetesRecipeTest {
             spec:
               containers:            
               - image: nginx:latest
+                ~~(exceeds max memory limits/requests ratio of 2)~~>resources:
+                    limits:
+                        cpu: "2Gi"
+                        memory: "1Gi"
+                    requests:
+                        cpu: "100Mi"
+                        memory: "64m"
+              - image: k8s.gcr.io/test-webserver
                 ~~(exceeds max memory limits/requests ratio of 2)~~>resources:
                     limits:
                         cpu: "2Gi"

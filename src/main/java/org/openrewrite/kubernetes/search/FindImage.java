@@ -21,7 +21,6 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
@@ -86,7 +85,7 @@ public class FindImage extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repository, imageName, imageTag, "*");
-        YamlSearchResult result = new YamlSearchResult(this, imageToSearch.toString());
+        String result = imageToSearch.toString();
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
@@ -95,7 +94,7 @@ public class FindImage extends Recipe {
                 if ((inContainerSpec(c) || (includeInitContainers && inInitContainerSpec(c))) && isImageName(c)) {
                     ContainerImage image = new ContainerImage(scalar.getValue());
                     if (image.getImageName().matches(imageToSearch)) {
-                        return scalar.withMarkers(scalar.getMarkers().addIfAbsent(result));
+                        return scalar.withMarkers(scalar.getMarkers().searchResult(result));
                     }
                 }
                 return super.visitScalar(scalar, ctx);

@@ -22,7 +22,6 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.search.EntryMarkingVisitor;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
@@ -62,7 +61,7 @@ public class FindServicesByType extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult result = new YamlSearchResult(this, "type:" + serviceType);
+        String result = "type:" + serviceType;
 
         return new EntryMarkingVisitor() {
             @Override
@@ -71,7 +70,7 @@ public class FindServicesByType extends Recipe {
                 if (K8S.Service.isServiceSpec(c)) {
                     K8S.Service svc = K8S.asService(mapping);
                     if (serviceType.equals(svc.getType())) {
-                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, result);
+                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, result);
                         return mapping;
                     }
                 }
