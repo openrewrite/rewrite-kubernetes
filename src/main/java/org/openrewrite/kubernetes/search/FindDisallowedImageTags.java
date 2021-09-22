@@ -54,7 +54,7 @@ public class FindDisallowedImageTags extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Disallowed tags";
+        return "Find disallowed image tags";
     }
 
     @Override

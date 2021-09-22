@@ -48,7 +48,7 @@ public class FindMissingDigest extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Find missing digest";
+        return "Find missing image digest";
     }
 
     @Override

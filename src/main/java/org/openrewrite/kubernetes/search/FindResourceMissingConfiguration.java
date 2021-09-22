@@ -49,7 +49,7 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Missing configuration";
+        return "Find missing configuration";
     }
 
     @Override

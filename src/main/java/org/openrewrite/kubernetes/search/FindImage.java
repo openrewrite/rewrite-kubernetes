@@ -67,7 +67,7 @@ public class FindImage extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Image name";
+        return "Find image by name";
     }
 
     @Override
