@@ -22,7 +22,6 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.search.EntryMarkingVisitor;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.List;
@@ -72,7 +71,7 @@ public class FindServiceExternalIPs extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult result = new YamlSearchResult(this, (findMissing ? "missing" : "found") + " ip");
+        String result = (findMissing ? "missing" : "found") + " ip";
 
         return new EntryMarkingVisitor() {
             @Override
@@ -86,7 +85,7 @@ public class FindServiceExternalIPs extends Recipe {
                     boolean matches = findMissing ? ips.stream().noneMatch(externalIPs::contains) :
                             ips.stream().anyMatch(externalIPs::contains);
                     if (matches) {
-                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, result);
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, result);
                     }
                 }
                 return super.visitSequence(sequence, ctx);

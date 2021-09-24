@@ -21,7 +21,6 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
@@ -66,7 +65,8 @@ public class FindMissingDigest extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult result = new YamlSearchResult(this, "missing digest");
+        String result = "missing digest";
+
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
@@ -74,7 +74,7 @@ public class FindMissingDigest extends Recipe {
                 if ((inContainerSpec(c) || (includeInitContainers && inInitContainerSpec(c))) && isImageName(c)) {
                     ContainerImage image = new ContainerImage(scalar.getValue());
                     if (!image.getImageName().hasDigest()) {
-                        return scalar.withMarkers(scalar.getMarkers().addIfAbsent(result));
+                        return scalar.withMarkers(scalar.getMarkers().searchResult(result));
                     }
                 }
                 return super.visitScalar(scalar, ctx);

@@ -20,7 +20,6 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.marker.RecipeSearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -68,15 +67,13 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        RecipeSearchResult result = new RecipeSearchResult(Tree.randomId(), this);
-
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
                 Yaml.Block b = (Yaml.Block) visit(document.getBlock(), ctx, getCursor());
                 boolean inKind = resourceKind == null || K8S.inKind(resourceKind, getCursor());
                 if (inKind && !("true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName())))) {
-                    return document.withBlock(b).withMarkers(document.getMarkers().addIfAbsent(result));
+                    return document.withBlock(b).withMarkers(document.getMarkers().searchResult());
                 }
                 return document;
             }

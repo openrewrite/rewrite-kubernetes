@@ -18,18 +18,17 @@ package org.openrewrite.kubernetes.search;
 
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 public class EntryMarkingVisitor extends YamlIsoVisitor<ExecutionContext> {
-    public static final String MARKER = EntryMarkingVisitor.class.getSimpleName();
+    public static final String MARKER_KEY = EntryMarkingVisitor.class.getSimpleName();
 
     @Override
     public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
         Yaml.Mapping.Entry e = super.visitMappingEntry(entry, ctx);
-        YamlSearchResult r = getCursor().getMessage(MARKER);
-        if (r != null) {
-            return e.withMarkers(e.getMarkers().addIfAbsent(r));
+        String description = getCursor().getMessage(MARKER_KEY);
+        if (description != null) {
+            return e.withMarkers(e.getMarkers().searchResult(description));
         }
         return e;
     }

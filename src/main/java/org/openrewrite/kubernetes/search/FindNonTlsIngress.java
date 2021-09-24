@@ -20,7 +20,6 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 public class FindNonTlsIngress extends Recipe {
@@ -52,18 +51,19 @@ public class FindNonTlsIngress extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult missingTls = new YamlSearchResult(this, "missing TLS");
-        YamlSearchResult missingDisallowHttp = new YamlSearchResult(this, "missing disallow http");
+        String missingTls = "missing TLS";
+        String missingDisallowHttp = "missing disallow http";
+
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
                 if (K8S.inKind("Ingress", getCursor())) {
                     Yaml.Document d = super.visitDocument(document, ctx);
                     if (!K8S.Ingress.isTlsConfigured(getCursor())) {
-                        d = d.withMarkers(d.getMarkers().addIfAbsent(missingTls));
+                        d = d.withMarkers(d.getMarkers().searchResult(missingTls));
                     }
                     if (!K8S.Ingress.isDisallowHttpConfigured(getCursor())) {
-                        d = d.withMarkers(d.getMarkers().addIfAbsent(missingDisallowHttp));
+                        d = d.withMarkers(d.getMarkers().searchResult(missingDisallowHttp));
                     }
                     return d;
                 }

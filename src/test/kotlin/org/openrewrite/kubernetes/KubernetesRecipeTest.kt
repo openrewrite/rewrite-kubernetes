@@ -18,8 +18,6 @@ package org.openrewrite.kubernetes
 import org.intellij.lang.annotations.Language
 import org.openrewrite.Recipe
 import org.openrewrite.RecipeTest
-import org.openrewrite.TreePrinter
-import org.openrewrite.marker.SearchResult
 import java.io.File
 import java.nio.file.Path
 
@@ -27,9 +25,6 @@ interface KubernetesRecipeTest : RecipeTest<Kubernetes> {
     override val parser: KubernetesParser
         get() = KubernetesParser.builder()
             .build()
-
-    override val treePrinter: TreePrinter<*>?
-        get() = SearchResult.printer("~~>", "~~(%s)~~>")
 
     fun assertChanged(
         parser: KubernetesParser = this.parser,

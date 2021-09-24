@@ -19,9 +19,9 @@ package org.openrewrite.kubernetes.tree
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.tree.K8S.Pod.inSpec
+import org.openrewrite.marker.SearchResult
 import org.openrewrite.yaml.YamlParser
 import org.openrewrite.yaml.YamlVisitor
-import org.openrewrite.yaml.search.YamlSearchResult
 import org.openrewrite.yaml.tree.Yaml
 
 class K8STest {
@@ -46,50 +46,50 @@ class K8STest {
     fun `must understand resource`() {
         val doc = YamlParser().parse(source)[0].documents[0]
         val result = object : YamlVisitor<Any>() {
-            val m = YamlSearchResult(null, "found pod")
+            val m = "found pod"
 
             override fun visitSequenceEntry(entry: Yaml.Sequence.Entry, p: Any): Yaml {
                 if (K8S.inPod(cursor)) {
-                    return entry.withMarkers(entry.markers.addIfAbsent(m))
+                    return entry.withMarkers(entry.markers.searchResult(m))
                 }
                 return super.visitSequenceEntry(entry, p)
             }
         }.visit(doc, "")
 
-        assertThat(result?.markers?.findFirst(YamlSearchResult::class.java)?.isPresent)
+        assertThat(result?.markers?.findFirst(SearchResult::class.java)?.isPresent)
     }
 
     @Test
     fun `must understand image container name`() {
         val doc = YamlParser().parse(source)[0].documents[0]
         val result = object : YamlVisitor<Any>() {
-            val m = YamlSearchResult(null, "found image")
+            val m = "found image"
 
             override fun visitMappingEntry(entry: Yaml.Mapping.Entry, p: Any): Yaml {
                 if (K8S.Containers.isImageName(cursor)) {
-                    return entry.withMarkers(entry.markers.addIfAbsent(m))
+                    return entry.withMarkers(entry.markers.searchResult(m))
                 }
                 return super.visitMappingEntry(entry, p)
             }
         }.visit(doc, "")
 
-        assertThat(result?.markers?.findFirst(YamlSearchResult::class.java)?.isPresent)
+        assertThat(result?.markers?.findFirst(SearchResult::class.java)?.isPresent)
     }
 
     @Test
     fun `must understand deployment pod spec`() {
         val doc = YamlParser().parse(source)[0].documents[1]
         val result = object : YamlVisitor<Any>() {
-            val m = YamlSearchResult(null, "found spec")
+            val m = "found spec"
 
             override fun visitMappingEntry(entry: Yaml.Mapping.Entry, p: Any): Yaml {
                 if (inSpec(cursor)) {
-                    return entry.withMarkers(entry.markers.addIfAbsent(m))
+                    return entry.withMarkers(entry.markers.searchResult(m))
                 }
                 return super.visitMappingEntry(entry, p)
             }
         }.visit(doc, "")
 
-        assertThat(result?.markers?.findFirst(YamlSearchResult::class.java)?.isPresent)
+        assertThat(result?.markers?.findFirst(SearchResult::class.java)?.isPresent)
     }
 }

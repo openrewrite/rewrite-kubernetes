@@ -21,7 +21,6 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.regex.Pattern;
@@ -73,8 +72,8 @@ public class FindAnnotation extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         Pattern pattern = value != null ? Pattern.compile(value) : null;
-        YamlSearchResult found = new YamlSearchResult(this, "found:" + annotationName);
-        YamlSearchResult valid = new YamlSearchResult(this, "found:" + value);
+        String found = "found:" + annotationName;
+        String valid = "found:" + value;
 
         return new EntryMarkingVisitor() {
             @Override
@@ -83,9 +82,9 @@ public class FindAnnotation extends Recipe {
                 if (inAnnotations(c)) {
                     K8S.Annotations annos = asAnnotations(c.firstEnclosing(Yaml.Mapping.class));
                     if (value == null && annos.getKeys().contains(annotationName)) {
-                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, found);
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, found);
                     } else if (pattern != null && annos.valueMatches(annotationName, pattern, c)) {
-                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER, valid);
+                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, valid);
                     }
                 }
                 return super.visitScalar(scalar, executionContext);

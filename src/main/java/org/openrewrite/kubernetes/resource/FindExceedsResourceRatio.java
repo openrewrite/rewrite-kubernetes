@@ -21,10 +21,8 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
-import static org.openrewrite.Tree.randomId;
 import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inResources;
 
 @Value
@@ -69,8 +67,7 @@ public class FindExceedsResourceRatio extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlSearchResult result = new YamlSearchResult(randomId(), FindExceedsResourceRatio.this,
-                "exceeds max " + resourceType + " limits/requests ratio of " + ratioLimit);
+        String result = "exceeds max " + resourceType + " limits/requests ratio of " + ratioLimit;
         int resourceLimit = Integer.parseInt(this.ratioLimit);
 
         return new YamlIsoVisitor<ExecutionContext>() {
@@ -98,7 +95,7 @@ public class FindExceedsResourceRatio extends Recipe {
                                         ResourceLimit limLimit = new ResourceLimit(limValStr);
 
                                         if (reqLimit.exceedsRatio(resourceLimit, limLimit.getValue())) {
-                                            return e.withMarkers(e.getMarkers().addIfAbsent(result));
+                                            return e.withMarkers(e.getMarkers().searchResult(result));
                                         }
 
                                         return e;

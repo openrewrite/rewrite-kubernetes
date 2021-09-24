@@ -20,10 +20,8 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.YamlIsoVisitor;
-import org.openrewrite.yaml.search.YamlSearchResult;
 import org.openrewrite.yaml.tree.Yaml;
 
-import static org.openrewrite.Tree.randomId;
 import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inLimits;
 import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inRequests;
 import static org.openrewrite.kubernetes.tree.K8S.asResourceLimits;
@@ -77,15 +75,14 @@ public class FindExceedsResourceValue extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         ResourceLimit limit = new ResourceLimit(resourceLimit);
-        YamlSearchResult result = new YamlSearchResult(randomId(), FindExceedsResourceValue.this,
-                "exceeds maximum of " + limit.getValue());
+        String result = "exceeds maximum of " + limit.getValue();
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
                 Cursor c = getCursor();
                 if (((inLimits(resourceType, c) && "limits".equals(resourceValueType)) || (inRequests(resourceType, c) && "requests".equals(resourceValueType))) && asResourceLimits(scalar).getValue().exceeds(limit.getValue())) {
-                    return scalar.withMarkers(scalar.getMarkers().addIfAbsent(result));
+                    return scalar.withMarkers(scalar.getMarkers().searchResult(result));
                 }
                 return super.visitScalar(scalar, executionContext);
             }
