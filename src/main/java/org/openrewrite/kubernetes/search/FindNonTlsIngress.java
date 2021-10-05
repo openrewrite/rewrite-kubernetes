@@ -19,10 +19,13 @@ package org.openrewrite.kubernetes.search;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
 public class FindNonTlsIngress extends Recipe {
+    private static final SearchResult MISSING_TLS = new SearchResult(Tree.randomId(), "missing TLS");
+    private static final SearchResult MISSING_DISALLOW_HTTP = new SearchResult(Tree.randomId(), "missing disallow http");
 
     @Option(displayName = "Optional file matcher",
             description = "Matching files will be modified. This is a glob expression.",
@@ -51,19 +54,16 @@ public class FindNonTlsIngress extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        String missingTls = "missing TLS";
-        String missingDisallowHttp = "missing disallow http";
-
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
                 if (K8S.inKind("Ingress", getCursor())) {
                     Yaml.Document d = super.visitDocument(document, ctx);
                     if (!K8S.Ingress.isTlsConfigured(getCursor())) {
-                        d = d.withMarkers(d.getMarkers().searchResult(missingTls));
+                        d = d.withMarkers(d.getMarkers().addIfAbsent(MISSING_TLS));
                     }
                     if (!K8S.Ingress.isDisallowHttpConfigured(getCursor())) {
-                        d = d.withMarkers(d.getMarkers().searchResult(missingDisallowHttp));
+                        d = d.withMarkers(d.getMarkers().addIfAbsent(MISSING_DISALLOW_HTTP));
                     }
                     return d;
                 }
