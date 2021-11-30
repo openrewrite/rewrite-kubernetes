@@ -16,11 +16,13 @@
 
 package org.openrewrite.kubernetes.rbac
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
 class AddRuleToRoleTest : KubernetesRecipeTest {
 
+    @Disabled
     @Test
     fun `must add rule to ClusterRole`() = assertChanged(
         recipe = AddRuleToRole(
@@ -77,6 +79,7 @@ class AddRuleToRoleTest : KubernetesRecipeTest {
         """
     )
 
+    @Disabled
     @Test
     fun `must support globbing for names`() = assertChanged(
         recipe = AddRuleToRole(
