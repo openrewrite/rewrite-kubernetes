@@ -69,13 +69,10 @@ public interface K8S extends Marker {
         String kind = null;
         for (Yaml.Mapping.Entry e : m.getEntries()) {
             Yaml.Block value = e.getValue();
-            switch (e.getKey().getValue()) {
-                case "apiVersion":
-                    apiVersion = ((Yaml.Scalar) value).getValue();
-                    break;
-                case "kind":
-                    kind = ((Yaml.Scalar) value).getValue();
-                    break;
+            if ("apiVersion".equals(e.getKey().getValue())) {
+                apiVersion = ((Yaml.Scalar) value).getValue();
+            } else if ("kind".equals(e.getKey().getValue())) {
+                kind = ((Yaml.Scalar) value).getValue();
             }
         }
         return new Resource(randomId(), apiVersion, kind);
@@ -312,7 +309,7 @@ public interface K8S extends Marker {
         }
 
         public static boolean isImageName(Cursor cursor) {
-            return cursor.getPathAsStream(o -> (o instanceof Yaml.Mapping.Entry && ((Yaml.Mapping.Entry) o).getKey().getValue().equals("image"))).findFirst().isPresent();
+            return cursor.getPathAsStream(o -> (o instanceof Yaml.Mapping.Entry && "image".equals(((Yaml.Mapping.Entry) o).getKey().getValue()))).findFirst().isPresent();
         }
     }
 
@@ -370,7 +367,7 @@ public interface K8S extends Marker {
         }
 
         public static boolean inExternalIPs(Cursor cursor) {
-            return cursor.getPathAsStream(o -> o instanceof Yaml.Mapping.Entry && ((Yaml.Mapping.Entry) o).getKey().getValue().equals("externalIPs")).findFirst().isPresent();
+            return cursor.getPathAsStream(o -> o instanceof Yaml.Mapping.Entry && "externalIPs".equals(((Yaml.Mapping.Entry) o).getKey().getValue())).findFirst().isPresent();
         }
     }
 

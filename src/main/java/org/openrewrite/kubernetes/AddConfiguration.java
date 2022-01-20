@@ -85,7 +85,7 @@ public class AddConfiguration extends Recipe {
                 String traveledPath = "$";
                 String nextInsertionOnSequencePath = "";
                 for (String currentNode : configurationPath.split("\\.")) {
-                    if (!currentNode.equals("$")) {
+                    if (!"$".equals(currentNode)) {
                         if (currentNode.contains("[")) {
                             String entriesSelectorWithoutFilter = currentNode.substring(0, currentNode.indexOf('['));
                             nextInsertionOnSequencePath = traveledPath + "." + entriesSelectorWithoutFilter;
