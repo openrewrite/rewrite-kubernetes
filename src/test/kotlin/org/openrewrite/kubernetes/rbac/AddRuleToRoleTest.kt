@@ -22,7 +22,6 @@ import org.openrewrite.kubernetes.KubernetesRecipeTest
 
 class AddRuleToRoleTest : KubernetesRecipeTest {
 
-    @Disabled
     @Test
     fun `must add rule to ClusterRole`() = assertChanged(
         recipe = AddRuleToRole(
