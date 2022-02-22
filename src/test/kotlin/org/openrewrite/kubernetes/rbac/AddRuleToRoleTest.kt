@@ -16,11 +16,56 @@
 
 package org.openrewrite.kubernetes.rbac
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.openrewrite.kubernetes.KubernetesRecipeTest
 
 class AddRuleToRoleTest : KubernetesRecipeTest {
+
+    @Test
+    fun `unsupported apiVersion`() = assertUnchanged(
+        recipe = AddRuleToRole(
+            "ClusterRole",
+            "cluster-role",
+            setOf(""),
+            setOf("pods"),
+            null,
+            setOf("update"),
+            null
+        ),
+        before = """
+            apiVersion: rbac.authorization.k8s.io/v2
+            kind: ClusterRole
+            metadata:
+              name: cluster-role
+            rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["update"]
+        """
+    )
+
+    @Test
+    fun `cluster role already contains rule`() = assertUnchanged(
+        recipe = AddRuleToRole(
+            "ClusterRole",
+            "cluster-role",
+            setOf(""),
+            setOf("pods"),
+            null,
+            setOf("update"),
+            null
+        ),
+        before = """
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: ClusterRole
+            metadata:
+              name: cluster-role
+            rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["update"]
+        """
+    )
 
     @Test
     fun `must add rule to ClusterRole`() = assertChanged(
@@ -78,7 +123,6 @@ class AddRuleToRoleTest : KubernetesRecipeTest {
         """
     )
 
-    @Disabled
     @Test
     fun `must support globbing for names`() = assertChanged(
         recipe = AddRuleToRole(

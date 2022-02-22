@@ -23,11 +23,14 @@ import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.YamlParser;
+import org.openrewrite.yaml.search.FindKey;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -77,9 +80,6 @@ public class AddRuleToRole extends Recipe {
     @Nullable
     String fileMatcher;
 
-    @Nullable
-    Yaml.Sequence.Entry newSequenceEntry;
-
     public AddRuleToRole(String rbacResourceType,
                          String rbacResourceName,
                          Set<String> apiGroups,
@@ -94,17 +94,6 @@ public class AddRuleToRole extends Recipe {
         this.resourceNames = resourceNames;
         this.verbs = verbs;
         this.fileMatcher = fileMatcher;
-
-        String apiGroupsStr = setToString(apiGroups);
-        String resourcesStr = setToString(resources);
-        String resourceNamesStr = setToString(resourceNames);
-        String verbsStr = setToString(verbs);
-        List<Yaml.Documents> docs = new YamlParser().parse("- apiGroups: " + apiGroupsStr + "\n"
-                + "  resources: " + resourcesStr + "\n"
-                + (resourceNamesStr != null ? "  resourceNames: " + resourceNamesStr + "\n" : "")
-                + "  verbs: " + verbsStr);
-        this.newSequenceEntry =
-                ((Yaml.Sequence) docs.get(0).getDocuments().get(0).getBlock()).getEntries().get(0).withPrefix("\n");
     }
 
     @Override
@@ -128,16 +117,25 @@ public class AddRuleToRole extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        PathMatcher globMatcher = FileSystems.getDefault().getPathMatcher("glob:" + rbacResourceName);
-
         return new YamlIsoVisitor<ExecutionContext>() {
+            private final PathMatcher globMatcher = FileSystems.getDefault().getPathMatcher("glob:" + rbacResourceName);
+            private final Yaml.Sequence.Entry newSequenceEntry = generateSequence();
+
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
                 Cursor c = getCursor();
                 if (K8S.inKind(rbacResourceType, c) && K8S.Metadata.isMetadata(c)) {
                     K8S.Metadata meta = K8S.asMetadata((Yaml.Mapping) entry.getValue());
-                    if (globMatcher.matches(Paths.get(meta.getName()))) {
-                        c.putMessageOnFirstEnclosing(Yaml.Document.class, "resource-name", meta.getName());
+                    Yaml.Document document = c.dropParentUntil(p -> p instanceof Yaml.Document).getValue();
+                    if (globMatcher.matches(Paths.get(meta.getName())) && isSupportedAPI(document)) {
+                        Set<Yaml> resourceRules = FindKey.find(document, "$.rules[*]");
+                        for (Yaml yaml : new ArrayList<>(resourceRules)) {
+                            if (containsRule((Yaml.Mapping) yaml)) {
+                                return entry;
+                            }
+                        }
+                        Yaml.Block addToRules = ((Yaml.Mapping.Entry) (FindKey.find(document, "$.rules").toArray()[0])).getValue();
+                        executionContext.putMessage("RULE_KEY", addToRules);
                     }
                 }
                 return super.visitMappingEntry(entry, executionContext);
@@ -145,19 +143,69 @@ public class AddRuleToRole extends Recipe {
 
             @Override
             public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext executionContext) {
-                Yaml.Sequence s = super.visitSequence(sequence, executionContext);
-                Cursor c = getCursor();
-                if (K8S.RBAC.inRules(c) && c.getNearestMessage("resource-name") != null) {
-                    if (!s.getEntries().contains(newSequenceEntry)) {
-                        return s.withEntries(concat(s.getEntries(), newSequenceEntry));
+                Object found = executionContext.getMessage("RULE_KEY");
+                if (found == sequence) {
+                    sequence = sequence.withEntries(concat(sequence.getEntries(), newSequenceEntry));
+                }
+                return super.visitSequence(sequence, executionContext);
+            }
+
+            private boolean isSupportedAPI(Yaml.Document document) {
+                Set<Yaml> apiVersion = FindKey.find(document, "$.apiVersion");
+                return apiVersion.size() == 1 &&
+                        apiVersion.toArray()[0] instanceof Yaml.Mapping.Entry &&
+                        ((Yaml.Mapping.Entry) apiVersion.toArray()[0]).getValue() instanceof Yaml.Scalar &&
+                        "rbac.authorization.k8s.io/v1".equals(((Yaml.Scalar) ((Yaml.Mapping.Entry) apiVersion.toArray()[0]).getValue()).getValue());
+            }
+
+            private boolean containsRule(Yaml.Mapping rules) {
+                Set<Yaml> apiGroupsSet = FindKey.find(rules, "..rules.apiGroups");
+                Set<String> apiGroupValues = extractEntryValues(apiGroupsSet);
+                if (apiGroupValues.size() != apiGroups.size() || !apiGroupValues.containsAll(apiGroups)) {
+                    return false;
+                }
+
+                Set<Yaml> apiResourcesSet = FindKey.find(rules, "..rules.resources");
+                Set<String> resourceValues = extractEntryValues(apiResourcesSet);
+                if (resourceValues.size() != resources.size() || !resourceValues.containsAll(resources)) {
+                    return false;
+                }
+
+                Set<Yaml> apiVerbsSet = FindKey.find(rules, "..rules.verbs");
+                Set<String> verbValues = extractEntryValues(apiVerbsSet);
+                if (verbValues.size() != verbs.size() || !verbValues.containsAll(verbs)) {
+                    return false;
+                }
+
+                if (resourceNames != null) {
+                    Set<Yaml> resourceNamesSet = FindKey.find(rules, "..rules.resourceNames");
+                    Set<String> resourceNamesValues = extractEntryValues(resourceNamesSet);
+                    return (resourceNamesValues.size() != resourceNames.size() || !resourceNamesValues.containsAll(resourceNames));
+                }
+
+                return true;
+            }
+
+            private Set<String> extractEntryValues(@Nullable Set<Yaml> entries) {
+                Set<String> values = new HashSet<>();
+                if (entries != null && entries.size() == 1) {
+                    Yaml.Mapping.Entry entry = ((Yaml.Mapping.Entry) entries.toArray()[0]);
+                    if (entry.getValue() instanceof Yaml.Scalar) {
+                        values.add(((Yaml.Scalar) entry.getValue()).getValue());
+                    } else if (entry.getValue() instanceof Yaml.Sequence) {
+                        for (Yaml.Sequence.Entry yaml : ((Yaml.Sequence) entry.getValue()).getEntries()) {
+                            if (yaml.getBlock() instanceof Yaml.Scalar) {
+                                values.add(((Yaml.Scalar) yaml.getBlock()).getValue());
+                            }
+                        }
                     }
                 }
-                return s;
+                return values;
             }
         };
     }
 
-    private static @Nullable String setToString(@Nullable Set<String> strs) {
+    private @Nullable String setToString(@Nullable Set<String> strs) {
         if (strs == null) {
             return null;
         }
@@ -176,4 +224,15 @@ public class AddRuleToRole extends Recipe {
         return sb.toString();
     }
 
+    private Yaml.Sequence.Entry generateSequence() {
+        String apiGroupsStr = setToString(apiGroups);
+        String resourcesStr = setToString(resources);
+        String resourceNamesStr = setToString(resourceNames);
+        String verbsStr = setToString(verbs);
+        List<Yaml.Documents> docs = new YamlParser().parse("- apiGroups: " + apiGroupsStr + "\n"
+                + "  resources: " + resourcesStr + "\n"
+                + (resourceNamesStr != null ? "  resourceNames: " + resourceNamesStr + "\n" : "")
+                + "  verbs: " + verbsStr);
+        return ((Yaml.Sequence) docs.get(0).getDocuments().get(0).getBlock()).getEntries().get(0).withPrefix("\n");
+    }
 }
