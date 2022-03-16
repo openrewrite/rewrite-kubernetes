@@ -189,7 +189,7 @@ public class AddRuleToRole extends Recipe {
             private Set<String> extractEntryValues(@Nullable Set<Yaml> entries) {
                 Set<String> values = new HashSet<>();
                 if (entries != null && entries.size() == 1) {
-                    Yaml.Mapping.Entry entry = ((Yaml.Mapping.Entry) entries.toArray()[0]);
+                    Yaml.Mapping.Entry entry = (Yaml.Mapping.Entry) entries.toArray()[0];
                     if (entry.getValue() instanceof Yaml.Scalar) {
                         values.add(((Yaml.Scalar) entry.getValue()).getValue());
                     } else if (entry.getValue() instanceof Yaml.Sequence) {
