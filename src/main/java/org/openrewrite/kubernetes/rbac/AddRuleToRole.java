@@ -180,7 +180,7 @@ public class AddRuleToRole extends Recipe {
                 if (resourceNames != null) {
                     Set<Yaml> resourceNamesSet = FindKey.find(rules, "..rules.resourceNames");
                     Set<String> resourceNamesValues = extractEntryValues(resourceNamesSet);
-                    return (resourceNamesValues.size() != resourceNames.size() || !resourceNamesValues.containsAll(resourceNames));
+                    return resourceNamesValues.size() != resourceNames.size() || !resourceNamesValues.containsAll(resourceNames);
                 }
 
                 return true;
