@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import static org.openrewrite.Tree.randomId;
 
-public class RefreshModel<P> extends YamlIsoVisitor<P> {
+public class UpdateKubernetesModel<P> extends YamlIsoVisitor<P> {
     private static final Pattern METADATA_LABEL = Pattern.compile("/metadata/labels/(.+)");
     private static final Pattern METADATA_ANNOTATION = Pattern.compile("/metadata/annotations/(.+)");
 
@@ -44,12 +44,16 @@ public class RefreshModel<P> extends YamlIsoVisitor<P> {
                         getCursor().getMessage("labels")
                 )
         );
-
-        return d.withMarkers(document.getMarkers().computeByType(resource, (old, n) -> n));
+        if (resource.getApiVersion() != null && resource.getKind() != null) {
+            return d.withMarkers(document.getMarkers().addIfAbsent(resource));
+        } else {
+            return d;
+        }
     }
 
     @Override
     public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, P p) {
+
         String path = getPath();
 
         if (entry.getValue() instanceof Yaml.Scalar) {

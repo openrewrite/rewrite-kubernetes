@@ -15,25 +15,33 @@
  */
 package org.openrewrite.kubernetes;
 
+import org.openrewrite.TreeVisitor;
 import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.yaml.YamlVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
-@SuppressWarnings("NotNullFieldNotInitialized")
 public class KubernetesVisitor<P> extends YamlVisitor<P> {
-    protected KubernetesModel model;
 
-    public Kubernetes.ResourceDocument visitKubernetes(Kubernetes.ResourceDocument resource, P p) {
-        this.model = resource.getModel();
-        return (Kubernetes.ResourceDocument) visitDocument(resource, p);
+    protected KubernetesModel getKubernetesModel() {
+        Yaml.Document doc = getCursor().firstEnclosing(Yaml.Document.class);
+        if (doc != null) {
+            return getKubernetesModel(doc);
+        }
+        throw new IllegalStateException("KubernetesVisitor should not be visiting a YAML document without a KubernetesModel");
     }
 
-    @Override
-    public Yaml visitDocument(Yaml.Document document, P p) {
-        Yaml.Document refactored = (Yaml.Document) super.visitDocument(document, p);
-        if (refactored != document) {
-            return new Kubernetes.ResourceDocument(refactored);
+    public void maybeUpdateModel() {
+        for (TreeVisitor<Yaml, P> afterVisit : getAfterVisit()) {
+            if(afterVisit instanceof UpdateKubernetesModel) {
+                return;
+            }
         }
-        return refactored;
+        doAfterVisit(new UpdateKubernetesModel<>());
+    }
+
+    public static KubernetesModel getKubernetesModel(Yaml.Document doc) {
+        return doc.getMarkers()
+                .findFirst(KubernetesModel.class)
+                .orElseThrow(() -> new IllegalStateException("KubernetesVisitor should not be visiting a YAML document without a KubernetesModel"));
     }
 }

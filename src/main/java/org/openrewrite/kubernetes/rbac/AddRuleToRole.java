@@ -20,6 +20,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.kubernetes.KubernetesVisitor;
 import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.YamlParser;
@@ -117,7 +118,7 @@ public class AddRuleToRole extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new YamlIsoVisitor<ExecutionContext>() {
+        return new KubernetesVisitor<ExecutionContext>() {
             private final PathMatcher globMatcher = FileSystems.getDefault().getPathMatcher("glob:" + rbacResourceName);
             private final Yaml.Sequence.Entry newSequenceEntry = generateSequence();
 
@@ -135,19 +136,20 @@ public class AddRuleToRole extends Recipe {
                             }
                         }
                         Yaml.Block addToRules = ((Yaml.Mapping.Entry) (FindKey.find(document, "$.rules").toArray()[0])).getValue();
-                        executionContext.putMessage("RULE_KEY", addToRules);
+                        getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,"RULE_KEY", addToRules);
                     }
                 }
-                return super.visitMappingEntry(entry, executionContext);
+                return (Yaml.Mapping.Entry) super.visitMappingEntry(entry, executionContext);
             }
 
             @Override
             public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext executionContext) {
-                Object found = executionContext.getMessage("RULE_KEY");
+                Object found = getCursor().getNearestMessage("RULE_KEY");
                 if (found == sequence) {
                     sequence = sequence.withEntries(concat(sequence.getEntries(), newSequenceEntry));
+                    maybeUpdateModel();
                 }
-                return super.visitSequence(sequence, executionContext);
+                return (Yaml.Sequence) super.visitSequence(sequence, executionContext);
             }
 
             private boolean isSupportedAPI(Yaml.Document document) {

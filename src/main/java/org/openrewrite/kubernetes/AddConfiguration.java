@@ -20,7 +20,9 @@ import lombok.Value;
 import org.intellij.lang.annotations.Language;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.yaml.MergeYaml;
+import org.openrewrite.yaml.tree.Yaml;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -73,13 +75,15 @@ public class AddConfiguration extends Recipe {
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         return new KubernetesVisitor<ExecutionContext>() {
             @Override
-            public Kubernetes.ResourceDocument visitKubernetes(Kubernetes.ResourceDocument resource, ExecutionContext context) {
-                if (!resourceKind.equals(resource.getModel().getKind())) {
-                    return resource;
+            public Yaml visitDocument(Yaml.Document document, ExecutionContext executionContext) {
+
+                KubernetesModel model = getKubernetesModel();
+                if (!resourceKind.equals(model.getKind())) {
+                    return document;
                 }
 
-                if (apiVersion != null && !apiVersion.equals(resource.getModel().getApiVersion())) {
-                    return resource;
+                if (apiVersion != null && !apiVersion.equals(model.getApiVersion())) {
+                    return document;
                 }
 
                 String traveledPath = "$";
@@ -103,7 +107,7 @@ public class AddConfiguration extends Recipe {
                 }
                 doAfterVisit(new MergeYaml(configurationPath, value, true, null));
 
-                return resource;
+                return document;
             }
         };
     }
