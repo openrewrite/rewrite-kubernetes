@@ -19,8 +19,10 @@ package org.openrewrite.kubernetes.tree;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.With;
 import lombok.experimental.FieldDefaults;
 import org.openrewrite.Cursor;
+import org.openrewrite.Tree;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.resource.ResourceLimit;
 import org.openrewrite.marker.Marker;
@@ -34,6 +36,7 @@ import static java.util.Collections.emptySet;
 import static org.openrewrite.Tree.randomId;
 
 public interface K8S extends Marker {
+
 
     static boolean inKind(String kind, Cursor cursor) {
         Yaml.Document doc = cursor.firstEnclosing(Yaml.Document.class);
@@ -202,6 +205,7 @@ public interface K8S extends Marker {
     @Data
     class Resource implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
         String apiVersion;
         String kind;
@@ -212,6 +216,7 @@ public interface K8S extends Marker {
     @Data
     class Metadata implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
         @Nullable
         String namespace;
@@ -233,6 +238,7 @@ public interface K8S extends Marker {
     @Data
     class Annotations implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
         Set<String> keys;
 
@@ -261,6 +267,7 @@ public interface K8S extends Marker {
     @Data
     class Labels implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
         Set<String> keys;
 
@@ -289,6 +296,7 @@ public interface K8S extends Marker {
     @Data
     class Pod implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
 
         public static boolean inSpec(Cursor cursor) {
@@ -302,6 +310,7 @@ public interface K8S extends Marker {
     @Data
     class Containers implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
 
         public static boolean inContainerSpec(Cursor cursor) {
@@ -318,6 +327,7 @@ public interface K8S extends Marker {
     @Data
     class InitContainers implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
 
         public static boolean inInitContainerSpec(Cursor cursor) {
@@ -330,6 +340,7 @@ public interface K8S extends Marker {
     @Data
     class ResourceLimits implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
         ResourceLimit value;
 
@@ -352,6 +363,7 @@ public interface K8S extends Marker {
     @Data
     class Service implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
         @Nullable
         String type;
@@ -376,6 +388,7 @@ public interface K8S extends Marker {
     @Data
     class Ingress implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
 
         public static boolean isTlsConfigured(Cursor cursor) {
@@ -403,6 +416,7 @@ public interface K8S extends Marker {
     @Data
     class RBAC implements K8S {
         @EqualsAndHashCode.Include
+        @With
         UUID id;
 
         public static boolean inRules(Cursor cursor) {

@@ -15,44 +15,38 @@
  */
 package org.openrewrite.kubernetes;
 
-import org.intellij.lang.annotations.Language;
 import org.openrewrite.ExecutionContext;
-import org.openrewrite.InMemoryExecutionContext;
-import org.openrewrite.Parser;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.YamlParser;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
 
-public final class KubernetesParser implements Parser<Kubernetes> {
-    YamlParser yamlParser = new YamlParser();
+public final class KubernetesParser extends YamlParser {
+
+    private static final Pattern METADATA_LABEL = Pattern.compile("/metadata/labels/(.+)");
+    private static final Pattern METADATA_ANNOTATION = Pattern.compile("/metadata/annotations/(.+)");
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     private KubernetesParser() {
     }
 
     @Override
-    public List<Kubernetes> parse(@Language("yaml") String... sources) {
-        return parse(new InMemoryExecutionContext(), sources);
-    }
-
-    @Override
-    public List<Kubernetes> parseInputs(Iterable<Input> sources, @Nullable Path relativeTo, ExecutionContext ctx) {
-        return yamlParser.parseInputs(sources, relativeTo, ctx).stream()
-                .map(yaml -> toKubernetes(yaml, ctx))
+    public List<Yaml.Documents> parseInputs(Iterable<Input> sources, @Nullable Path relativeTo, ExecutionContext ctx) {
+        return super.parseInputs(sources, relativeTo, ctx).stream()
+                .map(yaml -> updateModel(yaml, ctx))
                 .collect(toList());
     }
 
-    @Override
-    public boolean accept(Path path) {
-        return yamlParser.accept(path);
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    private Yaml.Documents updateModel(Yaml.Documents yaml, ExecutionContext ctx) {
+        return (Yaml.Documents) new UpdateKubernetesModel<>().visitNonNull(yaml, ctx);
     }
 
     public static class Builder {
@@ -61,9 +55,4 @@ public final class KubernetesParser implements Parser<Kubernetes> {
         }
     }
 
-    private Kubernetes toKubernetes(Yaml.Documents yaml, ExecutionContext ctx) {
-        Yaml.Documents y = (Yaml.Documents) new RefreshModel<>().visit(yaml, ctx);
-        assert y != null;
-        return new Kubernetes(y);
-    }
 }

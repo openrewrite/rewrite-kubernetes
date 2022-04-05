@@ -18,7 +18,7 @@ package org.openrewrite.kubernetes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class KubernetesParserTest {
+class KubernetesParserTest : KubernetesRecipeTest {
 
     @Test
     fun kubernetesModel() {
@@ -47,14 +47,15 @@ class KubernetesParserTest {
                   maxAgeSeconds: 3600
         """
 
-        val k = KubernetesParser.builder().build().parse(manifest)[0].documents[0]
+        val model = getModel(KubernetesParser.builder().build().parse(manifest)[0].documents[0])
 
-        assertThat(k.model.apiVersion).isEqualTo("storage.cnrm.cloud.google.com/v1beta1")
-        assertThat(k.model.kind).isEqualTo("StorageBucket")
-        assertThat(k.model.metadata.name).isEqualTo("sample")
-        assertThat(k.model.metadata.annotations)
+
+        assertThat(model.apiVersion).isEqualTo("storage.cnrm.cloud.google.com/v1beta1")
+        assertThat(model.kind).isEqualTo("StorageBucket")
+        assertThat(model.metadata.name).isEqualTo("sample")
+        assertThat(model.metadata.annotations)
             .containsExactlyEntriesOf(mapOf("cnrm.cloud.google.com/force-destroy" to "false"))
-        assertThat(k.model.metadata.labels)
+        assertThat(model.metadata.labels)
             .containsExactlyEntriesOf(mapOf("label-one" to "value-one"))
     }
 }
