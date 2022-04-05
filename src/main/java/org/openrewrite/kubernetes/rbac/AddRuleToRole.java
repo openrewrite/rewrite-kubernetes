@@ -129,7 +129,7 @@ public class AddRuleToRole extends Recipe {
                     K8S.Metadata meta = K8S.asMetadata((Yaml.Mapping) entry.getValue());
                     Yaml.Document document = c.dropParentUntil(p -> p instanceof Yaml.Document).getValue();
                     if (globMatcher.matches(Paths.get(meta.getName())) && isSupportedAPI(document)) {
-                        Set<Yaml> resourceRules = FindKey.find(document, "$.rules[*]");
+                        Set<Yaml> resourceRules = FindKey.find(document, "$.rules[*].*");
                         for (Yaml yaml : new ArrayList<>(resourceRules)) {
                             if (containsRule((Yaml.Mapping) yaml)) {
                                 return entry;
@@ -161,26 +161,26 @@ public class AddRuleToRole extends Recipe {
             }
 
             private boolean containsRule(Yaml.Mapping rules) {
-                Set<Yaml> apiGroupsSet = FindKey.find(rules, "..rules.apiGroups");
+                Set<Yaml> apiGroupsSet = FindKey.find(rules, "$.apiGroups");
                 Set<String> apiGroupValues = extractEntryValues(apiGroupsSet);
                 if (apiGroupValues.size() != apiGroups.size() || !apiGroupValues.containsAll(apiGroups)) {
                     return false;
                 }
 
-                Set<Yaml> apiResourcesSet = FindKey.find(rules, "..rules.resources");
+                Set<Yaml> apiResourcesSet = FindKey.find(rules, "$.resources");
                 Set<String> resourceValues = extractEntryValues(apiResourcesSet);
                 if (resourceValues.size() != resources.size() || !resourceValues.containsAll(resources)) {
                     return false;
                 }
 
-                Set<Yaml> apiVerbsSet = FindKey.find(rules, "..rules.verbs");
+                Set<Yaml> apiVerbsSet = FindKey.find(rules, "$.verbs");
                 Set<String> verbValues = extractEntryValues(apiVerbsSet);
                 if (verbValues.size() != verbs.size() || !verbValues.containsAll(verbs)) {
                     return false;
                 }
 
                 if (resourceNames != null) {
-                    Set<Yaml> resourceNamesSet = FindKey.find(rules, "..rules.resourceNames");
+                    Set<Yaml> resourceNamesSet = FindKey.find(rules, "$.resourceNames");
                     Set<String> resourceNamesValues = extractEntryValues(resourceNamesSet);
                     return resourceNamesValues.size() != resourceNames.size() || !resourceNamesValues.containsAll(resourceNames);
                 }

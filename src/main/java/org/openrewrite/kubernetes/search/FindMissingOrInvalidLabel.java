@@ -21,6 +21,7 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
+import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.regex.Pattern;
@@ -76,15 +77,17 @@ public class FindMissingOrInvalidLabel extends Recipe {
         String invalid = null != value ? ("invalid:" + value) : null;
 
         return new EntryMarkingVisitor() {
+            private final JsonPathMatcher IN_LABELS = new JsonPathMatcher("$..metadata.labels.*");
+
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
-                Cursor c = getCursor();
-                if (inLabels(c)) {
-                    K8S.Labels labels = asLabels(c.firstEnclosing(Yaml.Mapping.class));
+                Cursor parent = getCursor().dropParentUntil(is -> is instanceof Yaml.Mapping || is instanceof Yaml.Document);
+                if (parent.getValue() instanceof Yaml.Mapping && IN_LABELS.matches(parent)) {
+                    K8S.Labels labels = asLabels(parent.getValue());
                     if (value == null && !labels.getKeys().contains(labelName)) {
-                        c.getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, missing);
-                    } else if (pattern != null && !labels.valueMatches(labelName, pattern, c)) {
-                        c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, invalid);
+                        getCursor().getParentOrThrow().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, missing);
+                    } else if (pattern != null && !labels.valueMatches(labelName, pattern, getCursor())) {
+                        getCursor().putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, invalid);
                     }
                 }
                 return super.visitMappingEntry(entry, ctx);

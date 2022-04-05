@@ -21,6 +21,7 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
+import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.regex.Pattern;
@@ -91,5 +92,4 @@ public class FindMissingOrInvalidAnnotation extends Recipe {
             }
         };
     }
-
 }

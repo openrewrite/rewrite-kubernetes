@@ -178,7 +178,16 @@ public interface K8S extends Marker {
 
         return jsonPath.find(cursor)
                 .flatMap(found -> {
-                    if (found instanceof List) {
+                    if (found instanceof Yaml.Mapping) {
+                        return ((Yaml.Mapping) found).getEntries().stream()
+                                .map(o -> {
+                                    if (o.getValue() == cursor.getValue()) {
+                                        return cursor;
+                                    }
+                                    return null;
+                                }).filter(Objects::nonNull)
+                                .findFirst();
+                    } else if (found instanceof List) {
                         //noinspection unchecked
                         return ((List<Object>) found).stream()
                                 .map(o -> {
@@ -243,7 +252,11 @@ public interface K8S extends Marker {
         Set<String> keys;
 
         public static boolean inAnnotations(Cursor cursor) {
-            return inMappingEntry("..metadata.annotations.*", cursor);
+            Cursor parent = cursor.dropParentUntil(is -> is instanceof Yaml.Mapping || is instanceof Yaml.Document);
+            if (parent.getValue() instanceof Yaml.Mapping) {
+                return new JsonPathMatcher("$..metadata.annotations.*").matches(parent);
+            }
+            return false;
         }
 
         public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
