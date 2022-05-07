@@ -55,8 +55,11 @@ class AddConfigurationTest : KubernetesRecipeTest {
         recipe = AddConfiguration(
             null,
             "PodSecurityPolicy",
-            "$.spec",
-            "privileged: false"
+            "$",
+            """
+                spec:
+                  privileged: false
+            """.trimIndent()
         ),
         before = """
             apiVersion: policy/v1beta1
@@ -133,8 +136,11 @@ class AddConfigurationTest : KubernetesRecipeTest {
         recipe = AddConfiguration(
             null,
             "Pod",
-            "$.spec.containers[*].securityContext",
-            "allowPrivilegeEscalation: false"
+            "$.spec.containers[*].*",
+            """
+                securityContext:
+                  allowPrivilegeEscalation: false
+            """.trimIndent()
         ),
         before = """
             apiVersion: v1

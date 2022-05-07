@@ -86,25 +86,6 @@ public class AddConfiguration extends Recipe {
                     return document;
                 }
 
-                String traveledPath = "$";
-                String nextInsertionOnSequencePath = "";
-                for (String currentNode : configurationPath.split("\\.")) {
-                    if (!"$".equals(currentNode)) {
-                        if (currentNode.contains("[")) {
-                            String entriesSelectorWithoutFilter = currentNode.substring(0, currentNode.indexOf('['));
-                            nextInsertionOnSequencePath = traveledPath + "." + entriesSelectorWithoutFilter;
-                            doAfterVisit(new MergeYaml(traveledPath, entriesSelectorWithoutFilter + ": {}", true, null));
-                        } else {
-                            if (nextInsertionOnSequencePath.isEmpty()) {
-                                doAfterVisit(new MergeYaml(traveledPath, currentNode + ": {}", true, null));
-                            } else {
-                                doAfterVisit(new MergeYaml(nextInsertionOnSequencePath, currentNode + ": {}", true, null));
-                                nextInsertionOnSequencePath = "";
-                            }
-                        }
-                        traveledPath = traveledPath + "." + currentNode;
-                    }
-                }
                 doAfterVisit(new MergeYaml(configurationPath, value, true, null));
 
                 return document;
