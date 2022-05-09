@@ -163,8 +163,10 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: PodSecurityPolicy
-      configurationPath: $.spec.runAsUser
-      value: 'rule: MustRunAsNonRoot'
+      configurationPath: $.spec
+      value: |-
+        runAsUser:
+          rule: MustRunAsNonRoot
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.ImagePullPolicyAlways
@@ -187,8 +189,10 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: $.spec.containers[*].securityContext
-      value: 'allowPrivilegeEscalation: false'
+      configurationPath: $.spec.containers[*].*
+      value: |-
+        securityContext:
+          allowPrivilegeEscalation: false
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.NoHostNetworkSharing
@@ -211,8 +215,10 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: $.spec.containers[*].securityContext
-      value: 'readOnlyRootFilesystem: false'
+      configurationPath: $.spec.containers[*].*
+      value: |-
+        securityContext:
+          readOnlyRootFilesystem: false
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.LimitContainerCapabilities
@@ -223,7 +229,9 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: $.spec.containers[*].securityContext.capabilities
+      configurationPath: $.spec.containers[*].*
       value: |-
-        drop:
-          - ALL
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
