@@ -189,7 +189,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: $.spec.containers[*].*
+      configurationPath: $.spec.containers
       value: |-
         securityContext:
           allowPrivilegeEscalation: false
@@ -215,7 +215,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: $.spec.containers[*].*
+      configurationPath: $.spec.containers
       value: |-
         securityContext:
           readOnlyRootFilesystem: false
@@ -229,7 +229,7 @@ tags:
 recipeList:
   - org.openrewrite.kubernetes.AddConfiguration:
       resourceKind: Pod
-      configurationPath: $.spec.containers[*].*
+      configurationPath: $.spec.containers
       value: |-
         securityContext:
           capabilities:

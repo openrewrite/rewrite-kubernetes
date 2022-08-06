@@ -77,7 +77,7 @@ public class FindMissingOrInvalidLabel extends Recipe {
         String invalid = null != value ? ("invalid:" + value) : null;
 
         return new EntryMarkingVisitor() {
-            private final JsonPathMatcher IN_LABELS = new JsonPathMatcher("$..metadata.labels.*");
+            private final JsonPathMatcher IN_LABELS = new JsonPathMatcher("$.*..metadata.labels.*");
 
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {

@@ -254,7 +254,7 @@ public interface K8S extends Marker {
         public static boolean inAnnotations(Cursor cursor) {
             Cursor parent = cursor.dropParentUntil(is -> is instanceof Yaml.Mapping || is instanceof Yaml.Document);
             if (parent.getValue() instanceof Yaml.Mapping) {
-                return new JsonPathMatcher("$..metadata.annotations.*").matches(parent);
+                return new JsonPathMatcher("$.*..metadata.annotations.*").matches(parent);
             }
             return false;
         }
@@ -327,7 +327,7 @@ public interface K8S extends Marker {
         UUID id;
 
         public static boolean inContainerSpec(Cursor cursor) {
-            return inMappingEntry("..spec.containers[*].*", cursor);
+            return inMappingEntry("$.*..spec.containers[*].*", cursor);
         }
 
         public static boolean isImageName(Cursor cursor) {
@@ -344,7 +344,7 @@ public interface K8S extends Marker {
         UUID id;
 
         public static boolean inInitContainerSpec(Cursor cursor) {
-            return inMappingEntry("..spec.initContainers[*].*", cursor);
+            return inMappingEntry("$.*..spec.initContainers[*].*", cursor);
         }
     }
 
@@ -358,15 +358,15 @@ public interface K8S extends Marker {
         ResourceLimit value;
 
         public static boolean inResources(Cursor cursor) {
-            return inMappingEntry("..spec.containers[*].resources", cursor);
+            return inMappingEntry("$.*..spec.containers[*].resources", cursor);
         }
 
         public static boolean inLimits(String type, Cursor cursor) {
-            return inMappingEntry("..spec.containers[*].resources.limits." + type, cursor);
+            return inMappingEntry("$.*..spec.containers[*].resources.limits." + type, cursor);
         }
 
         public static boolean inRequests(String type, Cursor cursor) {
-            return inMappingEntry("..spec.containers[*].resources.requests." + type, cursor);
+            return inMappingEntry("$.*..spec.containers[*].resources.requests." + type, cursor);
         }
 
     }

@@ -129,11 +129,8 @@ public class AddRuleToRole extends Recipe {
                     K8S.Metadata meta = K8S.asMetadata((Yaml.Mapping) entry.getValue());
                     Yaml.Document document = c.dropParentUntil(p -> p instanceof Yaml.Document).getValue();
                     if (globMatcher.matches(Paths.get(meta.getName())) && isSupportedAPI(document)) {
-                        Set<Yaml> resourceRules = FindKey.find(document, "$.rules[*].*");
-                        for (Yaml yaml : new ArrayList<>(resourceRules)) {
-                            if (containsRule((Yaml.Mapping) yaml)) {
-                                return entry;
-                            }
+                        if (containsRule(FindKey.find(document, "$.rules[*].*"))) {
+                            return entry;
                         }
                         Yaml.Block addToRules = ((Yaml.Mapping.Entry) (FindKey.find(document, "$.rules").toArray()[0])).getValue();
                         getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,"RULE_KEY", addToRules);
@@ -160,38 +157,33 @@ public class AddRuleToRole extends Recipe {
                         "rbac.authorization.k8s.io/v1".equals(((Yaml.Scalar) ((Yaml.Mapping.Entry) apiVersion.toArray()[0]).getValue()).getValue());
             }
 
-            private boolean containsRule(Yaml.Mapping rules) {
-                Set<Yaml> apiGroupsSet = FindKey.find(rules, "$.apiGroups");
-                Set<String> apiGroupValues = extractEntryValues(apiGroupsSet);
-                if (apiGroupValues.size() != apiGroups.size() || !apiGroupValues.containsAll(apiGroups)) {
-                    return false;
-                }
+            private boolean containsRule(Set<Yaml> rules) {
 
-                Set<Yaml> apiResourcesSet = FindKey.find(rules, "$.resources");
-                Set<String> resourceValues = extractEntryValues(apiResourcesSet);
-                if (resourceValues.size() != resources.size() || !resourceValues.containsAll(resources)) {
-                    return false;
-                }
+                for (Yaml yaml : rules) {
+                    Yaml.Mapping.Entry entry = (Yaml.Mapping.Entry) yaml;
+                    Set<String> values = extractEntryValues(entry);
+                    if ("apiGroups".equals(entry.getKey().getValue()) && (values.size() != apiGroups.size() || !values.containsAll(apiGroups))) {
+                        return false;
+                    }
+                    if ("resources".equals(entry.getKey().getValue()) && (values.size() != resources.size() || !values.containsAll(resources))) {
+                        return false;
+                    }
+                    if ("verbs".equals(entry.getKey().getValue()) && (values.size() != verbs.size() || !values.containsAll(verbs))) {
+                        return false;
+                    }
 
-                Set<Yaml> apiVerbsSet = FindKey.find(rules, "$.verbs");
-                Set<String> verbValues = extractEntryValues(apiVerbsSet);
-                if (verbValues.size() != verbs.size() || !verbValues.containsAll(verbs)) {
-                    return false;
+                    if (resourceNames != null) {
+                        if ("resourceNames".equals(entry.getKey().getValue()) && (values.size() != resourceNames.size() || !values.containsAll(resourceNames))) {
+                            return false;
+                        }
+                    }
                 }
-
-                if (resourceNames != null) {
-                    Set<Yaml> resourceNamesSet = FindKey.find(rules, "$.resourceNames");
-                    Set<String> resourceNamesValues = extractEntryValues(resourceNamesSet);
-                    return resourceNamesValues.size() != resourceNames.size() || !resourceNamesValues.containsAll(resourceNames);
-                }
-
                 return true;
             }
 
-            private Set<String> extractEntryValues(@Nullable Set<Yaml> entries) {
+            private Set<String> extractEntryValues(@Nullable Yaml.Mapping.Entry entry) {
                 Set<String> values = new HashSet<>();
-                if (entries != null && entries.size() == 1) {
-                    Yaml.Mapping.Entry entry = (Yaml.Mapping.Entry) entries.toArray()[0];
+                if (entry != null) {
                     if (entry.getValue() instanceof Yaml.Scalar) {
                         values.add(((Yaml.Scalar) entry.getValue()).getValue());
                     } else if (entry.getValue() instanceof Yaml.Sequence) {

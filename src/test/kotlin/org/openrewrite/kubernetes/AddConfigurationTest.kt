@@ -136,7 +136,7 @@ class AddConfigurationTest : KubernetesRecipeTest {
         recipe = AddConfiguration(
             null,
             "Pod",
-            "$.spec.containers[*].*",
+            "$.spec.containers",
             """
                 securityContext:
                   allowPrivilegeEscalation: false
