@@ -49,9 +49,14 @@ public final class KubernetesParser extends YamlParser {
         return (Yaml.Documents) new UpdateKubernetesModel<>().visitNonNull(yaml, ctx);
     }
 
-    public static class Builder {
+    public static class Builder extends YamlParser.Builder {
         public KubernetesParser build() {
             return new KubernetesParser();
+        }
+
+        @Override
+        public String getDslName() {
+            return "kubernetes";
         }
     }
 
