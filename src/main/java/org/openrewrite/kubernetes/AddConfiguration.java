@@ -86,7 +86,7 @@ public class AddConfiguration extends Recipe {
                     return document;
                 }
 
-                doAfterVisit(new MergeYaml(configurationPath, value, true, null));
+                doAfterVisit(new MergeYaml(configurationPath, value, true, null, null));
 
                 return document;
             }
