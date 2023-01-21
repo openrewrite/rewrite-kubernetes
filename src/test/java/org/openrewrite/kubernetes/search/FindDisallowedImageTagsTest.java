@@ -85,7 +85,6 @@ class FindDisallowedImageTagsTest extends KubernetesParserTest {
         );
     }
 
-
     @Test
     void findDisallowedImageTagsInWorkloads() {
         rewriteRun(
