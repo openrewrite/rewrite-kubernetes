@@ -20,10 +20,14 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
 import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
@@ -34,9 +38,9 @@ import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainer
 public class FindDisallowedImageTags extends Recipe {
 
     @Option(displayName = "Disallowed tags",
-            description = "The set of image tags to find which are considered disallowed.",
+            description = "The set of image tags to find which are considered disallowed. This is a comma-separated list of tags.",
             example = "latest")
-    Set<String> disallowedTags;
+    String disallowedTags;
 
     @Option(displayName = "Include initContainers",
             description = "Boolean to indicate whether or not to treat initContainers/image identically to containers/image.",
@@ -71,19 +75,21 @@ public class FindDisallowedImageTags extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        String result = "disallowed tag: " + disallowedTags;
+        List<String> disallowed = Arrays.asList(disallowedTags.split("\\s*,\\s*"));
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
+                Yaml.Scalar s = super.visitScalar(scalar, ctx);
                 Cursor c = getCursor();
                 if ((inContainerSpec(c) || (includeInitContainers && inInitContainerSpec(c))) && isImageName(c)) {
                     ContainerImage image = new ContainerImage(scalar);
-                    if (disallowedTags.stream().anyMatch(t -> t.equals(image.getImageName().getTag()))) {
-                        return scalar.withMarkers(scalar.getMarkers().searchResult(result));
+                    List<String> foundDisallowed = disallowed.stream().filter(t -> t.equals(image.getImageName().getTag())).collect(Collectors.toList());
+                    if (foundDisallowed.size() > 0) {
+                        s = SearchResult.found(s, "disallowed tag: [" + String.join(", ", foundDisallowed) + "]");
                     }
                 }
-                return super.visitScalar(scalar, ctx);
+                return s;
             }
         };
     }

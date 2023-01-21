@@ -30,7 +30,7 @@ class FindDisallowedImageTagsTest extends KubernetesParserTest {
     void findDisallowedImageTags() {
         rewriteRun(
           spec -> spec.recipe(new FindDisallowedImageTags(
-            Set.of("latest", "dev"),
+            "latest, dev",
             true,
             null
           )),
@@ -89,7 +89,7 @@ class FindDisallowedImageTagsTest extends KubernetesParserTest {
     void findDisallowedImageTagsInWorkloads() {
         rewriteRun(
           spec -> spec.recipe(new FindDisallowedImageTags(
-            Set.of("latest", "dev"),
+            "latest, dev",
             false,
             null
           )),
@@ -118,7 +118,7 @@ class FindDisallowedImageTagsTest extends KubernetesParserTest {
                 template:
                   spec:
                     containers:
-                    - image: ~~(disallowed tag: [latest, dev])~~>nginx:latest
+                    - image: ~~(disallowed tag: [latest])~~>nginx:latest
               ---
               apiVersion: apps/v1
               kind: StatefulSet
@@ -126,7 +126,7 @@ class FindDisallowedImageTagsTest extends KubernetesParserTest {
                 template:
                   spec:
                     containers:
-                    - image: ~~(disallowed tag: [latest, dev])~~>app:dev
+                    - image: ~~(disallowed tag: [dev])~~>app:dev
               """
           )
         );
@@ -136,7 +136,7 @@ class FindDisallowedImageTagsTest extends KubernetesParserTest {
     void notExecuteOnPathsThatDoNotMatch() {
         rewriteRun(
           spec -> spec.recipe(new FindDisallowedImageTags(
-            Set.of("latest", "dev"),
+            "latest, dev",
             false,
             "/some/path/to/*.yaml"
           )),
