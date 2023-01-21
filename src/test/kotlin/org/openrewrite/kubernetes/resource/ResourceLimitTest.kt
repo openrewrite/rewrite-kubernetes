@@ -24,9 +24,9 @@ class ResourceLimitTest {
     @ParameterizedTest
     @EnumSource(ResourceLimit.ResourceValue.Unit::class)
     fun `given a base unit, must parse into ResourceValue`(unit: ResourceLimit.ResourceValue.Unit) =
-        setOf(10L, 100L, 1000L).forEach { i ->
-            val value = ResourceLimit.ResourceValue("$i$unit")
-            assertThat(value.unit).isEqualTo(unit)
-            assertThat(unit.fromAbsoluteValue(value.absoluteValue)).isEqualTo(i)
-        }
+            setOf(10L, 100L, 1000L).forEach { i ->
+                val value = ResourceLimit.ResourceValue("$i$unit")
+                assertThat(value.unit).isEqualTo(unit)
+                assertThat(unit.fromAbsoluteValue(value.absoluteValue)).isEqualTo(i)
+            }
 }

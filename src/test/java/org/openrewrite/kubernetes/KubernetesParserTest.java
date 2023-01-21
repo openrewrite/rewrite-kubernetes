@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openrewrite.kubernetes
+package org.openrewrite.kubernetes;
 
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Test;
+import org.openrewrite.kubernetes.tree.KubernetesModel;
 
-class KubernetesParserTest : KubernetesRecipeTest {
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class KubernetesParserTest extends KubernetesRecipeTest {
 
     @Test
-    fun kubernetesModel() {
-        val manifest = """
+    void kubernetesModel() {
+        String manifest = """
             apiVersion: storage.cnrm.cloud.google.com/v1beta1
             kind: StorageBucket
             metadata:
@@ -45,17 +49,16 @@ class KubernetesParserTest : KubernetesRecipeTest {
                   responseHeader: ["Content-Type"]
                   method: ["GET", "HEAD", "DELETE"]
                   maxAgeSeconds: 3600
-        """
+        """;
 
-        val model = getModel(KubernetesParser.builder().build().parse(manifest)[0].documents[0])
-
-
-        assertThat(model.apiVersion).isEqualTo("storage.cnrm.cloud.google.com/v1beta1")
-        assertThat(model.kind).isEqualTo("StorageBucket")
-        assertThat(model.metadata.name).isEqualTo("sample")
-        assertThat(model.metadata.annotations)
-            .containsExactlyEntriesOf(mapOf("cnrm.cloud.google.com/force-destroy" to "false"))
-        assertThat(model.metadata.labels)
-            .containsExactlyEntriesOf(mapOf("label-one" to "value-one"))
+        KubernetesModel model = getModel(
+          KubernetesParser.builder().build().parse(manifest).get(0).getDocuments().get(0));
+        assertThat(model.getApiVersion()).isEqualTo("storage.cnrm.cloud.google.com/v1beta1");
+        assertThat(model.getKind()).isEqualTo("StorageBucket");
+        assertThat(model.getMetadata().getName()).isEqualTo("sample");
+        assertThat(model.getMetadata().getAnnotations())
+          .containsExactlyEntriesOf(Map.of("cnrm.cloud.google.com/force-destroy", "false"));
+        assertThat(model.getMetadata().getLabels())
+          .containsExactlyEntriesOf(Map.of("label-one", "value-one"));
     }
 }
