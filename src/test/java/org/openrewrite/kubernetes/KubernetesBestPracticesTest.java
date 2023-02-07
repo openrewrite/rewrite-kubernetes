@@ -22,9 +22,9 @@ import static org.openrewrite.yaml.Assertions.yaml;
 
 class KubernetesBestPracticesTest extends KubernetesRecipeTest {
 
-    static private Environment ENV = Environment.builder()
-      .scanRuntimeClasspath()
-      .build();
+    private static final Environment ENV = Environment.builder()
+            .scanRuntimeClasspath()
+            .build();
 
     @Test
     void noPrivilegedContainers() {

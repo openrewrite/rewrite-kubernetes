@@ -85,7 +85,7 @@ public class FindDisallowedImageTags extends Recipe {
                 if ((inContainerSpec(c) || (includeInitContainers && inInitContainerSpec(c))) && isImageName(c)) {
                     ContainerImage image = new ContainerImage(scalar);
                     List<String> foundDisallowed = disallowed.stream().filter(t -> t.equals(image.getImageName().getTag())).collect(Collectors.toList());
-                    if (foundDisallowed.size() > 0) {
+                    if (!foundDisallowed.isEmpty()) {
                         s = SearchResult.found(s, "disallowed tag: [" + String.join(", ", foundDisallowed) + "]");
                     }
                 }
