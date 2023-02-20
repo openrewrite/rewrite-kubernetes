@@ -2,6 +2,9 @@ plugins {
     id("org.openrewrite.build.recipe-library") version "latest.release"
 }
 
+group = "org.openrewrite.recipe"
+description = "A rewrite module automating best practices and migrations for Kubernetes"
+
 var rewriteVersion = if(project.hasProperty("releasing")) {
     "latest.release"
 } else {
