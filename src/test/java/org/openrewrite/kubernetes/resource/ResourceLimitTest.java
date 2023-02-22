@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class ResourceLimitTest {
+class ResourceLimitTest {
 
     @ParameterizedTest
     @EnumSource(ResourceLimit.ResourceValue.Unit.class)

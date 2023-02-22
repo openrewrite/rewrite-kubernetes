@@ -26,7 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.openrewrite.kubernetes.tree.K8S.Pod.inSpec;
 
 @SuppressWarnings("YAMLDuplicatedKeys")
-public class K8STest {
+class K8STest {
 
     Yaml.Documents source = YamlParser.builder()
       .build()

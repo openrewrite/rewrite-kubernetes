@@ -20,7 +20,7 @@ import org.openrewrite.kubernetes.KubernetesParserTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-public class FindNonTlsIngressTest extends KubernetesParserTest {
+class FindNonTlsIngressTest extends KubernetesParserTest {
 
     @Test
     void findIngressWithNoTLSConfigured() {
