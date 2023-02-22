@@ -22,7 +22,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class KubernetesParserTest extends KubernetesRecipeTest {
+public class KubernetesParserTest extends KubernetesRecipeTest {
 
     @Test
     void kubernetesModel() {
