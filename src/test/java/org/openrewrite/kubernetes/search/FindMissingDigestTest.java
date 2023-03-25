@@ -16,11 +16,11 @@
 package org.openrewrite.kubernetes.search;
 
 import org.junit.jupiter.api.Test;
-import org.openrewrite.kubernetes.KubernetesParserTest;
+import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class FindMissingDigestTest extends KubernetesParserTest {
+class FindMissingDigestTest extends KubernetesRecipeTest {
 
     @Test
     void detectWhenDigestIsMissing() {

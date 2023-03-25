@@ -20,7 +20,7 @@ import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 import org.openrewrite.yaml.tree.Yaml;
 
-class KubernetesRecipeTest implements RewriteTest {
+public abstract class KubernetesRecipeTest implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
         spec.parser(KubernetesParser.builder());

@@ -16,11 +16,11 @@
 package org.openrewrite.kubernetes.resource;
 
 import org.junit.jupiter.api.Test;
-import org.openrewrite.kubernetes.KubernetesParserTest;
+import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class CapResourceLimitToMaximumTest extends KubernetesParserTest {
+class CapResourceLimitToMaximumTest extends KubernetesRecipeTest {
 
     @Test
     void capResourceLimitToGivenMaximumInDifferentUnits() {

@@ -16,13 +16,13 @@
 package org.openrewrite.kubernetes.rbac;
 
 import org.junit.jupiter.api.Test;
-import org.openrewrite.kubernetes.KubernetesParserTest;
+import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import java.util.Set;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class AddRuleToRoleTest extends KubernetesParserTest {
+class AddRuleToRoleTest extends KubernetesRecipeTest {
 
     @Test
     void unsupportedApiVersion() {

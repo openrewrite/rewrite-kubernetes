@@ -16,11 +16,11 @@
 package org.openrewrite.kubernetes.resource;
 
 import org.junit.jupiter.api.Test;
-import org.openrewrite.kubernetes.KubernetesParserTest;
+import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class FindExceedsResourceRatioTest extends KubernetesParserTest {
+class FindExceedsResourceRatioTest extends KubernetesRecipeTest {
 
     @Test
     void findLimitsThatExceedAGivenMaximumRatio() {
