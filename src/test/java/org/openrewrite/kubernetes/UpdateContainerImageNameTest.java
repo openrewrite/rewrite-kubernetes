@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class UpdateContainerImageNameTest extends KubernetesParserTest {
+class UpdateContainerImageNameTest extends KubernetesRecipeTest {
 
     @Test
     void updateContainerImageWithAllValues() {

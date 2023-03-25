@@ -17,13 +17,13 @@ package org.openrewrite.kubernetes.search;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.openrewrite.kubernetes.KubernetesParserTest;
+import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import java.util.Set;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class FindDisallowedImageTagsTest extends KubernetesParserTest {
+class FindDisallowedImageTagsTest extends KubernetesRecipeTest {
 
     @Disabled("JsonPathMatcher has changed, need to figure out how to fix this.")
     @Test

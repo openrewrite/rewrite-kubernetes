@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class AddConfigurationTest extends KubernetesParserTest {
+class AddConfigurationTest extends KubernetesRecipeTest {
 
     @Test
     void addConfigurationToMappingEntryIfThePathDoesNotExist() {

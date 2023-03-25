@@ -17,11 +17,11 @@ package org.openrewrite.kubernetes.search;
 
 import org.junit.jupiter.api.Test;
 import org.openrewrite.config.Environment;
-import org.openrewrite.kubernetes.KubernetesParserTest;
+import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class FindResourceMissingConfigurationTest extends KubernetesParserTest {
+class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
 
     @Test
     void podLivenessProbe() {
