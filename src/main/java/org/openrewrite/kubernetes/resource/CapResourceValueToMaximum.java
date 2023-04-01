@@ -78,12 +78,12 @@ public class CapResourceValueToMaximum extends Recipe {
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
+            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Cursor c = getCursor();
                 if (((inLimits(resourceType, c) && "limits".equals(resourceValueType)) || (inRequests(resourceType, c) && "requests".equals(resourceValueType))) && asResourceLimits(scalar).getValue().exceeds(limit.getValue())) {
                     return scalar.withValue(limit.convertToUnit(scalar));
                 }
-                return super.visitScalar(scalar, executionContext);
+                return super.visitScalar(scalar, ctx);
             }
         };
     }

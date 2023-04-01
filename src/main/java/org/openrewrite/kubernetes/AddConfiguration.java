@@ -75,7 +75,7 @@ public class AddConfiguration extends Recipe {
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         return new KubernetesVisitor<ExecutionContext>() {
             @Override
-            public Yaml visitDocument(Yaml.Document document, ExecutionContext executionContext) {
+            public Yaml visitDocument(Yaml.Document document, ExecutionContext ctx) {
 
                 KubernetesModel model = getKubernetesModel();
                 if (!resourceKind.equals(model.getKind())) {

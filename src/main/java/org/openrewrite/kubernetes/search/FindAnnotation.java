@@ -77,7 +77,7 @@ public class FindAnnotation extends Recipe {
 
         return new EntryMarkingVisitor() {
             @Override
-            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext executionContext) {
+            public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Cursor c = getCursor();
                 if (inAnnotations(c)) {
                     K8S.Annotations annos = asAnnotations(c.firstEnclosing(Yaml.Mapping.class));
@@ -87,7 +87,7 @@ public class FindAnnotation extends Recipe {
                         c.putMessageOnFirstEnclosing(Yaml.Mapping.Entry.class, MARKER_KEY, valid);
                     }
                 }
-                return super.visitScalar(scalar, executionContext);
+                return super.visitScalar(scalar, ctx);
             }
         };
     }

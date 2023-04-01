@@ -123,7 +123,7 @@ public class AddRuleToRole extends Recipe {
             private final Yaml.Sequence.Entry newSequenceEntry = generateSequence();
 
             @Override
-            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
+            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
                 Cursor c = getCursor();
                 if (K8S.inKind(rbacResourceType, c) && K8S.Metadata.isMetadata(c)) {
                     K8S.Metadata meta = K8S.asMetadata((Yaml.Mapping) entry.getValue());
@@ -136,17 +136,17 @@ public class AddRuleToRole extends Recipe {
                         getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,"RULE_KEY", addToRules);
                     }
                 }
-                return (Yaml.Mapping.Entry) super.visitMappingEntry(entry, executionContext);
+                return (Yaml.Mapping.Entry) super.visitMappingEntry(entry, ctx);
             }
 
             @Override
-            public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext executionContext) {
+            public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext ctx) {
                 Object found = getCursor().getNearestMessage("RULE_KEY");
                 if (found == sequence) {
                     sequence = sequence.withEntries(concat(sequence.getEntries(), newSequenceEntry));
                     maybeUpdateModel();
                 }
-                return (Yaml.Sequence) super.visitSequence(sequence, executionContext);
+                return (Yaml.Sequence) super.visitSequence(sequence, ctx);
             }
 
             private boolean isSupportedAPI(Yaml.Document document) {

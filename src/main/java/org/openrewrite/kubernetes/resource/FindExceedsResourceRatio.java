@@ -72,8 +72,8 @@ public class FindExceedsResourceRatio extends Recipe {
 
         return new YamlIsoVisitor<ExecutionContext>() {
             @Override
-            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext executionContext) {
-                Yaml.Mapping.Entry e = super.visitMappingEntry(entry, executionContext);
+            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
+                Yaml.Mapping.Entry e = super.visitMappingEntry(entry, ctx);
                 Cursor c = getCursor();
                 if (inResources(c)) {
                     JsonPathMatcher requestsMatcher = new JsonPathMatcher(".requests." + resourceType);
