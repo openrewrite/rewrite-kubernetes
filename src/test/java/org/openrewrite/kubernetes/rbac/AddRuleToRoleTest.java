@@ -16,6 +16,7 @@
 package org.openrewrite.kubernetes.rbac;
 
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import java.util.Set;
@@ -78,6 +79,7 @@ class AddRuleToRoleTest extends KubernetesRecipeTest {
         );
     }
 
+    @DocumentExample
     @Test
     void addRuleToClusterRole() {
         rewriteRun(

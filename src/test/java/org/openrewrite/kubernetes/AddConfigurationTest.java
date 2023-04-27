@@ -16,11 +16,13 @@
 package org.openrewrite.kubernetes;
 
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
 class AddConfigurationTest extends KubernetesRecipeTest {
 
+    @DocumentExample
     @Test
     void addConfigurationToMappingEntryIfThePathDoesNotExist() {
         rewriteRun(

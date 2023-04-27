@@ -16,6 +16,7 @@
 package org.openrewrite.kubernetes;
 
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.config.Environment;
 
 import static org.openrewrite.yaml.Assertions.yaml;
@@ -26,6 +27,7 @@ class KubernetesBestPracticesTest extends KubernetesRecipeTest {
             .scanRuntimeClasspath()
             .build();
 
+    @DocumentExample
     @Test
     void noPrivilegedContainers() {
         rewriteRun(

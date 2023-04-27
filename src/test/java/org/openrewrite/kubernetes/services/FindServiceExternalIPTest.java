@@ -16,6 +16,7 @@
 package org.openrewrite.kubernetes.services;
 
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import java.util.Set;
@@ -24,6 +25,7 @@ import static org.openrewrite.yaml.Assertions.yaml;
 
 class FindServiceExternalIPTest extends KubernetesRecipeTest {
 
+    @DocumentExample
     @Test
     void findServicesByExternalIPs() {
         rewriteRun(

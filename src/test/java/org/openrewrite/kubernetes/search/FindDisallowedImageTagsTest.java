@@ -17,6 +17,7 @@ package org.openrewrite.kubernetes.search;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import java.util.Set;
@@ -85,6 +86,7 @@ class FindDisallowedImageTagsTest extends KubernetesRecipeTest {
         );
     }
 
+    @DocumentExample
     @Test
     void findDisallowedImageTagsInWorkloads() {
         rewriteRun(

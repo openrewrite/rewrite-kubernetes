@@ -16,12 +16,14 @@
 package org.openrewrite.kubernetes.search;
 
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
 class FindAnnotationTest extends KubernetesRecipeTest {
 
+    @DocumentExample
     @Test
     void findIfAnnotationExists() {
         rewriteRun(

@@ -16,12 +16,14 @@
 package org.openrewrite.kubernetes.services;
 
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
 class FindServicesByTypeTest extends KubernetesRecipeTest {
 
+    @DocumentExample
     @Test
     void findNodePortServices() {
         rewriteRun(
