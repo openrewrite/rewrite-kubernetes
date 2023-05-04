@@ -52,18 +52,10 @@ public class FindServicesByType extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         String result = "type:" + serviceType;
 
-        return new EntryMarkingVisitor() {
+        EntryMarkingVisitor visitor = new EntryMarkingVisitor() {
             @Override
             public Yaml.Mapping visitMapping(Yaml.Mapping mapping, ExecutionContext ctx) {
                 Cursor c = getCursor();
@@ -77,6 +69,7 @@ public class FindServicesByType extends Recipe {
                 return super.visitMapping(mapping, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
 }

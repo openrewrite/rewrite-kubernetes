@@ -21,10 +21,8 @@ import org.openrewrite.yaml.YamlParser;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.regex.Pattern;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 public final class KubernetesParser extends YamlParser {
 
@@ -39,10 +37,9 @@ public final class KubernetesParser extends YamlParser {
     }
 
     @Override
-    public List<Yaml.Documents> parseInputs(Iterable<Input> sources, @Nullable Path relativeTo, ExecutionContext ctx) {
-        return super.parseInputs(sources, relativeTo, ctx).stream()
-                .map(yaml -> updateModel(yaml, ctx))
-                .collect(toList());
+    public Stream<Yaml.Documents> parseInputs(Iterable<Input> sources, @Nullable Path relativeTo, ExecutionContext ctx) {
+        return super.parseInputs(sources, relativeTo, ctx)
+                .map(yaml -> updateModel(yaml, ctx));
     }
 
     private Yaml.Documents updateModel(Yaml.Documents yaml, ExecutionContext ctx) {

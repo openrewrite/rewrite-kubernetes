@@ -95,18 +95,10 @@ public class UpdateContainerImageName extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repoToFind, imageToFind, tagToFind, "*");
 
-        return new YamlIsoVisitor<ExecutionContext>() {
+        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Cursor c = getCursor();
@@ -129,6 +121,7 @@ public class UpdateContainerImageName extends Recipe {
                 return super.visitScalar(scalar, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
 }

@@ -56,17 +56,9 @@ public class UpdateServiceExternalIP extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
 
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
-
-        return new YamlIsoVisitor<ExecutionContext>() {
+        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Sequence.Entry visitSequenceEntry(Yaml.Sequence.Entry entry, ExecutionContext ctx) {
                 Cursor c = getCursor();
@@ -79,5 +71,6 @@ public class UpdateServiceExternalIP extends Recipe {
                 return super.visitSequenceEntry(entry, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 }

@@ -26,6 +26,7 @@ class KubernetesParserTest extends KubernetesRecipeTest {
 
     @Test
     void kubernetesModel() {
+        //language=yml
         String manifest = """
             apiVersion: storage.cnrm.cloud.google.com/v1beta1
             kind: StorageBucket
@@ -52,7 +53,7 @@ class KubernetesParserTest extends KubernetesRecipeTest {
         """;
 
         KubernetesModel model = getModel(
-          KubernetesParser.builder().build().parse(manifest).get(0).getDocuments().get(0));
+          KubernetesParser.builder().build().parse(manifest).findFirst().get().getDocuments().get(0));
         assertThat(model.getApiVersion()).isEqualTo("storage.cnrm.cloud.google.com/v1beta1");
         assertThat(model.getKind()).isEqualTo("StorageBucket");
         assertThat(model.getMetadata().getName()).isEqualTo("sample");

@@ -20,6 +20,7 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -58,22 +59,14 @@ public class FindResourceMissingConfiguration extends Recipe {
 
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new YamlIsoVisitor<ExecutionContext>() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
+        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
                 Yaml.Block b = (Yaml.Block) visit(document.getBlock(), ctx, getCursor());
                 boolean inKind = resourceKind == null || K8S.inKind(resourceKind, getCursor());
                 if (inKind && !("true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName())))) {
-                    return document.withBlock(b).withMarkers(document.getMarkers().searchResult());
+                    return SearchResult.found(document.withBlock(b));
                 }
                 return document;
             }
@@ -87,5 +80,6 @@ public class FindResourceMissingConfiguration extends Recipe {
                 return super.visitMappingEntry(entry, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 }

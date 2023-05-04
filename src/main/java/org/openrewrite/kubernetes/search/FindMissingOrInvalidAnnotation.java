@@ -21,7 +21,6 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.regex.Pattern;
@@ -63,20 +62,12 @@ public class FindMissingOrInvalidAnnotation extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         Pattern pattern = value != null ? Pattern.compile(value) : null;
         String missing = "missing:" + annotationName;
         String invalid = null != value ? ("invalid:" + value) : null;
 
-        return new EntryMarkingVisitor() {
+        EntryMarkingVisitor visitor = new EntryMarkingVisitor() {
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
                 Cursor c = getCursor();
@@ -91,5 +82,6 @@ public class FindMissingOrInvalidAnnotation extends Recipe {
                 return super.visitMappingEntry(entry, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 }

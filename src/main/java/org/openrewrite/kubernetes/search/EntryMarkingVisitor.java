@@ -17,6 +17,7 @@
 package org.openrewrite.kubernetes.search;
 
 import org.openrewrite.ExecutionContext;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -28,7 +29,7 @@ public class EntryMarkingVisitor extends YamlIsoVisitor<ExecutionContext> {
         Yaml.Mapping.Entry e = super.visitMappingEntry(entry, ctx);
         String description = getCursor().getMessage(MARKER_KEY);
         if (description != null) {
-            return e.withMarkers(e.getMarkers().searchResult(description));
+            return SearchResult.found(e, description);
         }
         return e;
     }

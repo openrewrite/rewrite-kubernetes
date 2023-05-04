@@ -62,20 +62,12 @@ public class FindAnnotation extends Recipe {
     }
 
     @Override
-    protected @Nullable TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         Pattern pattern = value != null ? Pattern.compile(value) : null;
         String found = "found:" + annotationName;
         String valid = "found:" + value;
 
-        return new EntryMarkingVisitor() {
+        EntryMarkingVisitor visitor = new EntryMarkingVisitor() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Cursor c = getCursor();
@@ -90,6 +82,7 @@ public class FindAnnotation extends Recipe {
                 return super.visitScalar(scalar, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
 }
