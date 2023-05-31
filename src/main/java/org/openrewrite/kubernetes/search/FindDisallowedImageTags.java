@@ -26,7 +26,6 @@ import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.openrewrite.kubernetes.tree.K8S.Containers.inContainerSpec;
@@ -66,18 +65,10 @@ public class FindDisallowedImageTags extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         List<String> disallowed = Arrays.asList(disallowedTags.split("\\s*,\\s*"));
 
-        return new YamlIsoVisitor<ExecutionContext>() {
+        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Yaml.Scalar s = super.visitScalar(scalar, ctx);
@@ -92,6 +83,7 @@ public class FindDisallowedImageTags extends Recipe {
                 return s;
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
 }

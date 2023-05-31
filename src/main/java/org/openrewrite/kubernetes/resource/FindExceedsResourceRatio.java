@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
@@ -58,19 +59,11 @@ public class FindExceedsResourceRatio extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         String result = "exceeds max " + resourceType + " limits/requests ratio of " + ratioLimit;
         int resourceLimit = Integer.parseInt(this.ratioLimit);
 
-        return new YamlIsoVisitor<ExecutionContext>() {
+        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
                 Yaml.Mapping.Entry e = super.visitMappingEntry(entry, ctx);
@@ -95,7 +88,7 @@ public class FindExceedsResourceRatio extends Recipe {
                                         ResourceLimit limLimit = new ResourceLimit(limValStr);
 
                                         if (reqLimit.exceedsRatio(resourceLimit, limLimit.getValue())) {
-                                            return e.withMarkers(e.getMarkers().searchResult(result));
+                                            return SearchResult.found(e, result);
                                         }
 
                                         return e;
@@ -107,6 +100,7 @@ public class FindExceedsResourceRatio extends Recipe {
             }
 
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
     private static @Nullable String valueFromEntry(Object o) {

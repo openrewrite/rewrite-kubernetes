@@ -22,7 +22,6 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.KubernetesVisitor;
 import org.openrewrite.kubernetes.tree.K8S;
-import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.YamlParser;
 import org.openrewrite.yaml.search.FindKey;
 import org.openrewrite.yaml.tree.Yaml;
@@ -30,10 +29,9 @@ import org.openrewrite.yaml.tree.Yaml;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.openrewrite.internal.ListUtils.concat;
 
@@ -108,17 +106,8 @@ public class AddRuleToRole extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new KubernetesVisitor<ExecutionContext>() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
+        KubernetesVisitor<ExecutionContext> visitor = new KubernetesVisitor<ExecutionContext>() {
             private final PathMatcher globMatcher = FileSystems.getDefault().getPathMatcher("glob:" + rbacResourceName);
             private final Yaml.Sequence.Entry newSequenceEntry = generateSequence();
 
@@ -133,7 +122,7 @@ public class AddRuleToRole extends Recipe {
                             return entry;
                         }
                         Yaml.Block addToRules = ((Yaml.Mapping.Entry) (FindKey.find(document, "$.rules").toArray()[0])).getValue();
-                        getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,"RULE_KEY", addToRules);
+                        getCursor().putMessageOnFirstEnclosing(Yaml.Document.class, "RULE_KEY", addToRules);
                     }
                 }
                 return (Yaml.Mapping.Entry) super.visitMappingEntry(entry, ctx);
@@ -197,6 +186,7 @@ public class AddRuleToRole extends Recipe {
                 return values;
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
     private @Nullable String setToString(@Nullable Set<String> strs) {
@@ -223,10 +213,10 @@ public class AddRuleToRole extends Recipe {
         String resourcesStr = setToString(resources);
         String resourceNamesStr = setToString(resourceNames);
         String verbsStr = setToString(verbs);
-        List<Yaml.Documents> docs = new YamlParser().parse("- apiGroups: " + apiGroupsStr + "\n"
+        Stream<Yaml.Documents> docs = new YamlParser().parse("- apiGroups: " + apiGroupsStr + "\n"
                 + "  resources: " + resourcesStr + "\n"
                 + (resourceNamesStr != null ? "  resourceNames: " + resourceNamesStr + "\n" : "")
                 + "  verbs: " + verbsStr);
-        return ((Yaml.Sequence) docs.get(0).getDocuments().get(0).getBlock()).getEntries().get(0).withPrefix("\n");
+        return ((Yaml.Sequence) docs.findFirst().get().getDocuments().get(0).getBlock()).getEntries().get(0).withPrefix("\n");
     }
 }

@@ -62,18 +62,10 @@ public class FindServiceExternalIPs extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         String result = (findMissing ? "missing" : "found") + " ip";
 
-        return new EntryMarkingVisitor() {
+        EntryMarkingVisitor visitor = new EntryMarkingVisitor() {
             @Override
             public Yaml.Sequence visitSequence(Yaml.Sequence sequence, ExecutionContext ctx) {
                 Cursor c = getCursor();
@@ -91,5 +83,6 @@ public class FindServiceExternalIPs extends Recipe {
                 return super.visitSequence(sequence, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 }

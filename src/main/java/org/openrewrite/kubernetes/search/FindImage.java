@@ -20,6 +20,7 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.ContainerImage;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
@@ -75,31 +76,24 @@ public class FindImage extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repository, imageName, imageTag, "*");
         String result = imageToSearch.toString();
 
-        return new YamlIsoVisitor<ExecutionContext>() {
+        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
             public Yaml.Scalar visitScalar(Yaml.Scalar scalar, ExecutionContext ctx) {
                 Cursor c = getCursor();
                 if ((inContainerSpec(c) || (includeInitContainers && inInitContainerSpec(c))) && isImageName(c)) {
                     ContainerImage image = new ContainerImage(scalar.getValue());
                     if (image.getImageName().matches(imageToSearch)) {
-                        return scalar.withMarkers(scalar.getMarkers().searchResult(result));
+                        return SearchResult.found(scalar, result);
                     }
                 }
                 return super.visitScalar(scalar, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
 }

@@ -26,7 +26,6 @@ import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.regex.Pattern;
 
-import static org.openrewrite.kubernetes.tree.K8S.Labels.inLabels;
 import static org.openrewrite.kubernetes.tree.K8S.asLabels;
 
 @Value
@@ -63,20 +62,12 @@ public class FindMissingOrInvalidLabel extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getSingleSourceApplicableTest() {
-        if (fileMatcher != null) {
-            return new HasSourcePath<>(fileMatcher);
-        }
-        return null;
-    }
-
-    @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         Pattern pattern = value != null ? Pattern.compile(value) : null;
         String missing = "missing:" + labelName;
         String invalid = null != value ? ("invalid:" + value) : null;
 
-        return new EntryMarkingVisitor() {
+        EntryMarkingVisitor visitor = new EntryMarkingVisitor() {
             private final JsonPathMatcher IN_LABELS = new JsonPathMatcher("$.*..metadata.labels.*");
 
             @Override
@@ -93,6 +84,7 @@ public class FindMissingOrInvalidLabel extends Recipe {
                 return super.visitMappingEntry(entry, ctx);
             }
         };
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
     }
 
 }

@@ -72,7 +72,7 @@ public class AddConfiguration extends Recipe {
     }
 
     @Override
-    protected TreeVisitor<?, ExecutionContext> getVisitor() {
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
         return new KubernetesVisitor<ExecutionContext>() {
             @Override
             public Yaml visitDocument(Yaml.Document document, ExecutionContext ctx) {
@@ -86,7 +86,7 @@ public class AddConfiguration extends Recipe {
                     return document;
                 }
 
-                doAfterVisit(new MergeYaml(configurationPath, value, true, null, null));
+                doAfterVisit(new MergeYaml(configurationPath, value, true, null).getVisitor());
 
                 return document;
             }

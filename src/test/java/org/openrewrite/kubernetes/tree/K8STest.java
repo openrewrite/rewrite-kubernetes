@@ -47,7 +47,8 @@ class K8STest {
                   containers:
                     - image: image:latest
             """)
-      .get(0);
+      .findFirst()
+      .get();
 
     @Test
     void resource() {
