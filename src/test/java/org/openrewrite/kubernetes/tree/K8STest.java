@@ -47,6 +47,7 @@ class K8STest {
                   containers:
                     - image: image:latest
             """)
+      .map(Yaml.Documents.class::cast)
       .findFirst()
       .get();
 

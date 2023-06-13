@@ -52,7 +52,7 @@ public class AddConfiguration extends Recipe {
     String value;
 
     @Override
-    public Validated validate() {
+    public Validated<Object> validate() {
         return super.validate().and(
                 Validated.test("configurationPath",
                         "Configuration path must be absolute (i.e. must start with $).",

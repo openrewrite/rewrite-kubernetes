@@ -16,6 +16,7 @@
 package org.openrewrite.kubernetes;
 
 import org.openrewrite.ExecutionContext;
+import org.openrewrite.SourceFile;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.YamlParser;
 import org.openrewrite.yaml.tree.Yaml;
@@ -37,9 +38,9 @@ public final class KubernetesParser extends YamlParser {
     }
 
     @Override
-    public Stream<Yaml.Documents> parseInputs(Iterable<Input> sources, @Nullable Path relativeTo, ExecutionContext ctx) {
+    public Stream<SourceFile> parseInputs(Iterable<Input> sources, @Nullable Path relativeTo, ExecutionContext ctx) {
         return super.parseInputs(sources, relativeTo, ctx)
-                .map(yaml -> updateModel(yaml, ctx));
+                .map(yaml -> yaml instanceof Yaml.Documents ? updateModel((Yaml.Documents) yaml, ctx) : yaml);
     }
 
     private Yaml.Documents updateModel(Yaml.Documents yaml, ExecutionContext ctx) {
