@@ -116,7 +116,7 @@ public class AddRuleToRole extends Recipe {
                 Cursor c = getCursor();
                 if (K8S.inKind(rbacResourceType, c) && K8S.Metadata.isMetadata(c)) {
                     K8S.Metadata meta = K8S.asMetadata((Yaml.Mapping) entry.getValue());
-                    Yaml.Document document = c.dropParentUntil(p -> p instanceof Yaml.Document).getValue();
+                    Yaml.Document document = c.dropParentUntil(org.openrewrite.yaml.tree.Yaml.Document.class::isInstance).getValue();
                     if (globMatcher.matches(Paths.get(meta.getName())) && isSupportedAPI(document)) {
                         if (containsRule(FindKey.find(document, "$.rules[*].*"))) {
                             return entry;

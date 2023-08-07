@@ -94,7 +94,7 @@ public class UpdateKubernetesModel<P> extends YamlIsoVisitor<P> {
 
     private String getPath() {
         return "/" + getCursor().getPathAsStream()
-                .filter(p -> p instanceof Yaml.Mapping.Entry)
+                .filter(org.openrewrite.yaml.tree.Yaml.Mapping.Entry.class::isInstance)
                 .map(Yaml.Mapping.Entry.class::cast)
                 .map(e -> e.getKey().getValue())
                 .reduce("", (a, b) -> b + (a.isEmpty() ? "" : "/" + a));
