@@ -57,7 +57,7 @@ class K8STest {
             @Override
             public Yaml visitSequenceEntry(Yaml.Sequence.Entry entry, AtomicBoolean found) {
                 Yaml.Sequence.Entry e = (Yaml.Sequence.Entry) super.visitSequenceEntry(entry, found);
-                if(K8S.inPod(getCursor())) {
+                if (K8S.inPod(getCursor())) {
                     found.set(true);
                 }
                 return e;
@@ -73,7 +73,7 @@ class K8STest {
             @Override
             public Yaml visitMappingEntry(Yaml.Mapping.Entry entry, AtomicBoolean found) {
                 Yaml.Mapping.Entry e = (Yaml.Mapping.Entry) super.visitMappingEntry(entry, found);
-                if(K8S.Containers.isImageName(getCursor())) {
+                if (K8S.Containers.isImageName(getCursor())) {
                     found.set(true);
                 }
                 return e;
@@ -89,7 +89,7 @@ class K8STest {
             @Override
             public Yaml visitSequenceEntry(Yaml.Sequence.Entry entry, AtomicBoolean found) {
                 Yaml.Sequence.Entry e = (Yaml.Sequence.Entry) super.visitSequenceEntry(entry, found);
-                if(inSpec(getCursor())) {
+                if (inSpec(getCursor())) {
                     found.set(true);
                 }
                 return e;

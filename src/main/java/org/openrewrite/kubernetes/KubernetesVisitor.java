@@ -32,7 +32,7 @@ public class KubernetesVisitor<P> extends YamlVisitor<P> {
 
     public void maybeUpdateModel() {
         for (TreeVisitor<?, P> afterVisit : getAfterVisit()) {
-            if(afterVisit instanceof UpdateKubernetesModel) {
+            if (afterVisit instanceof UpdateKubernetesModel) {
                 return;
             }
         }
