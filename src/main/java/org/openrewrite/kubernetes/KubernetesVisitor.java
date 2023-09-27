@@ -15,6 +15,7 @@
  */
 package org.openrewrite.kubernetes;
 
+import org.openrewrite.SourceFile;
 import org.openrewrite.TreeVisitor;
 import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.yaml.YamlVisitor;
@@ -22,12 +23,29 @@ import org.openrewrite.yaml.tree.Yaml;
 
 public class KubernetesVisitor<P> extends YamlVisitor<P> {
 
+    @Override
+    public boolean isAcceptable(SourceFile sourceFile, P p) {
+        if (!(sourceFile instanceof Yaml.Documents)) {
+            return false;
+        }
+        Yaml.Documents docs = (Yaml.Documents) sourceFile;
+        for (Yaml.Document doc : docs.getDocuments()) {
+            if (doc.getMarkers().findFirst(KubernetesModel.class).orElse(null) == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected KubernetesModel getKubernetesModel() {
         Yaml.Document doc = getCursor().firstEnclosing(Yaml.Document.class);
-        if (doc != null) {
-            return getKubernetesModel(doc);
+        if (doc == null) {
+            throw new IllegalStateException("The KubernetesModel marker is placed on Yaml.Document elements, " +
+                                            "but no Yaml.Document could be found in " + getCursor());
         }
-        throw new IllegalStateException("KubernetesVisitor should not be visiting a YAML document without a KubernetesModel");
+        return doc.getMarkers()
+                .findFirst(KubernetesModel.class)
+                .orElseThrow(() -> new IllegalStateException("KubernetesVisitor should not be visiting a YAML document without a KubernetesModel"));
     }
 
     public void maybeUpdateModel() {
@@ -37,11 +55,5 @@ public class KubernetesVisitor<P> extends YamlVisitor<P> {
             }
         }
         doAfterVisit(new UpdateKubernetesModel<>());
-    }
-
-    public static KubernetesModel getKubernetesModel(Yaml.Document doc) {
-        return doc.getMarkers()
-                .findFirst(KubernetesModel.class)
-                .orElseThrow(() -> new IllegalStateException("KubernetesVisitor should not be visiting a YAML document without a KubernetesModel"));
     }
 }
