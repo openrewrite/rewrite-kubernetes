@@ -11,3 +11,7 @@
 This project implements [Rewrite recipes](https://github.com/openrewrite/rewrite) to perform Kubernetes hygiene and migration tasks.
 
 Browse [a selection of recipes available through this module in the recipe catalog](https://docs.openrewrite.org/recipes/kubernetes).
+
+## Contributing
+
+We appreciate all types of contributions. See the [contributing guide](https://github.com/openrewrite/.github/blob/main/CONTRIBUTING.md) for detailed instructions on how to get started.
