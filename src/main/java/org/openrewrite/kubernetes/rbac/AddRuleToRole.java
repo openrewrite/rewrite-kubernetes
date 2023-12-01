@@ -186,7 +186,7 @@ public class AddRuleToRole extends Recipe {
                 return values;
             }
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
     }
 
     private @Nullable String setToString(@Nullable Set<String> strs) {

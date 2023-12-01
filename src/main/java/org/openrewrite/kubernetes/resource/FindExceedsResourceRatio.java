@@ -100,7 +100,7 @@ public class FindExceedsResourceRatio extends Recipe {
             }
 
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
     }
 
     private static @Nullable String valueFromEntry(Object o) {

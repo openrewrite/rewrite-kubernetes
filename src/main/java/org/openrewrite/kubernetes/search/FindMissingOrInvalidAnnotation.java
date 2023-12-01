@@ -82,6 +82,6 @@ public class FindMissingOrInvalidAnnotation extends Recipe {
                 return super.visitMappingEntry(entry, ctx);
             }
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
     }
 }

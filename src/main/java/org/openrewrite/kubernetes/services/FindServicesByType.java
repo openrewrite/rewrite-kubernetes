@@ -69,7 +69,7 @@ public class FindServicesByType extends Recipe {
                 return super.visitMapping(mapping, ctx);
             }
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath<>(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
     }
 
 }
