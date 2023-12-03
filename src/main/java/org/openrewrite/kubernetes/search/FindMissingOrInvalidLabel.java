@@ -84,7 +84,7 @@ public class FindMissingOrInvalidLabel extends Recipe {
                 return super.visitMappingEntry(entry, ctx);
             }
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new FindSourceFiles(fileMatcher), visitor) : visitor;
     }
 
 }

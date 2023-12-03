@@ -93,7 +93,7 @@ public class FindImage extends Recipe {
                 return super.visitScalar(scalar, ctx);
             }
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new FindSourceFiles(fileMatcher), visitor) : visitor;
     }
 
 }

@@ -62,6 +62,6 @@ public class FindNonTlsIngress extends Recipe {
                 return super.visitDocument(document, ctx);
             }
         };
-        return fileMatcher != null ? Preconditions.check(new HasSourcePath(fileMatcher), visitor) : visitor;
+        return fileMatcher != null ? Preconditions.check(new FindSourceFiles(fileMatcher), visitor) : visitor;
     }
 }
