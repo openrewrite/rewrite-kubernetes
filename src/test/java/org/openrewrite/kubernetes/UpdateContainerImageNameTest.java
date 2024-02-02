@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2024 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
  */
 package org.openrewrite.kubernetes;
 
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openrewrite.DocumentExample;
 
 import java.util.List;
@@ -24,6 +27,7 @@ import static org.openrewrite.yaml.Assertions.yaml;
 
 class UpdateContainerImageNameTest extends KubernetesRecipeTest {
 
+    @Language("yaml")
     private static String getYamlWithImage(String image) {
         String template = """
               apiVersion: v1
@@ -35,6 +39,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
         return String.format(template, image);
     }
 
+    @Language("yaml")
     private static String getYamlWithInitContainerImage(String icImage) {
         String template = """
               apiVersion: v1
@@ -177,6 +182,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
             true,
             null
           )),
+          //language=yaml
           yaml(
             """
               apiVersion: v1
@@ -280,43 +286,46 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
             getYamlWithImage("repo123/456image:v7.8.9@SHA256:9876543")
           )
         );
-        for (String imageThatDontMatch : List.of(
-          "repoXXX/image456:v7.8.9@SHA256:9876543",
-          "repo123/image457:v7.8.9@SHA256:9876543",
-          "repo123/image456:v1.8.9@SHA256:9876543",
-          "repo123/image456:v7.8.9@SHA256:987654X"
-        )) {
-            rewriteRun(
-              spec -> spec.recipe(new UpdateContainerImageName(
-                "repo123",
-                "image456",
-                "v7.8.9",
-                "SHA256:9876543",
-                "",
-                "456image",
-                "",
-                "",
-                false,
-                null
-              )),
-              yaml(getYamlWithImage(imageThatDontMatch))
-            );
-            rewriteRun(
-              spec -> spec.recipe(new UpdateContainerImageName(
-                "repo123",
-                "image456",
-                "v7.8.9",
-                "SHA256:9876543",
-                "",
-                "456image",
-                "",
-                "",
-                true,
-                null
-              )),
-              yaml(getYamlWithInitContainerImage(imageThatDontMatch))
-            );
-        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "repoXXX/image456:v7.8.9@SHA256:9876543",
+      "repo123/image457:v7.8.9@SHA256:9876543",
+      "repo123/image456:v1.8.9@SHA256:9876543",
+      "repo123/image456:v7.8.9@SHA256:987654X"
+    })
+    void shouldNotUpdateMismatches(String imageThatDontMatch) {
+        rewriteRun(
+          spec -> spec.recipe(new UpdateContainerImageName(
+            "repo123",
+            "image456",
+            "v7.8.9",
+            "SHA256:9876543",
+            "",
+            "456image",
+            "",
+            "",
+            false,
+            null
+          )),
+          yaml(getYamlWithImage(imageThatDontMatch))
+        );
+        rewriteRun(
+          spec -> spec.recipe(new UpdateContainerImageName(
+            "repo123",
+            "image456",
+            "v7.8.9",
+            "SHA256:9876543",
+            "",
+            "456image",
+            "",
+            "",
+            true,
+            null
+          )),
+          yaml(getYamlWithInitContainerImage(imageThatDontMatch))
+        );
     }
 
     @Test
@@ -413,8 +422,18 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
         );
     }
 
-    @Test
-    void updateContainerImage_should_update_for_image_match_query() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "image456:v7.8.9@SHA256:9876543",
+      "image456@SHA256:9876543",
+      "image456:v7.8.9",
+      "repo123/image456@SHA256:9876543",
+      "repo123/image456:v7.8.9",
+      "repo123/image456",
+      "repo/image456:v7.8.9@SHA256:9876543",
+      "image456"
+    })
+    void updateContainerImage_should_update_for_image_match_query(String imageThatMatch) {
         UpdateContainerImageName recipe = new UpdateContainerImageName(
           "*",
           "image456",
@@ -427,32 +446,19 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
           true,
           null
         );
-        for (String imageThatMatch : List.of(
-          "image456:v7.8.9@SHA256:9876543",
-          "image456@SHA256:9876543",
-          "image456:v7.8.9",
-          "repo123/image456@SHA256:9876543",
-          "repo123/image456:v7.8.9",
-          "repo123/image456",
-          "repo/image456:v7.8.9@SHA256:9876543",
-          "image456"
-        )) {
-            rewriteRun(
-              spec -> spec.recipe(recipe),
-              yaml(
-                getYamlWithImage(imageThatMatch),
-                getYamlWithImage("changedRepo/changedRepo/changedImageName:v913@SHA256:999")
-              )
-            );
-            rewriteRun(
-              spec -> spec.recipe(recipe),
-              yaml(
-                getYamlWithInitContainerImage(imageThatMatch),
-                getYamlWithInitContainerImage("changedRepo/changedRepo/changedImageName:v913@SHA256:999")
-              )
-            );
-        }
-
+        rewriteRun(
+          spec -> spec.recipe(recipe),
+          yaml(
+            getYamlWithImage(imageThatMatch),
+            getYamlWithImage("changedRepo/changedRepo/changedImageName:v913@SHA256:999")
+          )
+        );
+        rewriteRun(
+          spec -> spec.recipe(recipe),
+          yaml(
+            getYamlWithInitContainerImage(imageThatMatch),
+            getYamlWithInitContainerImage("changedRepo/changedRepo/changedImageName:v913@SHA256:999")
+          )
+        );
     }
-
 }
