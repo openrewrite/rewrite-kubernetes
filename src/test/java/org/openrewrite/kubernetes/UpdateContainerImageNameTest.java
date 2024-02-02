@@ -26,31 +26,30 @@ import java.util.List;
 import static org.openrewrite.yaml.Assertions.yaml;
 
 class UpdateContainerImageNameTest extends KubernetesRecipeTest {
-
     @Language("yaml")
     private static String getYamlWithImage(String image) {
-        String template = """
-              apiVersion: v1
-              kind: Pod
-              spec:
-                  containers:
-                  - image: %s
-          """;
-        return String.format(template, image);
+        //language=yaml
+        return """
+          apiVersion: v1
+          kind: Pod
+          spec:
+              containers:
+              - image: %s
+          """.formatted(image);
     }
 
     @Language("yaml")
     private static String getYamlWithInitContainerImage(String icImage) {
-        String template = """
-              apiVersion: v1
-              kind: Pod
-              spec:
-                  containers:
-                  - image: notGoingToMatch
-                  initContainers:
-                  - image: %s
-          """;
-        return String.format(template, icImage);
+        //language=yaml
+        return """
+          apiVersion: v1
+          kind: Pod
+          spec:
+              containers:
+              - image: notGoingToMatch
+              initContainers:
+              - image: %s
+           """.formatted(icImage);
     }
 
     @DocumentExample
@@ -69,6 +68,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
             false,
             null
           )),
+          //language=yaml
           yaml(
             """
               apiVersion: v1
@@ -120,6 +120,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
             true,
             null
           )),
+          //language=yaml
           yaml(
             """
               apiVersion: v1
@@ -168,7 +169,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
     }
 
     @Test
-    void updateContainerImage_digestToUpdate_as_emptyString_should_remove_digest() {
+    void digestToUpdate_as_emptyString_should_remove_digest() {
         rewriteRun(
           spec -> spec.recipe(new UpdateContainerImageName(
             null,
@@ -231,7 +232,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
     }
 
     @Test
-    void updateContainerImage_should_respect_all_find_flags() {
+    void respect_all_find_flags() {
         rewriteRun(
           spec -> spec.recipe(new UpdateContainerImageName(
             "repo123",
@@ -329,7 +330,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
     }
 
     @Test
-    void updateContainerImage_should_unset_when_flags_are_empty_string() {
+    void unset_when_flags_are_empty_string() {
         UpdateContainerImageName recipe1 = new UpdateContainerImageName(
           "repo123",
           "image456",
@@ -433,7 +434,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
       "repo/image456:v7.8.9@SHA256:9876543",
       "image456"
     })
-    void updateContainerImage_should_update_for_image_match_query(String imageThatMatch) {
+    void update_for_image_match_query(String imageThatMatch) {
         UpdateContainerImageName recipe = new UpdateContainerImageName(
           "*",
           "image456",
