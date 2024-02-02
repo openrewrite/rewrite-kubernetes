@@ -533,6 +533,7 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
           )
         );
     }
+
     @ParameterizedTest
     @ValueSource(strings = {
       "image456:v7.8.9",
@@ -541,7 +542,6 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
       "image456",
       "repo/image456:v7.8.9@"
     })
-
     void update_for_image_empty_string_digest_that_matches(String imageThatMatch) {
         UpdateContainerImageName recipe = new UpdateContainerImageName(
           "*",
