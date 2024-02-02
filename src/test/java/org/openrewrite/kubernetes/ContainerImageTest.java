@@ -40,12 +40,39 @@ class ContainerImageTest {
     }
 
     @Test
+    void parseContainerImageNameWithDigestButNoTag() {
+        ContainerImage image = new ContainerImage("bucket/image@sha256:cb5c1bddd1b5665e1867a7fa1b5fa843a47ee433bbb75d4293888b71def53229");
+        assertThat(image.getImageName().getRepository()).isEqualTo("bucket");
+        assertThat(image.getImageName().getImage()).isEqualTo("image");
+        assertThat(image.getImageName().getTag()).isNullOrEmpty();
+        assertThat(image.getImageName().getDigest()).isEqualTo("sha256:cb5c1bddd1b5665e1867a7fa1b5fa843a47ee433bbb75d4293888b71def53229");
+    }
+
+    @Test
     void parseOnlyContainerImageName() {
         ContainerImage image = new ContainerImage("image");
         assertThat(image.getImageName().getRepository()).isNullOrEmpty();
         assertThat(image.getImageName().getImage()).isEqualTo("image");
         assertThat(image.getImageName().getTag()).isNullOrEmpty();
         assertThat(image.getImageName().getDigest()).isNullOrEmpty();
+    }
+
+    @Test
+    void parseOnlyContainerImageWithDigestNoRepo() {
+        ContainerImage image = new ContainerImage("image@sha:1234567890");
+        assertThat(image.getImageName().getRepository()).isNullOrEmpty();
+        assertThat(image.getImageName().getImage()).isEqualTo("image");
+        assertThat(image.getImageName().getTag()).isNullOrEmpty();
+        assertThat(image.getImageName().getDigest()).isEqualTo("sha:1234567890");
+    }
+
+    @Test
+    void parseOnlyContainerImageWithTagDigestNoRepo() {
+        ContainerImage image = new ContainerImage("image:v999@sha:1234567890");
+        assertThat(image.getImageName().getRepository()).isNullOrEmpty();
+        assertThat(image.getImageName().getImage()).isEqualTo("image");
+        assertThat(image.getImageName().getTag()).isEqualTo("v999");
+        assertThat(image.getImageName().getDigest()).isEqualTo("sha:1234567890");
     }
 
     @Test

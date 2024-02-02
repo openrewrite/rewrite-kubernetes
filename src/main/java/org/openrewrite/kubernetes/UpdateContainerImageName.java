@@ -50,6 +50,13 @@ public class UpdateContainerImageName extends Recipe {
     @Nullable
     String tagToFind;
 
+    @Option(displayName = "Image digest to find",
+            description = "The digest part of the image name to search for in containers and initContainers.",
+            example = "sha256:cb5c1bddd1b5665e1867a7fa1b5fa843a47ee433bbb75d4293888b71def53229",
+            required = false)
+    @Nullable
+    String digestToFind;
+
     @Option(displayName = "Repository to update",
             description = "The repository part of the image name to update to in containers and initContainers.",
             example = "gcr.io/account/bucket",
@@ -70,6 +77,13 @@ public class UpdateContainerImageName extends Recipe {
             required = false)
     @Nullable
     String tagToUpdate;
+
+    @Option(displayName = "Image digest to update",
+            description = "The digest part of the image name to update to in containers and initContainers.",
+            example = "sha256:cb5c1bddd1b5665e1867a7fa1b5fa843a47ee433bbb75d4293888b71def53229",
+            required = false)
+    @Nullable
+    String digestToUpdate;
 
     @Option(displayName = "Include initContainers",
             description = "Boolean to indicate whether or not to treat initContainers/image identically to containers/image.",
@@ -96,7 +110,10 @@ public class UpdateContainerImageName extends Recipe {
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repoToFind, imageToFind, tagToFind, "*");
+        ContainerImage.ImageName imageToSearch = new ContainerImage.ImageName(repoToFind,
+                imageToFind,
+                tagToFind,
+                digestToFind);
 
         YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
             @Override
@@ -114,6 +131,9 @@ public class UpdateContainerImageName extends Recipe {
                         }
                         if (null != tagToUpdate) {
                             newName = newName.withTag(tagToUpdate);
+                        }
+                        if (null != digestToUpdate) {
+                            newName = newName.withDigest(digestToUpdate);
                         }
                         return scalar.withValue(newName.toString());
                     }

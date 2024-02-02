@@ -49,6 +49,7 @@ public class ContainerImage {
         if (idx > -1) {
             digest = imageName.substring(idx + 1);
             imageName = imageName.substring(0, idx);
+            image = imageName;
         }
         idx = imageName.lastIndexOf(':');
         if (idx > -1) {
@@ -79,6 +80,7 @@ public class ContainerImage {
         @With
         @Nullable
         String tag;
+        @With
         @Nullable
         String digest;
 
