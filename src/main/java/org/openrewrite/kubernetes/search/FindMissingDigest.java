@@ -29,7 +29,7 @@ import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
 import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindMissingDigest extends Recipe {
 
     @Option(displayName = "Include initContainers",

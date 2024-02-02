@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindServiceExternalIPs extends Recipe {
 
     private static final String FIND_IPS = "findips";

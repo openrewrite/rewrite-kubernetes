@@ -25,7 +25,7 @@ import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindResourceMissingConfiguration extends Recipe {
 
     @Option(displayName = "Resource kind",

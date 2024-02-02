@@ -27,7 +27,7 @@ import org.openrewrite.yaml.tree.Yaml;
 import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inResources;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindExceedsResourceRatio extends Recipe {
 
     @Option(displayName = "Resource limit type",

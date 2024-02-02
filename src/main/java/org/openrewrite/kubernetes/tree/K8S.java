@@ -210,7 +210,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Resource implements K8S {
         @EqualsAndHashCode.Include
@@ -221,7 +221,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Metadata implements K8S {
         @EqualsAndHashCode.Include
@@ -243,7 +243,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Annotations implements K8S {
         @EqualsAndHashCode.Include
@@ -276,7 +276,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Labels implements K8S {
         @EqualsAndHashCode.Include
@@ -305,7 +305,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Pod implements K8S {
         @EqualsAndHashCode.Include
@@ -319,7 +319,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Containers implements K8S {
         @EqualsAndHashCode.Include
@@ -336,7 +336,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class InitContainers implements K8S {
         @EqualsAndHashCode.Include
@@ -349,7 +349,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class ResourceLimits implements K8S {
         @EqualsAndHashCode.Include
@@ -372,7 +372,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Service implements K8S {
         @EqualsAndHashCode.Include
@@ -397,7 +397,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class Ingress implements K8S {
         @EqualsAndHashCode.Include
@@ -425,7 +425,7 @@ public interface K8S extends Marker {
     }
 
     @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
+    @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = false)
     @Data
     class RBAC implements K8S {
         @EqualsAndHashCode.Include

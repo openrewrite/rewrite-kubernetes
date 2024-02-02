@@ -29,7 +29,7 @@ import static org.openrewrite.kubernetes.tree.K8S.Annotations.inAnnotations;
 import static org.openrewrite.kubernetes.tree.K8S.asAnnotations;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindAnnotation extends Recipe {
 
     @Option(displayName = "Annotation name",

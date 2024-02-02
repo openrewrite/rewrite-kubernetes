@@ -25,7 +25,7 @@ import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindServicesByType extends Recipe {
 
     @Option(displayName = "Service type",

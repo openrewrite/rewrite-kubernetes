@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 import static org.openrewrite.kubernetes.tree.K8S.asLabels;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindMissingOrInvalidLabel extends Recipe {
 
     @Option(displayName = "Label name",

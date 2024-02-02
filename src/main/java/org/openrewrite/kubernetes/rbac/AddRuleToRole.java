@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.openrewrite.internal.ListUtils.concat;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class AddRuleToRole extends Recipe {
 
     @Option(displayName = "RBAC Resource type",

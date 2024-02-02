@@ -27,7 +27,7 @@ import static org.openrewrite.kubernetes.tree.K8S.ResourceLimits.inRequests;
 import static org.openrewrite.kubernetes.tree.K8S.asResourceLimits;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class CapResourceValueToMaximum extends Recipe {
 
     @Option(displayName = "Resource value type",

@@ -33,7 +33,7 @@ import static org.openrewrite.kubernetes.tree.K8S.Containers.isImageName;
 import static org.openrewrite.kubernetes.tree.K8S.InitContainers.inInitContainerSpec;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class FindDisallowedImageTags extends Recipe {
 
     @Option(displayName = "Disallowed tags",

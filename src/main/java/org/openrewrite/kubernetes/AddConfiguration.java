@@ -25,7 +25,7 @@ import org.openrewrite.yaml.MergeYaml;
 import org.openrewrite.yaml.tree.Yaml;
 
 @Value
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class AddConfiguration extends Recipe {
 
     @Option(displayName = "API version",
