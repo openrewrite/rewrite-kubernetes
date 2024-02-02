@@ -462,4 +462,75 @@ class UpdateContainerImageNameTest extends KubernetesRecipeTest {
           )
         );
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "image456:v7.8.9",
+      "repo123/image456:v7.8.9",
+      "repo123/image456",
+      "image456"
+    })
+    void update_for_image_null_digest_that_match(String imageThatMatch) {
+        UpdateContainerImageName recipe = new UpdateContainerImageName(
+          "*",
+          "image456",
+          "*",
+          null,
+          "changedRepo/changedRepo",
+          "changedImageName",
+          "v913",
+          "SHA256:999",
+          true,
+          null
+        );
+        rewriteRun(
+          spec -> spec.recipe(recipe),
+          yaml(
+            getYamlWithImage(imageThatMatch),
+            getYamlWithImage("changedRepo/changedRepo/changedImageName:v913@SHA256:999")
+          )
+        );
+        rewriteRun(
+          spec -> spec.recipe(recipe),
+          yaml(
+            getYamlWithInitContainerImage(imageThatMatch),
+            getYamlWithInitContainerImage("changedRepo/changedRepo/changedImageName:v913@SHA256:999")
+          )
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+      "image456:v7.8.9@SHA256:9876543",
+      "image456@SHA256:9876543",
+      "repo123/image456@SHA256:9876543",
+      "repo/image456:v7.8.9@SHA256:9876543",
+      "repo/image456:v7.8.9@",
+    })
+    void update_for_image_null_digest_not_match(String imageThatDoesntMatch) {
+        UpdateContainerImageName recipe = new UpdateContainerImageName(
+          "*",
+          "image456",
+          "*",
+          null,
+          "changedRepo/changedRepo",
+          "changedImageName",
+          "v913",
+          "SHA256:999",
+          true,
+          null
+        );
+        rewriteRun(
+          spec -> spec.recipe(recipe),
+          yaml(
+            getYamlWithImage(imageThatDoesntMatch)
+          )
+        );
+        rewriteRun(
+          spec -> spec.recipe(recipe),
+          yaml(
+            getYamlWithInitContainerImage(imageThatDoesntMatch)
+          )
+        );
+    }
 }
