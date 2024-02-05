@@ -20,8 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
-import java.util.Set;
-
 import static org.openrewrite.yaml.Assertions.yaml;
 
 class FindDisallowedImageTagsTest extends KubernetesRecipeTest {

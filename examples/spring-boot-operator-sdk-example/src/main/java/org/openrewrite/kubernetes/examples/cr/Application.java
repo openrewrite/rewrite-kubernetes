@@ -1,7 +1,6 @@
 package org.openrewrite.kubernetes.examples.cr;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceValidationFluent;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.*;
 
