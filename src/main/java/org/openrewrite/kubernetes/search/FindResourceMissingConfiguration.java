@@ -65,7 +65,7 @@ public class FindResourceMissingConfiguration extends Recipe {
             public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
                 Yaml.Block b = (Yaml.Block) visit(document.getBlock(), ctx, getCursor());
                 boolean inKind = resourceKind == null || K8S.inKind(resourceKind, getCursor());
-                if (inKind && !("true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName())))) {
+                if (inKind && !"true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName()))) {
                     return SearchResult.found(document.withBlock(b));
                 }
                 return document;
