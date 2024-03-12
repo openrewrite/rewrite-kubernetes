@@ -48,6 +48,7 @@ public final class KubernetesParser extends YamlParser {
     }
 
     public static class Builder extends YamlParser.Builder {
+        @Override
         public KubernetesParser build() {
             return new KubernetesParser();
         }
