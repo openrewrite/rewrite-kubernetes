@@ -260,7 +260,7 @@ public interface K8S extends Marker {
         }
 
         public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
-            Yaml.Mapping.Entry e = (cursor.getValue() instanceof Yaml.Mapping.Entry) ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
+            Yaml.Mapping.Entry e = cursor.getValue() instanceof Yaml.Mapping.Entry ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
             if (e == null) {
                 return false;
             }
@@ -289,7 +289,7 @@ public interface K8S extends Marker {
         }
 
         public boolean valueMatches(String name, Pattern regex, Cursor cursor) {
-            Yaml.Mapping.Entry e = (cursor.getValue() instanceof Yaml.Mapping.Entry) ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
+            Yaml.Mapping.Entry e = cursor.getValue() instanceof Yaml.Mapping.Entry ? cursor.getValue() : cursor.firstEnclosing(Yaml.Mapping.Entry.class);
             if (e == null) {
                 return false;
             }
