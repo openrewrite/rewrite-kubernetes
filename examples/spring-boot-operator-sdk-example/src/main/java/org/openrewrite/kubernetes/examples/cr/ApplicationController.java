@@ -13,8 +13,8 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
-import io.javaoperatorsdk.operator.api.Context;
 import io.javaoperatorsdk.operator.api.*;
+import io.javaoperatorsdk.operator.api.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
