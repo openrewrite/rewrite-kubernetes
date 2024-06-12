@@ -28,6 +28,7 @@ public class KubernetesModel implements Marker {
 
     @With
     UUID id;
+
     String apiVersion;
     String kind;
     Metadata metadata;

@@ -74,12 +74,15 @@ public class ContainerImage {
         @Nullable
         @With
         String repository;
+
         @With
         @Nullable
         String image;
+
         @With
         @Nullable
         String tag;
+
         @With
         @Nullable
         String digest;

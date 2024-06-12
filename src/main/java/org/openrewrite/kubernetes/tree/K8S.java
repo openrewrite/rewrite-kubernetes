@@ -216,6 +216,7 @@ public interface K8S extends Marker {
         @EqualsAndHashCode.Include
         @With
         UUID id;
+
         String apiVersion;
         String kind;
     }
@@ -227,11 +228,15 @@ public interface K8S extends Marker {
         @EqualsAndHashCode.Include
         @With
         UUID id;
+
         @Nullable
         String namespace;
+
         String name;
+
         @Nullable
         Annotations annotations;
+
         @Nullable
         Labels labels;
 
@@ -249,6 +254,7 @@ public interface K8S extends Marker {
         @EqualsAndHashCode.Include
         @With
         UUID id;
+
         Set<String> keys;
 
         public static boolean inAnnotations(Cursor cursor) {
@@ -282,6 +288,7 @@ public interface K8S extends Marker {
         @EqualsAndHashCode.Include
         @With
         UUID id;
+
         Set<String> keys;
 
         public static boolean inLabels(Cursor cursor) {
@@ -355,6 +362,7 @@ public interface K8S extends Marker {
         @EqualsAndHashCode.Include
         @With
         UUID id;
+
         ResourceLimit value;
 
         public static boolean inResources(Cursor cursor) {
@@ -378,6 +386,7 @@ public interface K8S extends Marker {
         @EqualsAndHashCode.Include
         @With
         UUID id;
+
         @Nullable
         String type;
 

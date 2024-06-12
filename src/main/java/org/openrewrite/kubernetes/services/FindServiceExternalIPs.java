@@ -38,6 +38,7 @@ public class FindServiceExternalIPs extends Recipe {
             description = "The list of IP addresses of which at least one external IP should .",
             example = "192.168.0.1")
     Set<String> externalIPs;
+
     @Option(displayName = "Find missing",
             description = "Whether to treat this search as finding Services whose externalIPs do not contain any of " +
                     "the query IPs.",
