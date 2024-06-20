@@ -4,8 +4,8 @@ package org.openrewrite.kubernetes.examples.cr;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.fabric8.kubernetes.api.model.ObjectReference;
+import org.openrewrite.internal.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class ApplicationStatus {
