@@ -81,14 +81,9 @@ public class FindResourceMissingConfiguration extends Recipe {
             }
         };
 
-        TreeVisitor<? extends Tree, ExecutionContext> kubernetesResourceVisitor = Traits.kubernetesResource()
-                .asVisitor((KubernetesResource resource, ExecutionContext ctx) -> {
-                    String kind = resource.getModel().getKind();
-                    if (resourceKind == null || resourceKind.equals(kind)) {
-                        return yamlVisitor.visitNonNull(resource.getTree(), ctx, resource.getCursor().getParent());
-                    }
-                    return resource.getTree();
-                });
+        TreeVisitor<? extends Tree, ExecutionContext> kubernetesResourceVisitor = Traits.kubernetesResource(resourceKind)
+                .asVisitor((KubernetesResource resource, ExecutionContext ctx) ->
+                        yamlVisitor.visitNonNull(resource.getTree(), ctx, resource.getCursor().getParent()));
 
         if (fileMatcher != null) {
             return Preconditions.check(new FindSourceFiles(fileMatcher), kubernetesResourceVisitor);

@@ -15,6 +15,7 @@
  */
 package org.openrewrite.kubernetes.trait;
 
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.Cursor;
 import org.openrewrite.ExecutionContext;
@@ -32,7 +33,13 @@ public class KubernetesResource implements Trait<Yaml.Document> {
     Cursor cursor;
     KubernetesModel model;
 
+    @Value
+    @EqualsAndHashCode(callSuper = false)
     public static class Matcher extends SimpleTraitMatcher<KubernetesResource> {
+
+        @Nullable
+        String kind;
+
         @Override
         protected @Nullable KubernetesResource test(Cursor cursor) {
             Object value = cursor.getValue();
@@ -42,6 +49,7 @@ public class KubernetesResource implements Trait<Yaml.Document> {
                         .getMarkers()
                         .findFirst(KubernetesModel.class)
                         .map(kubernetesModel -> new KubernetesResource(cursor, kubernetesModel))
+                        .filter(kubernetesResource -> kind == null || kubernetesResource.getModel().getKind().equals(kind))
                         .orElse(null);
             }
             return null;
