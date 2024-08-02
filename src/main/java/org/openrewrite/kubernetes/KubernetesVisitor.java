@@ -21,6 +21,10 @@ import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.yaml.YamlVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
+/**
+ * @deprecated Likely better served by {@link org.openrewrite.kubernetes.trait.Traits}.
+ */
+@Deprecated
 public class KubernetesVisitor<P> extends YamlVisitor<P> {
 
     @Override
