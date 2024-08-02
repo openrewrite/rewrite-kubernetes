@@ -48,7 +48,7 @@ public class KubernetesResource implements Trait<Yaml.Document> {
                         .visitNonNull((Yaml.Document) value, new InMemoryExecutionContext(), cursor.getParent())
                         .getMarkers()
                         .findFirst(KubernetesModel.class)
-                        .filter(model -> kind == null || model.getKind().equals(kind))
+                        .filter(model -> kind == null || kind.equals(model.getKind()))
                         .map(kubernetesModel -> new KubernetesResource(cursor, kubernetesModel))
                         .orElse(null);
             }
