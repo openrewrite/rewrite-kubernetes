@@ -33,7 +33,7 @@ public class UpdateKubernetesModel<P> extends YamlIsoVisitor<P> {
     public Yaml.Document visitDocument(Yaml.Document document, P p) {
         Yaml.Document d = super.visitDocument(document, p);
 
-        KubernetesModel resource = new KubernetesModel(
+        KubernetesModel model = new KubernetesModel(
                 randomId(),
                 getCursor().getMessage("apiVersion"),
                 getCursor().getMessage("kind"),
@@ -44,8 +44,8 @@ public class UpdateKubernetesModel<P> extends YamlIsoVisitor<P> {
                         getCursor().getMessage("labels")
                 )
         );
-        if (resource.getApiVersion() != null && resource.getKind() != null) {
-            return d.withMarkers(document.getMarkers().addIfAbsent(resource));
+        if (model.getApiVersion() != null && model.getKind() != null) {
+            return d.withMarkers(document.getMarkers().addIfAbsent(model));
         } else {
             return d;
         }
