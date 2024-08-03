@@ -21,12 +21,14 @@ import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.trait.KubernetesResource;
 import org.openrewrite.kubernetes.trait.Traits;
-import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.marker.SearchResult;
+import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.util.Objects.requireNonNull;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -69,12 +71,12 @@ public class FindResourceMissingConfiguration extends Recipe {
                     new YamlIsoVisitor<AtomicBoolean>() {
                         @Override
                         public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, AtomicBoolean bool) {
-                            if (K8S.firstEnclosingEntryMatching(configurationPath, getCursor()).isPresent()) {
+                            if (new JsonPathMatcher(configurationPath).matches(getCursor())) {
                                 bool.set(true);
                             }
-                            return super.visitMappingEntry(entry, bool);
+                            return bool.get() ? entry : super.visitMappingEntry(entry, bool);
                         }
-                    }.visitNonNull(resource.getTree(), pathFound, resource.getCursor().getParent());
+                    }.visitNonNull(resource.getTree(), pathFound, requireNonNull(resource.getCursor().getParent()));
                     return pathFound.get() ? resource.getTree() : SearchResult.found(resource.getTree());
                 });
 
