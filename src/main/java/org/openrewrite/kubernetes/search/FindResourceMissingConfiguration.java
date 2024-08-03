@@ -75,10 +75,7 @@ public class FindResourceMissingConfiguration extends Recipe {
                             return super.visitMappingEntry(entry, bool);
                         }
                     }.visitNonNull(resource.getTree(), pathFound, resource.getCursor().getParent());
-                    if (!pathFound.get()) {
-                        return SearchResult.found(resource.getTree());
-                    }
-                    return resource.getTree();
+                    return pathFound.get() ? resource.getTree() : SearchResult.found(resource.getTree());
                 });
 
         if (fileMatcher != null) {
