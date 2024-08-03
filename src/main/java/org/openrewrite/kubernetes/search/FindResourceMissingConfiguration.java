@@ -26,6 +26,8 @@ import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class FindResourceMissingConfiguration extends Recipe {
@@ -61,29 +63,23 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlIsoVisitor<ExecutionContext> yamlVisitor = new YamlIsoVisitor<ExecutionContext>() {
-            @Override
-            public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
-                Yaml.Block b = (Yaml.Block) visit(document.getBlock(), ctx, getCursor());
-                if (!"true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName()))) {
-                    return SearchResult.found(document.withBlock(b));
-                }
-                return document;
-            }
-
-            @Override
-            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
-                if (K8S.firstEnclosingEntryMatching(configurationPath, getCursor()).isPresent()) {
-                    getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,
-                            FindResourceMissingConfiguration.class.getSimpleName(), "true");
-                }
-                return super.visitMappingEntry(entry, ctx);
-            }
-        };
-
         TreeVisitor<? extends Tree, ExecutionContext> kubernetesResourceVisitor = Traits.kubernetesResource(resourceKind)
-                .asVisitor((KubernetesResource resource, ExecutionContext ctx) ->
-                        yamlVisitor.visitNonNull(resource.getTree(), ctx, resource.getCursor().getParent()));
+                .asVisitor((KubernetesResource resource, ExecutionContext ctx) -> {
+                    AtomicBoolean pathFound = new AtomicBoolean(false);
+                    new YamlIsoVisitor<AtomicBoolean>() {
+                        @Override
+                        public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, AtomicBoolean bool) {
+                            if (K8S.firstEnclosingEntryMatching(configurationPath, getCursor()).isPresent()) {
+                                bool.set(true);
+                            }
+                            return super.visitMappingEntry(entry, bool);
+                        }
+                    }.visitNonNull(resource.getTree(), pathFound, resource.getCursor().getParent());
+                    if (!pathFound.get()) {
+                        return SearchResult.found(resource.getTree());
+                    }
+                    return resource.getTree();
+                });
 
         if (fileMatcher != null) {
             return Preconditions.check(new FindSourceFiles(fileMatcher), kubernetesResourceVisitor);
