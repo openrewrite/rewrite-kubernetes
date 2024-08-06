@@ -33,27 +33,26 @@ public class UpdateKubernetesModel<P> extends YamlIsoVisitor<P> {
     public Yaml.Document visitDocument(Yaml.Document document, P p) {
         Yaml.Document d = super.visitDocument(document, p);
 
-        KubernetesModel model = new KubernetesModel(
-                randomId(),
-                getCursor().getMessage("apiVersion"),
-                getCursor().getMessage("kind"),
-                new KubernetesModel.Metadata(
-                        getCursor().getMessage("namespace"),
-                        getCursor().getMessage("name"),
-                        getCursor().getMessage("annotations"),
-                        getCursor().getMessage("labels")
-                )
-        );
-        if (model.getApiVersion() != null && model.getKind() != null) {
-            return d.withMarkers(document.getMarkers().addIfAbsent(model));
-        } else {
-            return d;
+        if (getCursor().<String>getMessage("apiVersion") != null &&
+            getCursor().<String>getMessage("kind") != null) {
+            KubernetesModel kubernetesModel = new KubernetesModel(
+                    randomId(),
+                    getCursor().getMessage("apiVersion"),
+                    getCursor().getMessage("kind"),
+                    new KubernetesModel.Metadata(
+                            getCursor().getMessage("namespace"),
+                            getCursor().getMessage("name"),
+                            getCursor().getMessage("annotations"),
+                            getCursor().getMessage("labels")
+                    ));
+            return d.withMarkers(document.getMarkers().addIfAbsent(kubernetesModel));
         }
+
+        return d;
     }
 
     @Override
     public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, P p) {
-
         String path = getPath();
 
         if (entry.getValue() instanceof Yaml.Scalar) {
