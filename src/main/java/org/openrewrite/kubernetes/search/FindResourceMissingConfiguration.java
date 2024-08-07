@@ -19,10 +19,16 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.internal.lang.Nullable;
-import org.openrewrite.kubernetes.tree.K8S;
+import org.openrewrite.kubernetes.trait.KubernetesResource;
+import org.openrewrite.kubernetes.trait.Traits;
 import org.openrewrite.marker.SearchResult;
+import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.YamlIsoVisitor;
 import org.openrewrite.yaml.tree.Yaml;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.util.Objects.requireNonNull;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -57,29 +63,26 @@ public class FindResourceMissingConfiguration extends Recipe {
         return "Find Kubernetes resources with missing configuration.";
     }
 
-
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        YamlIsoVisitor<ExecutionContext> visitor = new YamlIsoVisitor<ExecutionContext>() {
-            @Override
-            public Yaml.Document visitDocument(Yaml.Document document, ExecutionContext ctx) {
-                Yaml.Block b = (Yaml.Block) visit(document.getBlock(), ctx, getCursor());
-                boolean inKind = resourceKind == null || K8S.inKind(resourceKind, getCursor());
-                if (inKind && !"true".equals(getCursor().getMessage(FindResourceMissingConfiguration.class.getSimpleName()))) {
-                    return SearchResult.found(document.withBlock(b));
-                }
-                return document;
-            }
+        TreeVisitor<? extends Tree, ExecutionContext> kubernetesResourceVisitor = Traits.kubernetesResource(resourceKind)
+                .asVisitor((KubernetesResource resource, ExecutionContext ctx) -> {
+                    AtomicBoolean pathFound = new AtomicBoolean(false);
+                    new YamlIsoVisitor<AtomicBoolean>() {
+                        @Override
+                        public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, AtomicBoolean bool) {
+                            if (new JsonPathMatcher(configurationPath).matches(getCursor())) {
+                                bool.set(true);
+                            }
+                            return bool.get() ? entry : super.visitMappingEntry(entry, bool);
+                        }
+                    }.visitNonNull(resource.getTree(), pathFound, requireNonNull(resource.getCursor().getParent()));
+                    return pathFound.get() ? resource.getTree() : SearchResult.found(resource.getTree());
+                });
 
-            @Override
-            public Yaml.Mapping.Entry visitMappingEntry(Yaml.Mapping.Entry entry, ExecutionContext ctx) {
-                if (K8S.firstEnclosingEntryMatching(configurationPath, getCursor()).isPresent()) {
-                    getCursor().putMessageOnFirstEnclosing(Yaml.Document.class,
-                            FindResourceMissingConfiguration.class.getSimpleName(), "true");
-                }
-                return super.visitMappingEntry(entry, ctx);
-            }
-        };
-        return fileMatcher != null ? Preconditions.check(new FindSourceFiles(fileMatcher), visitor) : visitor;
+        if (fileMatcher != null) {
+            return Preconditions.check(new FindSourceFiles(fileMatcher), kubernetesResourceVisitor);
+        }
+        return kubernetesResourceVisitor;
     }
 }

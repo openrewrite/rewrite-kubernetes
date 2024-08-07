@@ -25,10 +25,11 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated Unused; likely better served by {@link org.openrewrite.kubernetes.trait.Traits}.
+ */
+@Deprecated
 public final class KubernetesParser extends YamlParser {
-
-    private static final Pattern METADATA_LABEL = Pattern.compile("/metadata/labels/(.+)");
-    private static final Pattern METADATA_ANNOTATION = Pattern.compile("/metadata/annotations/(.+)");
 
     public static Builder builder() {
         return new Builder();

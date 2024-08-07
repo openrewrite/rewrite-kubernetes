@@ -17,6 +17,7 @@ package org.openrewrite.kubernetes.search;
 
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
+import org.openrewrite.Issue;
 import org.openrewrite.config.Environment;
 import org.openrewrite.kubernetes.KubernetesRecipeTest;
 
@@ -33,6 +34,7 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
             "$.spec.containers[*].livenessProbe",
             null
           )),
+          //language=yaml
           yaml(
             """
               apiVersion: v1
@@ -55,6 +57,31 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
     }
 
     @Test
+    void noChangeIfPresent() {
+        rewriteRun(
+          spec -> spec.recipe(new FindResourceMissingConfiguration(
+            "Pod",
+            "$.spec.containers[*].livenessProbe",
+            null
+          )),
+          //language=yaml
+          yaml(
+            """
+              apiVersion: v1
+              kind: Pod
+              spec:
+                containers:
+                - name: <container name>
+                  image: <image>
+                  livenessProbe:
+                    httpGet:
+                      path: /healthz
+              """
+          )
+        );
+    }
+
+    @Test
     void correctlyConfiguredPodLivenessProbe() {
         rewriteRun(
           spec -> spec.recipe(new FindResourceMissingConfiguration(
@@ -62,6 +89,7 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
             "$.spec.containers[*].livenessProbe",
             null
           )),
+          //language=yaml
           yaml(
             """
               apiVersion: v1
@@ -91,6 +119,7 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
             "..spec.containers[*].livenessProbe",
             null
           )),
+          //language=yaml
           yaml(
             """
               apiVersion: apps/v1
@@ -117,10 +146,8 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
     @Test
     void missingPodLivenessProbe() {
         rewriteRun(
-          spec -> spec.recipe(Environment.builder()
-            .scanRuntimeClasspath()
-            .build()
-            .activateRecipes("org.openrewrite.kubernetes.MissingPodLivenessProbe")),
+          spec -> spec.recipeFromResources("org.openrewrite.kubernetes.MissingPodLivenessProbe"),
+          //language=yaml
           yaml(
             """
               apiVersion: apps/v1
@@ -147,12 +174,10 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
     }
 
     @Test
-    void missingCpuLimits() {
+    void cpuLimitsMissing() {
         rewriteRun(
-          spec -> spec.recipe(Environment.builder()
-            .scanRuntimeClasspath()
-            .build()
-            .activateRecipes("org.openrewrite.kubernetes.MissingCpuLimits")),
+          spec -> spec.recipeFromResources("org.openrewrite.kubernetes.MissingCpuLimits"),
+          //language=yaml
           yaml(
             """
               apiVersion: apps/v1
@@ -177,6 +202,47 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
                   spec:
                     containers:
                     - image: nginx:latest
+              """
+          )
+        );
+    }
+
+    @Test
+    void cpuLimitsPresent() {
+        rewriteRun(
+          spec -> spec.recipeFromResources("org.openrewrite.kubernetes.MissingCpuLimits"),
+          //language=yaml
+          yaml(
+            """
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                labels:
+                  app: application
+              spec:
+                template:
+                  spec:
+                    containers:
+                    - image: nginx:latest
+                      resources:
+                        limits:
+                          cpu: "64Mi"
+              """
+          )
+        );
+    }
+
+    @Test
+    @Issue("https://github.com/openrewrite/rewrite-kubernetes/issues/51")
+    void springApplicationProperties() {
+        rewriteRun(
+          spec -> spec.recipeFromResources("org.openrewrite.kubernetes.MissingCpuLimits"),
+          //language=yaml
+          yaml(
+            """
+              spring:
+               application:
+                 foo: hello
               """
           )
         );
