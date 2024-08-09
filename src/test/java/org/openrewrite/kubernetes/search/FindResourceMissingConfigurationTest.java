@@ -45,7 +45,7 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
                   image: <image>
               """,
             """
-              ~~>apiVersion: v1
+              ~~(missing: $.spec.containers[*].livenessProbe)~~>apiVersion: v1
               kind: Pod
               spec:
                 containers:
@@ -160,7 +160,7 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
                 - image: nginx:latest
               """,
             """
-              ~~>apiVersion: apps/v1
+              ~~(missing: $.spec.containers[:1].livenessProbe)~~>apiVersion: apps/v1
               kind: Pod
               metadata:
                 labels:
@@ -192,7 +192,7 @@ class FindResourceMissingConfigurationTest extends KubernetesRecipeTest {
                     - image: nginx:latest
               """,
             """
-              ~~>apiVersion: apps/v1
+              ~~(missing: ..spec.containers[:1].resources.limits.cpu)~~>apiVersion: apps/v1
               kind: Deployment
               metadata:
                 labels:
