@@ -16,8 +16,8 @@
 
 package org.openrewrite.kubernetes.search;
 
+import org.jspecify.annotations.Nullable;
 import org.openrewrite.*;
-import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.tree.K8S;
 import org.openrewrite.marker.SearchResult;
 import org.openrewrite.yaml.YamlIsoVisitor;

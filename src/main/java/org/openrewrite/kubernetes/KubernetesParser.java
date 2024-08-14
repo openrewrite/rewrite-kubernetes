@@ -15,9 +15,9 @@
  */
 package org.openrewrite.kubernetes;
 
+import org.jspecify.annotations.Nullable;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.SourceFile;
-import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.yaml.YamlParser;
 import org.openrewrite.yaml.tree.Yaml;
 
