@@ -17,8 +17,8 @@ package org.openrewrite.kubernetes.search;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import org.jspecify.annotations.Nullable;
 import org.openrewrite.*;
-import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.trait.KubernetesResource;
 import org.openrewrite.kubernetes.trait.Traits;
 import org.openrewrite.marker.SearchResult;
