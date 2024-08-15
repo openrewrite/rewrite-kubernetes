@@ -17,10 +17,10 @@ package org.openrewrite.kubernetes.trait;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import org.jspecify.annotations.Nullable;
 import org.openrewrite.Cursor;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;
-import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.UpdateKubernetesModel;
 import org.openrewrite.kubernetes.tree.KubernetesModel;
 import org.openrewrite.trait.SimpleTraitMatcher;
