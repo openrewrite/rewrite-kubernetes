@@ -21,8 +21,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.With;
 import lombok.experimental.FieldDefaults;
+import org.jspecify.annotations.Nullable;
 import org.openrewrite.Cursor;
-import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.kubernetes.resource.ResourceLimit;
 import org.openrewrite.yaml.JsonPathMatcher;
 import org.openrewrite.yaml.tree.Yaml;
@@ -114,7 +114,7 @@ public interface K8S {
         return new Metadata(randomId(), namespace, name, annotations, labels);
     }
 
-    static Annotations asAnnotations(@Nullable Yaml.Mapping m) {
+    static Annotations asAnnotations(Yaml.@Nullable Mapping m) {
         if (m == null) {
             return new Annotations(randomId(), emptySet());
         }
@@ -125,7 +125,7 @@ public interface K8S {
         return new Annotations(randomId(), keys);
     }
 
-    static Labels asLabels(@Nullable Yaml.Mapping m) {
+    static Labels asLabels(Yaml.@Nullable Mapping m) {
         if (m == null) {
             return new Labels(randomId(), emptySet());
         }
@@ -136,7 +136,7 @@ public interface K8S {
         return new Labels(randomId(), keys);
     }
 
-    static ResourceLimits asResourceLimits(@Nullable Yaml.Scalar s) {
+    static ResourceLimits asResourceLimits(Yaml.@Nullable Scalar s) {
         if (null == s) {
             return new ResourceLimits(randomId(), null);
         } else {
@@ -144,7 +144,7 @@ public interface K8S {
         }
     }
 
-    static @Nullable Service asService(@Nullable Yaml.Mapping m) {
+    static @Nullable Service asService(Yaml.@Nullable Mapping m) {
         if (m == null) {
             return null;
         }
