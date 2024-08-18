@@ -22,7 +22,6 @@ import org.openrewrite.yaml.YamlParser;
 import org.openrewrite.yaml.tree.Yaml;
 
 import java.nio.file.Path;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
