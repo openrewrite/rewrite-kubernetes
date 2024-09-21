@@ -214,10 +214,10 @@ public class AddRuleToRole extends Recipe {
         String resourceNamesStr = setToString(resourceNames);
         String verbsStr = setToString(verbs);
         Stream<Yaml.Documents> docs = new YamlParser()
-                .parse("- apiGroups: " + apiGroupsStr + "\n"
-                + "  resources: " + resourcesStr + "\n"
-                + (resourceNamesStr != null ? "  resourceNames: " + resourceNamesStr + "\n" : "")
-                + "  verbs: " + verbsStr)
+                .parse("- apiGroups: " + apiGroupsStr + "\n" +
+                "  resources: " + resourcesStr + "\n" +
+                (resourceNamesStr != null ? "  resourceNames: " + resourceNamesStr + "\n" : "") +
+                "  verbs: " + verbsStr)
                 .map(Yaml.Documents.class::cast);
         return ((Yaml.Sequence) docs.findFirst().get().getDocuments().get(0).getBlock()).getEntries().get(0).withPrefix("\n");
     }

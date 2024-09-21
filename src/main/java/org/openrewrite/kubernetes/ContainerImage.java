@@ -89,21 +89,21 @@ public class ContainerImage {
 
         public boolean matches(ImageName otherName) {
             boolean matchesRepo =
-                    bothNull(this.getRepository(), otherName.getRepository())
-                            || Objects.equals(this.getRepository(), otherName.getRepository())
-                            || isGlobMatch(this.getRepository(), otherName.getRepository());
+                    bothNull(this.getRepository(), otherName.getRepository()) ||
+                            Objects.equals(this.getRepository(), otherName.getRepository()) ||
+                            isGlobMatch(this.getRepository(), otherName.getRepository());
             boolean matchesImage =
-                    bothNull(this.getImage(), otherName.getImage())
-                            || Objects.equals(this.getImage(), otherName.getImage())
-                            || isGlobMatch(this.getImage(), otherName.getImage());
+                    bothNull(this.getImage(), otherName.getImage()) ||
+                            Objects.equals(this.getImage(), otherName.getImage()) ||
+                            isGlobMatch(this.getImage(), otherName.getImage());
             boolean matchesTag =
-                    bothNull(this.getTag(), otherName.getTag())
-                            || Objects.equals(this.getTag(), otherName.getTag())
-                            || isGlobMatch(this.getTag(), otherName.getTag());
+                    bothNull(this.getTag(), otherName.getTag()) ||
+                            Objects.equals(this.getTag(), otherName.getTag()) ||
+                            isGlobMatch(this.getTag(), otherName.getTag());
             boolean matchesDigest =
-                    bothNull(this.getDigest(), otherName.getDigest())
-                            || Objects.equals(this.getDigest(), otherName.getDigest())
-                            || isGlobMatch(this.getDigest(), otherName.getDigest());
+                    bothNull(this.getDigest(), otherName.getDigest()) ||
+                            Objects.equals(this.getDigest(), otherName.getDigest()) ||
+                            isGlobMatch(this.getDigest(), otherName.getDigest());
 
             return matchesRepo && matchesImage && matchesTag && matchesDigest;
         }
