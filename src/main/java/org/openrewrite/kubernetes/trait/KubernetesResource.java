@@ -38,6 +38,8 @@ public class KubernetesResource implements Trait<Yaml.Document> {
     public static class Matcher extends SimpleTraitMatcher<KubernetesResource> {
 
         @Nullable
+        String apiVersion;
+        @Nullable
         String kind;
 
         @Override
@@ -48,6 +50,7 @@ public class KubernetesResource implements Trait<Yaml.Document> {
                         .visitNonNull((Yaml.Document) value, new InMemoryExecutionContext(), cursor.getParent())
                         .getMarkers()
                         .findFirst(KubernetesModel.class)
+                        .filter(model -> apiVersion == null || apiVersion.equals(model.getApiVersion()))
                         .filter(model -> kind == null || kind.equals(model.getKind()))
                         .map(kubernetesModel -> new KubernetesResource(cursor, kubernetesModel))
                         .orElse(null);

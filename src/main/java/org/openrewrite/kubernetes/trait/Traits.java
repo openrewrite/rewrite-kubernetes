@@ -22,7 +22,7 @@ public class Traits {
     private Traits() {
     }
 
-    public static KubernetesResource.Matcher kubernetesResource(@Nullable String kind) {
-        return new KubernetesResource.Matcher(kind);
+    public static KubernetesResource.Matcher kubernetesResource(@Nullable String apiVersion, @Nullable String kind) {
+        return new KubernetesResource.Matcher(apiVersion, kind);
     }
 }

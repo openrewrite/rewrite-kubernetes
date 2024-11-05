@@ -1,0 +1,72 @@
+#
+# Copyright 2024 the original author or authors.
+# <p>
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# <p>
+# https://www.apache.org/licenses/LICENSE-2.0
+# <p>
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_32
+displayName: Migrate to Kubernetes API v1.32
+description: >-
+    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.32.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_29
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: flowcontrol.apiserver.k8s.io/v1beta3
+      newApiVersion: flowcontrol.apiserver.k8s.io/v1
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_29
+displayName: Migrate to Kubernetes API v1.29
+description: >-
+    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.29.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_27
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: flowcontrol.apiserver.k8s.io/v1beta2
+      newApiVersion: flowcontrol.apiserver.k8s.io/v1
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_27
+displayName: Migrate to Kubernetes API v1.27
+description: >-
+    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.27.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_26
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: storage.k8s.io/v1beta1
+      newApiVersion: storage.k8s.io/v1
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_26
+displayName: Migrate to Kubernetes API v1.26
+description: >-
+    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.26.
+tags:
+  - kubernetes
+recipeList:
+  #- org.openrewrite.kubernetes.migrate.MigrateToAPIv1_25
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: flowcontrol.apiserver.k8s.io/v1beta1
+      newApiVersion: flowcontrol.apiserver.k8s.io/v1beta2
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: autoscaling/v2beta2
+      newApiVersion: autoscaling/v2
+---
+# and so on...
