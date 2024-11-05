@@ -22,7 +22,7 @@ import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.yaml.Assertions.yaml;
 
-public class MigrateApiTest implements RewriteTest {
+class MigrateApiTest implements RewriteTest {
 
     @Override
     public void defaults(RecipeSpec spec) {
