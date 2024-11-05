@@ -65,7 +65,7 @@ public class FindResourceMissingConfiguration extends Recipe {
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        TreeVisitor<? extends Tree, ExecutionContext> kubernetesResourceVisitor = Traits.kubernetesResource(resourceKind)
+        TreeVisitor<? extends Tree, ExecutionContext> kubernetesResourceVisitor = Traits.kubernetesResource(null, resourceKind)
                 .asVisitor((KubernetesResource resource, ExecutionContext ctx) -> {
                     AtomicBoolean pathFound = new AtomicBoolean(false);
                     new YamlIsoVisitor<AtomicBoolean>() {

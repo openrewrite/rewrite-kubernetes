@@ -79,22 +79,6 @@ public class AddRuleToRole extends Recipe {
     @Nullable
     String fileMatcher;
 
-    public AddRuleToRole(String rbacResourceType,
-                         String rbacResourceName,
-                         Set<String> apiGroups,
-                         Set<String> resources,
-                         @Nullable Set<String> resourceNames,
-                         Set<String> verbs,
-                         @Nullable String fileMatcher) {
-        this.rbacResourceType = rbacResourceType;
-        this.rbacResourceName = rbacResourceName;
-        this.apiGroups = apiGroups;
-        this.resources = resources;
-        this.resourceNames = resourceNames;
-        this.verbs = verbs;
-        this.fileMatcher = fileMatcher;
-    }
-
     @Override
     public String getDisplayName() {
         return "Add RBAC rules";
