@@ -39,9 +39,15 @@ class MigrateApiTest implements RewriteTest {
           yaml(
             """
               apiVersion: flowcontrol.apiserver.k8s.io/v1beta1
+              spec:
+                limited:
+                  assuredConcurrencyShares: 30
               """,
             """
               apiVersion: flowcontrol.apiserver.k8s.io/v1
+              spec:
+                limited:
+                  nominalConcurrencyShares: 30
               """
           )
         );
