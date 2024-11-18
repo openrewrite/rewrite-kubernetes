@@ -14,11 +14,13 @@
 # limitations under the License.
 #
 ---
+# Sourced from https://kubernetes.io/docs/reference/using-api/deprecation-guide/ and converted through GH Copilot Chat
+---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_32
 displayName: Migrate to Kubernetes API v1.32
 description: >-
-    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.32.
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.32.
 tags:
   - kubernetes
 recipeList:
@@ -31,7 +33,7 @@ type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_29
 displayName: Migrate to Kubernetes API v1.29
 description: >-
-    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.29.
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.29.
 tags:
   - kubernetes
 recipeList:
@@ -47,7 +49,7 @@ type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_27
 displayName: Migrate to Kubernetes API v1.27
 description: >-
-    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.27.
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.27.
 tags:
   - kubernetes
 recipeList:
@@ -60,11 +62,11 @@ type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_26
 displayName: Migrate to Kubernetes API v1.26
 description: >-
-    This recipe will apply changes commonly needed when migrating to Kubernetes API v1.26.
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.26.
 tags:
   - kubernetes
 recipeList:
-  #- org.openrewrite.kubernetes.migrate.MigrateToAPIv1_25
+  - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_25
   - org.openrewrite.kubernetes.ChangeApiVersion:
       oldApiVersion: flowcontrol.apiserver.k8s.io/v1beta1
       newApiVersion: flowcontrol.apiserver.k8s.io/v1beta2
@@ -72,4 +74,102 @@ recipeList:
       oldApiVersion: autoscaling/v2beta2
       newApiVersion: autoscaling/v2
 ---
-# and so on...
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_25
+displayName: Migrate to Kubernetes API v1.25
+description: >-
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.25.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_22
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: batch/v1beta1
+      newApiVersion: batch/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: discovery.k8s.io/v1beta1
+      newApiVersion: discovery.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: events.k8s.io/v1beta1
+      newApiVersion: events.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: autoscaling/v2beta1
+      newApiVersion: autoscaling/v2
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: policy/v1beta1
+      newApiVersion: policy/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: node.k8s.io/v1beta1
+      newApiVersion: node.k8s.io/v1
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_22
+displayName: Migrate to Kubernetes API v1.22
+description: >-
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.22.
+tags:
+  - kubernetes
+recipeList:
+  - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_16
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: admissionregistration.k8s.io/v1beta1
+      newApiVersion: admissionregistration.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: apiextensions.k8s.io/v1beta1
+      newApiVersion: apiextensions.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: apiregistration.k8s.io/v1beta1
+      newApiVersion: apiregistration.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: authentication.k8s.io/v1beta1
+      newApiVersion: authentication.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: authorization.k8s.io/v1beta1
+      newApiVersion: authorization.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: certificates.k8s.io/v1beta1
+      newApiVersion: certificates.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: coordination.k8s.io/v1beta1
+      newApiVersion: coordination.k8s.io/v1
+  #  - org.openrewrite.kubernetes.ChangeApiVersion:
+  #      oldApiVersion: extensions/v1beta1
+  #      newApiVersion: networking.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: networking.k8s.io/v1beta1
+      newApiVersion: networking.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: rbac.authorization.k8s.io/v1beta1
+      newApiVersion: rbac.authorization.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: scheduling.k8s.io/v1beta1
+      newApiVersion: scheduling.k8s.io/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: storage.k8s.io/v1beta1
+      newApiVersion: storage.k8s.io/v1
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.kubernetes.migrate.MigrateToAPIv1_16
+displayName: Migrate to Kubernetes API v1.16
+description: >-
+  This recipe will apply changes commonly needed when migrating to Kubernetes API v1.16.
+tags:
+  - kubernetes
+recipeList:
+  ## TODO No one-to-one mapping away from `extensions/v1beta1` to replacement; likely needs dedicated recipe
+  #  - org.openrewrite.kubernetes.ChangeApiVersion:
+  #      oldApiVersion: extensions/v1beta1
+  #      newApiVersion: networking.k8s.io/v1
+  #  - org.openrewrite.kubernetes.ChangeApiVersion:
+  #      oldApiVersion: extensions/v1beta1
+  #      newApiVersion: apps/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: apps/v1beta2
+      newApiVersion: apps/v1
+  - org.openrewrite.kubernetes.ChangeApiVersion:
+      oldApiVersion: apps/v1beta1
+      newApiVersion: apps/v1
+  #  - org.openrewrite.kubernetes.ChangeApiVersion:
+  #      oldApiVersion: extensions/v1beta1
+  #      newApiVersion: policy/v1beta1
+---
