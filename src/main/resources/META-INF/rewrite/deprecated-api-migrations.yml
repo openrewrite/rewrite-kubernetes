@@ -40,7 +40,7 @@ recipeList:
   - org.openrewrite.kubernetes.migrate.MigrateToAPIv1_27
   - org.openrewrite.kubernetes.ChangeApiVersion:
       oldApiVersion: flowcontrol.apiserver.k8s.io/v1beta2
-      newApiVersion: flowcontrol.apiserver.k8s.io/v1
+      newApiVersion: flowcontrol.apiserver.k8s.io/v1beta3
   - org.openrewrite.yaml.ChangePropertyKey:
       oldPropertyKey: spec.limited.assuredConcurrencyShares
       newPropertyKey: spec.limited.nominalConcurrencyShares
