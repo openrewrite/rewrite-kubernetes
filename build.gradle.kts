@@ -16,6 +16,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:latest.release")
 
     implementation(platform("org.openrewrite:rewrite-bom:${rewriteVersion}"))
+    implementation("org.openrewrite:rewrite-core")
     implementation("org.openrewrite:rewrite-yaml")
 
     testImplementation("org.openrewrite:rewrite-test")
