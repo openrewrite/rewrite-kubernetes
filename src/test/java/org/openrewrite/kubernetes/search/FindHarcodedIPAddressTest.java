@@ -27,7 +27,10 @@ class FindHarcodedIPAddressTest implements RewriteTest {
 
     @Override
     public void defaults(RecipeSpec spec) {
-        spec.recipe(new FindHarcodedIPAddress());
+        spec.recipeFromResource(
+          "/META-INF/rewrite/find-hardcoded-ipaddress.yml",
+          "org.openrewrite.kubernetes.search.FindHarcodedIPAddresses"
+        );
     }
 
     @DocumentExample
