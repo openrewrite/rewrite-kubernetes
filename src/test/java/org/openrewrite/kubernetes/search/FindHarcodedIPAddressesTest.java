@@ -23,7 +23,7 @@ import org.openrewrite.test.RewriteTest;
 import static org.openrewrite.test.SourceSpecs.text;
 import static org.openrewrite.yaml.Assertions.yaml;
 
-class FindHarcodedIPAddressTest implements RewriteTest {
+class FindHarcodedIPAddressesTest implements RewriteTest {
 
     @Override
     public void defaults(RecipeSpec spec) {
@@ -86,6 +86,18 @@ class FindHarcodedIPAddressTest implements RewriteTest {
             """
               256.168.0.1
               """
+          )
+        );
+    }
+
+    @Test
+    void skipSvg() {
+        rewriteRun(
+          text(
+            """
+              192.168.0.1
+              """,
+            spec -> spec.path("foo.svg")
           )
         );
     }

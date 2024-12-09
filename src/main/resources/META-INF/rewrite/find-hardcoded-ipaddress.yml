@@ -18,6 +18,9 @@ type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.kubernetes.search.FindHarcodedIPAddresses
 displayName: Find hardcoded IP addresses
 description: Find hardcoded IP address anywhere in text-based files.
+preconditions:
+  - org.openrewrite.FindSourceFiles:
+      filePattern: "!(**/*.svg)"
 recipeList:
   - org.openrewrite.text.Find:
       find: "\\b((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b"
